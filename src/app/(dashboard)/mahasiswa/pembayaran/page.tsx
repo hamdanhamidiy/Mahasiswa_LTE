@@ -25,64 +25,7 @@ interface PembayaranItem {
   bukti_pembayaran_url: string | null;
 }
 
-// Demo data for display when no data from API
-const DEMO_DATA: PembayaranItem[] = [
-  {
-    id: '1',
-    jenis: 'SPP Semester 1',
-    jumlah: 15000000,
-    status: 'lunas',
-    tanggal_bayar: '2025-01-20T00:00:00Z',
-    tanggal_jatuh_tempo: '2025-01-15T00:00:00Z',
-    metode_pembayaran: 'Transfer Bank BCA',
-    keterangan: 'Pembayaran penuh',
-    bukti_pembayaran_url: null,
-  },
-  {
-    id: '2',
-    jenis: 'Biaya Seragam',
-    jumlah: 2500000,
-    status: 'lunas',
-    tanggal_bayar: '2025-01-10T00:00:00Z',
-    tanggal_jatuh_tempo: '2025-02-01T00:00:00Z',
-    metode_pembayaran: 'Transfer Bank BRI',
-    keterangan: '3 set seragam lengkap',
-    bukti_pembayaran_url: null,
-  },
-  {
-    id: '3',
-    jenis: 'Biaya Praktik & Lab',
-    jumlah: 3000000,
-    status: 'cicilan',
-    tanggal_bayar: null,
-    tanggal_jatuh_tempo: '2025-03-15T00:00:00Z',
-    metode_pembayaran: null,
-    keterangan: 'Cicilan 2x — sudah bayar 50%',
-    bukti_pembayaran_url: null,
-  },
-  {
-    id: '4',
-    jenis: 'Biaya Sertifikasi',
-    jumlah: 1500000,
-    status: 'belum_lunas',
-    tanggal_bayar: null,
-    tanggal_jatuh_tempo: '2025-06-01T00:00:00Z',
-    metode_pembayaran: null,
-    keterangan: 'Sertifikasi Housekeeping International',
-    bukti_pembayaran_url: null,
-  },
-  {
-    id: '5',
-    jenis: 'Biaya Wisuda & Sertifikat',
-    jumlah: 2000000,
-    status: 'belum_lunas',
-    tanggal_bayar: null,
-    tanggal_jatuh_tempo: '2025-12-01T00:00:00Z',
-    metode_pembayaran: null,
-    keterangan: 'Termasuk foto wisuda',
-    bukti_pembayaran_url: null,
-  },
-];
+
 
 const STATUS_CONFIG: Record<string, { label: string; color: string; bgColor: string; borderColor: string; icon: typeof CheckCircle2 }> = {
   lunas: { label: 'Lunas', color: 'text-success', bgColor: 'bg-success/8', borderColor: 'border-success/15', icon: CheckCircle2 },
@@ -115,12 +58,7 @@ export default function PembayaranPage() {
 
   useEffect(() => {
     fetchData<PembayaranItem[]>('pembayaran').then(d => {
-      if (d && d.length > 0) {
-        setData(d);
-      } else {
-        // Use demo data when no API data
-        setData(DEMO_DATA);
-      }
+      setData(d || []);
       setLoading(false);
     });
   }, []);

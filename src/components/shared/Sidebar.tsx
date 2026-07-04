@@ -6,10 +6,10 @@ import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAppStore } from '@/lib/store';
 import {
-  Ship, LayoutDashboard, User, Calendar, ClipboardCheck, GraduationCap,
+  LayoutDashboard, User, Calendar, ClipboardCheck, GraduationCap,
   Briefcase, CreditCard, Award, Users, Megaphone, Settings, BarChart3,
   FileText, UserCheck, ChevronLeft, ChevronRight, LogOut, X,
-  Wallet, BookOpen, Building2, Anchor,
+  Wallet, BookOpen, Building2, Anchor, PanelLeftClose, PanelLeft,
 } from 'lucide-react';
 import type { UserRole } from '@/lib/types';
 import { Button } from '@/components/ui/button';
@@ -157,8 +157,9 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
 
   useEffect(() => {
     const check = () => {
-      setIsMobile(window.innerWidth < 1024);
-      if (window.innerWidth < 1024) setSidebarOpen(false);
+      const mobile = window.innerWidth < 1024;
+      setIsMobile(mobile);
+      if (mobile) setSidebarOpen(false);
     };
     check();
     window.addEventListener('resize', check);
@@ -169,37 +170,35 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
   const roleLabels: Record<UserRole, string> = {
     mahasiswa: 'Mahasiswa', instruktur: 'Instruktur', admin: 'Administrator', headmaster: 'Direktur',
   };
-  const roleColors: Record<UserRole, string> = {
-    mahasiswa: 'bg-blue-500/20 text-blue-300',
-    instruktur: 'bg-emerald-500/20 text-emerald-300',
-    admin: 'bg-amber-500/20 text-amber-300',
-    headmaster: 'bg-purple-500/20 text-purple-300',
-  };
 
   const initials = userName?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
 
   const NavLink = ({ item }: { item: NavItem }) => {
     const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
     const linkContent = (
-      <Link href={item.href} onClick={() => isMobile && setSidebarOpen(false)}
+      <Link
+        href={item.href}
+        onClick={() => isMobile && setSidebarOpen(false)}
         className={cn(
-          'flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] transition-all duration-200 group relative',
+          'flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all duration-200 group relative',
           isActive
-            ? 'bg-white/[0.12] text-white font-semibold shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]'
-            : 'text-white/50 hover:text-white/80 hover:bg-white/[0.06]'
+            ? 'bg-white/[0.10] text-white font-semibold'
+            : 'text-white/45 hover:text-white/75 hover:bg-white/[0.05]'
         )}
       >
-        {/* Active indicator — animated line */}
+        {/* Active indicator line */}
         <div className={cn(
-          'absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full bg-white/80 transition-all duration-300',
-          isActive ? 'h-[60%] opacity-100' : 'h-0 opacity-0'
+          'absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300',
+          isActive
+            ? 'h-5 opacity-100 bg-white'
+            : 'h-0 opacity-0 bg-white/50'
         )} />
 
         <item.icon className={cn(
-          'w-[17px] h-[17px] shrink-0 transition-all duration-200',
-          isActive ? 'text-white' : 'text-white/40 group-hover:text-white/65'
+          'w-4 h-4 shrink-0 transition-colors duration-200',
+          isActive ? 'text-white' : 'text-white/35 group-hover:text-white/60'
         )} />
-        {sidebarOpen && <span className="truncate">{item.label}</span>}
+        {sidebarOpen && <span className="truncate leading-none">{item.label}</span>}
         {item.badge && sidebarOpen && (
           <span className="ml-auto text-[9px] font-bold bg-white/15 text-white/70 px-1.5 py-0.5 rounded-full">{item.badge}</span>
         )}
@@ -220,59 +219,70 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
 
   return (
     <>
+      {/* Mobile overlay backdrop */}
       {isMobile && sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-fade-in" onClick={() => setSidebarOpen(false)} />
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       <aside className={cn(
         'fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        'bg-[var(--sidebar)] text-white',
-        sidebarOpen ? 'w-[260px]' : 'w-[70px]',
+        'bg-[var(--sidebar)] border-r border-white/[0.04]',
+        sidebarOpen ? 'w-[256px]' : 'w-[68px]',
         isMobile && !sidebarOpen && '-translate-x-full',
-        isMobile && sidebarOpen && 'w-[280px]'
+        isMobile && sidebarOpen && 'w-[272px] shadow-2xl shadow-black/40'
       )}>
-        {/* Subtle gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
-
-        <div className="flex flex-col h-full relative z-10">
+        <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 h-16 border-b border-white/[0.06]">
-            <Link href={`/${role}/dashboard`} className="flex items-center gap-3 min-w-0 group">
-              <div className="w-9 h-9 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 transition-all duration-200 group-hover:bg-white/[0.14] border border-white/[0.08] group-hover:scale-105">
-                <Anchor className="w-[18px] h-[18px] text-white/85" />
+          <div className="flex items-center justify-between px-4 h-[60px] border-b border-white/[0.06] shrink-0">
+            <Link href={`/${role}/dashboard`} className="flex items-center gap-2.5 min-w-0 group">
+              <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 group-hover:bg-white/[0.12] transition-colors border border-white/[0.06]">
+                <Anchor className="w-4 h-4 text-white/80" />
               </div>
               {sidebarOpen && (
-                <div className="min-w-0 animate-fade-in">
-                  <h1 className="text-[13px] font-bold tracking-tight truncate leading-tight text-white/95">LTE CRUISE</h1>
-                  <p className="text-[9px] text-white/28 truncate tracking-[0.16em] font-semibold leading-tight mt-0.5">ACADEMIC INFO SYSTEM</p>
+                <div className="min-w-0">
+                  <h1 className="text-[13px] font-bold tracking-tight text-white/90 leading-none">LTE CRUISE</h1>
+                  <p className="text-[8px] text-white/25 tracking-[0.18em] font-semibold mt-1 leading-none">ACADEMIC INFO SYSTEM</p>
                 </div>
               )}
             </Link>
-            <button onClick={isMobile ? () => setSidebarOpen(false) : toggleSidebar} className="p-1.5 rounded-md hover:bg-white/[0.08] transition-all duration-200 shrink-0">
-              {isMobile ? <X className="w-4 h-4 text-white/50" /> : sidebarOpen ? <ChevronLeft className="w-4 h-4 text-white/40" /> : <ChevronRight className="w-4 h-4 text-white/40" />}
-            </button>
+            {sidebarOpen && (
+              <button
+                onClick={isMobile ? () => setSidebarOpen(false) : toggleSidebar}
+                className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors shrink-0"
+              >
+                {isMobile
+                  ? <X className="w-4 h-4 text-white/40" />
+                  : <PanelLeftClose className="w-4 h-4 text-white/30 hover:text-white/50 transition-colors" />
+                }
+              </button>
+            )}
+            {!sidebarOpen && !isMobile && (
+              <button onClick={toggleSidebar} className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors">
+                <PanelLeft className="w-3.5 h-3.5 text-white/30 hover:text-white/50 transition-colors" />
+              </button>
+            )}
           </div>
 
-          {/* User info — Enhanced */}
+          {/* User info */}
           {sidebarOpen && (
-            <div className="px-4 py-3.5 border-b border-white/[0.06] animate-fade-in">
-              <div className="flex items-center gap-3">
+            <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
+              <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="w-9 h-9 rounded-lg bg-white/[0.10] flex items-center justify-center shrink-0 text-[11px] font-bold text-white/70">
+                  <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 text-[11px] font-bold text-white/60">
                     {initials}
                   </div>
-                  {/* Online indicator */}
-                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[var(--sidebar)] flex items-center justify-center">
-                    <div className="w-2 h-2 rounded-full bg-emerald-400" />
-                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[var(--sidebar)]" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[13px] font-semibold truncate text-white/90 leading-tight">{userName}</p>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={cn('px-2 py-0.5 rounded text-[9px] font-semibold tracking-[0.06em] uppercase', roleColors[role])}>
+                  <p className="text-[12px] font-semibold truncate text-white/85 leading-tight">{userName}</p>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">
                       {roleLabels[role]}
                     </span>
-                    {userNim && <span className="text-[10px] text-white/25 font-mono">{userNim}</span>}
+                    {userNim && <span className="text-[9px] text-white/20 font-mono">· {userNim}</span>}
                   </div>
                 </div>
               </div>
@@ -280,15 +290,19 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 py-3">
+          <ScrollArea className="flex-1 py-2">
             <nav className="px-2.5 space-y-0.5">
               {navGroups.map((group, gi) => (
                 <div key={gi}>
                   {sidebarOpen && gi > 0 && (
-                    <div className="menu-group-label">{group.title}</div>
+                    <div className="px-3 pt-4 pb-1.5">
+                      <span className="text-[9px] font-semibold text-white/20 uppercase tracking-[0.14em]">
+                        {group.title}
+                      </span>
+                    </div>
                   )}
                   {!sidebarOpen && gi > 0 && (
-                    <div className="my-2.5 mx-3 border-t border-white/[0.06]" />
+                    <div className="my-2 mx-3 border-t border-white/[0.06]" />
                   )}
                   <div className="space-y-0.5">
                     {group.items.map((item) => <NavLink key={item.href} item={item} />)}
@@ -298,15 +312,14 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
             </nav>
           </ScrollArea>
 
-          {/* Footer — Enhanced */}
-          <div className="p-3 border-t border-white/[0.06]">
-            {sidebarOpen && (
-              <div className="px-3 py-2 mb-2 rounded-lg bg-white/[0.03] border border-white/[0.04] animate-fade-in">
-                <p className="text-[9px] text-white/20 font-medium tracking-wider uppercase">LTE Cruise AIS v1.0</p>
-              </div>
-            )}
-            <Button variant="ghost"
-              className={cn('w-full justify-start text-white/40 hover:text-white/70 hover:bg-white/[0.06] text-[13px] h-10 transition-all duration-200 rounded-lg', !sidebarOpen && 'justify-center px-0')}
+          {/* Footer */}
+          <div className="p-2.5 border-t border-white/[0.06] shrink-0">
+            <Button
+              variant="ghost"
+              className={cn(
+                'w-full text-white/35 hover:text-white/60 hover:bg-white/[0.05] text-[12px] h-9 transition-all duration-200 rounded-lg',
+                sidebarOpen ? 'justify-start px-3' : 'justify-center px-0'
+              )}
               onClick={async () => {
                 const { createClient } = await import('@/lib/supabase/client');
                 const supabase = createClient();
@@ -314,7 +327,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
                 window.location.href = '/login';
               }}
             >
-              <LogOut className="w-[17px] h-[17px] shrink-0" />
+              <LogOut className="w-4 h-4 shrink-0" />
               {sidebarOpen && <span className="ml-2.5">Keluar</span>}
             </Button>
           </div>

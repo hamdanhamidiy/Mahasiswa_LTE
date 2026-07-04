@@ -1,126 +1,136 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Users, Plus, BookOpen } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Plus, BookOpen, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { fetchData } from '@/lib/api';
 
 const HARI_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
-export default function AdminJadwalPage() {
-  const jadwal = [
-    { hari: 'Senin', sesi: [{ waktu: '08:00 - 10:00', mapel: 'English for Hospitality', kelas: 'D1-ALL-25A', ruangan: 'Ruang A1', instruktur: 'Mr. John Smith' }, { waktu: '10:30 - 12:30', mapel: 'Housekeeping Management', kelas: 'D1-HK-25A', ruangan: 'Ruang B1', instruktur: 'Ibu Sari Dewi' }] },
-    { hari: 'Selasa', sesi: [{ waktu: '08:00 - 10:00', mapel: 'F&B Product', kelas: 'D1-FP-25A', ruangan: 'Kitchen Lab', instruktur: 'Chef Ahmad Yani' }, { waktu: '13:00 - 15:00', mapel: 'Restaurant Service', kelas: 'D1-FS-25A', ruangan: 'Ruang C1', instruktur: 'Mr. David Lee' }] },
-    { hari: 'Rabu', sesi: [{ waktu: '08:00 - 10:00', mapel: 'English Conversation', kelas: 'D1-ALL-25A', ruangan: 'Ruang A2', instruktur: 'Mr. John Smith' }] },
-    { hari: 'Kamis', sesi: [{ waktu: '08:00 - 10:00', mapel: 'F&B Product', kelas: 'D1-FP-24A', ruangan: 'Kitchen Lab', instruktur: 'Chef Ahmad Yani' }, { waktu: '10:30 - 12:30', mapel: 'Room Division Operations', kelas: 'D1-HK-25A', ruangan: 'Ruang B2', instruktur: 'Ibu Sari Dewi' }, { waktu: '13:00 - 15:00', mapel: 'Bartending & Mixology', kelas: 'D1-FS-24A', ruangan: 'Bar Lab', instruktur: 'Mr. David Lee' }] },
-    { hari: 'Jumat', sesi: [{ waktu: '08:00 - 10:00', mapel: 'Etika Profesi & Grooming', kelas: 'D1-ALL-25A', ruangan: 'Aula', instruktur: 'Ibu Ratna Sari' }] },
-  ];
+interface JadwalItem {
+  id: string; hari: string; jam_mulai: string; jam_selesai: string; ruangan: string; kelas: string; is_active: boolean;
+  mata_pelajaran?: { nama_mapel: string; kode_mapel: string };
+  instruktur?: { nama_lengkap: string };
+}
 
-  const totalSesi = jadwal.reduce((a, h) => a + h.sesi.length, 0);
+export default function AdminJadwalPage() {
+  const [jadwalList, setJadwalList] = useState<JadwalItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await fetchData<JadwalItem[]>('admin_jadwal');
+      setJadwalList(data || []);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  // Group by day
+  const grouped = HARI_ORDER.map(hari => ({
+    hari,
+    sesi: jadwalList.filter(j => j.hari === hari).map(j => ({
+      waktu: `${j.jam_mulai} - ${j.jam_selesai}`,
+      mapel: j.mata_pelajaran?.nama_mapel || '—',
+      kelas: j.kelas || '—',
+      ruangan: j.ruangan || '—',
+      instruktur: j.instruktur?.nama_lengkap || '—',
+    })),
+  })).filter(g => g.sesi.length > 0);
+
+  const totalSesi = jadwalList.length;
   const hariColors: Record<string, string> = {
     'Senin': 'bg-primary', 'Selasa': 'bg-chart-2', 'Rabu': 'bg-chart-3',
     'Kamis': 'bg-chart-4', 'Jumat': 'bg-chart-5', 'Sabtu': 'bg-muted-foreground',
   };
 
   return (
-    <div className="space-y-7 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Page Header */}
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div>
-            <h1>Manajemen Jadwal</h1>
-            <p>Atur jadwal pelajaran seluruh kelas LTE Cruise</p>
+            <h1>Jadwal Kuliah</h1>
+            <p>Kelola jadwal perkuliahan seluruh kelas</p>
           </div>
-          <div className="flex gap-2">
-            <Badge variant="outline" className="text-xs font-normal px-3 h-9 flex items-center"><Calendar className="w-3.5 h-3.5 mr-1.5" /> {totalSesi} Sesi / Minggu</Badge>
-            <Button className="bg-primary btn-press text-xs h-9 shadow-md shadow-primary/15"><Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Jadwal</Button>
-          </div>
+          <Button size="sm" className="bg-primary text-xs h-8 btn-press self-start">
+            <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Jadwal
+          </Button>
         </div>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Total Sesi</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{totalSesi}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-primary/8"><Calendar className="w-[18px] h-[18px] text-primary" /></div>
-            </div>
+      {/* Summary */}
+      <div className="grid grid-cols-3 gap-3">
+        <Card className="border border-border shadow-none card-interactive">
+          <CardContent className="p-3.5 text-center">
+            <Calendar className="w-4 h-4 mx-auto mb-1 text-primary" />
+            <p className="text-xl font-bold tabular-nums">{loading ? '—' : grouped.length}</p>
+            <p className="text-[9px] text-muted-foreground mt-0.5 uppercase tracking-wider font-medium">Hari Aktif</p>
           </CardContent>
         </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Hari Aktif</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{jadwal.length}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-chart-3/8"><Clock className="w-[18px] h-[18px] text-chart-3" /></div>
-            </div>
+        <Card className="border border-border shadow-none card-interactive">
+          <CardContent className="p-3.5 text-center">
+            <Clock className="w-4 h-4 mx-auto mb-1 text-chart-3" />
+            <p className="text-xl font-bold tabular-nums">{loading ? '—' : totalSesi}</p>
+            <p className="text-[9px] text-muted-foreground mt-0.5 uppercase tracking-wider font-medium">Total Sesi</p>
           </CardContent>
         </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Mata Pelajaran</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{new Set(jadwal.flatMap(h => h.sesi.map(s => s.mapel))).size}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-chart-4/8"><BookOpen className="w-[18px] h-[18px] text-chart-4" /></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Ruangan</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{new Set(jadwal.flatMap(h => h.sesi.map(s => s.ruangan))).size}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-chart-5/8"><MapPin className="w-[18px] h-[18px] text-chart-5" /></div>
-            </div>
+        <Card className="border border-border shadow-none card-interactive">
+          <CardContent className="p-3.5 text-center">
+            <BookOpen className="w-4 h-4 mx-auto mb-1 text-chart-4" />
+            <p className="text-xl font-bold tabular-nums">{loading ? '—' : new Set(jadwalList.map(j => j.mata_pelajaran?.nama_mapel)).size}</p>
+            <p className="text-[9px] text-muted-foreground mt-0.5 uppercase tracking-wider font-medium">Mata Pelajaran</p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Schedule Cards */}
-      <div className="space-y-4 stagger-children">
-        {jadwal.map(({ hari, sesi }) => (
-          <Card key={hari} className="border border-border shadow-sm overflow-hidden card-glow animate-slide-up">
-            <div className="flex items-center justify-between px-5 py-3.5 bg-muted/30 border-b border-border/40">
-              <div className="flex items-center gap-3">
-                <div className={`w-2 h-8 rounded-full ${hariColors[hari] || 'bg-primary'}`} />
-                <h3 className="text-sm font-bold">{hari}</h3>
+      {/* Schedule Grid */}
+      {loading ? (
+        <div className="py-16 text-center">
+          <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" />
+          <p className="text-xs text-muted-foreground">Memuat jadwal...</p>
+        </div>
+      ) : grouped.length === 0 ? (
+        <Card className="border border-border shadow-none">
+          <CardContent className="py-16 text-center">
+            <Calendar className="w-10 h-10 mx-auto mb-3 text-muted-foreground/15" />
+            <p className="text-xs text-muted-foreground font-medium">Belum ada jadwal</p>
+            <p className="text-[10px] text-muted-foreground/50 mt-0.5">Klik &quot;Tambah Jadwal&quot; untuk menambah jadwal baru</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4 stagger-children">
+          {grouped.map((day) => (
+            <Card key={day.hari} className="border border-border shadow-none overflow-hidden animate-slide-up">
+              <div className="flex items-center gap-3 px-5 py-3 border-b border-border bg-muted/30">
+                <div className={`w-2 h-2 rounded-full ${hariColors[day.hari] || 'bg-muted-foreground'}`} />
+                <h3 className="text-xs font-semibold uppercase tracking-wider">{day.hari}</h3>
+                <Badge variant="outline" className="text-[9px] ml-auto">{day.sesi.length} sesi</Badge>
               </div>
-              <Badge variant="outline" className="text-[10px] font-medium">{sesi.length} sesi</Badge>
-            </div>
-            <div className="px-5 py-3 space-y-1">
-              {sesi.map((s, i) => (
-                <div key={i} className="row-hover flex items-center gap-3 py-3 px-3 -mx-3 rounded-lg group">
-                  <div className="w-28 shrink-0">
-                    <span className="text-xs font-mono text-primary font-semibold tabular-nums">{s.waktu.split(' - ')[0]}</span>
-                    <span className="text-[10px] text-muted-foreground"> — {s.waktu.split(' - ')[1]}</span>
+              <CardContent className="p-0 divide-y divide-border">
+                {day.sesi.map((sesi, si) => (
+                  <div key={si} className="px-5 py-3.5 flex flex-col sm:flex-row sm:items-center gap-2 hover:bg-accent/30 transition-colors">
+                    <div className="flex items-center gap-2 sm:w-36 shrink-0">
+                      <Clock className="w-3 h-3 text-muted-foreground" />
+                      <span className="text-[11px] font-medium tabular-nums">{sesi.waktu}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[13px] font-semibold truncate">{sesi.mapel}</p>
+                      <div className="flex items-center gap-3 mt-0.5 text-[10px] text-muted-foreground">
+                        <span className="flex items-center gap-1"><Users className="w-2.5 h-2.5" />{sesi.kelas}</span>
+                        <span className="flex items-center gap-1"><MapPin className="w-2.5 h-2.5" />{sesi.ruangan}</span>
+                        <span>{sesi.instruktur}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="w-px h-8 bg-border/60 shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13px] font-semibold truncate group-hover:text-primary transition-colors">{s.mapel}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                      <Users className="w-3 h-3" />{s.kelas}
-                      <span className="opacity-30">·</span>
-                      <MapPin className="w-3 h-3" />{s.ruangan}
-                      <span className="opacity-30">·</span>
-                      {s.instruktur}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        ))}
-      </div>
+                ))}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,100 +1,74 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Briefcase, MapPin, Star, Calendar, Users, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Briefcase, MapPin, Globe, Loader2, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { fetchData } from '@/lib/api';
+
+interface OJTItem {
+  id: string; nama_perusahaan: string; negara: string; posisi: string; tanggal_mulai: string; tanggal_selesai: string | null; status_laporan: string;
+  mahasiswa?: { nama_lengkap: string; nim: string } | null;
+}
+
+const statusMap: Record<string, { label: string; cls: string }> = {
+  sedang_berjalan: { label: 'Berjalan', cls: 'status-pending' },
+  laporan_dikirim: { label: 'Lap. Terkirim', cls: 'status-info' },
+  selesai: { label: 'Selesai', cls: 'status-aktif' },
+};
 
 export default function InstrukturOJTPage() {
-  const ojtStudents = [
-    { id: '1', nama: 'Rina Maharani', nim: 'LTE-2024-001', hotel: 'The Ritz-Carlton Bali', bintang: 5, kota: 'Nusa Dua', negara: 'Indonesia', posisi: 'Housekeeping', progress: 75, status: 'sedang_berjalan' },
-    { id: '2', nama: 'Dimas Pratama', nim: 'LTE-2024-002', hotel: 'Hilton Singapore', bintang: 5, kota: 'Singapore', negara: 'Singapura', posisi: 'F&B Service', progress: 60, status: 'sedang_berjalan' },
-    { id: '3', nama: 'Siti Nurhaliza', nim: 'LTE-2024-003', hotel: 'Four Seasons Jakarta', bintang: 5, kota: 'Jakarta', negara: 'Indonesia', posisi: 'Front Office', progress: 90, status: 'laporan_dikirim' },
-    { id: '4', nama: 'Fajar Nugroho', nim: 'LTE-2024-004', hotel: 'Marriott Bangkok', bintang: 5, kota: 'Bangkok', negara: 'Thailand', posisi: 'F&B Product', progress: 45, status: 'sedang_berjalan' },
-    { id: '5', nama: 'Anisa Putri', nim: 'LTE-2024-005', hotel: 'Sheraton Dubai', bintang: 5, kota: 'Dubai', negara: 'UAE', posisi: 'Housekeeping', progress: 100, status: 'disetujui' },
-  ];
+  const [data, setData] = useState<OJTItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
-  const statusLabel: Record<string, { label: string; cls: string }> = {
-    sedang_berjalan: { label: 'OJT Aktif', cls: 'text-primary border-primary/20' },
-    laporan_dikirim: { label: 'Laporan Masuk', cls: 'text-warning border-warning/20' },
-    disetujui: { label: 'Selesai', cls: 'text-success border-success/20' },
-    belum_mulai: { label: 'Belum Mulai', cls: 'text-muted-foreground border-border' },
-  };
+  useEffect(() => { fetchData<OJTItem[]>('instruktur_mahasiswa_ojt').then(d => { setData(d || []); setLoading(false); }); }, []);
+  const filtered = data.filter(o => !search || o.mahasiswa?.nama_lengkap?.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-7 animate-fade-in">
-      <div className="page-header">
-        <div>
-          <h1>Mahasiswa OJT</h1>
-          <p>Monitoring mahasiswa bimbingan yang sedang OJT</p>
-        </div>
+    <div className="space-y-6 animate-fade-in">
+      <div className="page-header"><h1>Mahasiswa Bimbingan OJT</h1><p>Monitor OJT mahasiswa di bawah bimbingan Anda</p></div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Briefcase className="w-4 h-4 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{loading ? '—' : data.length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Total Bimbingan</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Globe className="w-4 h-4 mx-auto mb-1 text-chart-3" /><p className="text-xl font-bold">{loading ? '—' : data.filter(o => o.status_laporan === 'sedang_berjalan').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Sedang Berjalan</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><MapPin className="w-4 h-4 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{loading ? '—' : data.filter(o => o.status_laporan === 'selesai').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Selesai</p></CardContent></Card>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-        <Card className="border border-border/60 shadow-none bg-primary text-white animate-slide-up">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold tabular-nums">{ojtStudents.length}</p>
-            <p className="text-[10px] text-white/60 mt-0.5">Total Mahasiswa</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border/60 shadow-none card-interactive animate-slide-up">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold tabular-nums text-primary">{ojtStudents.filter(s => s.status === 'sedang_berjalan').length}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">OJT Aktif</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border/60 shadow-none card-interactive animate-slide-up">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold tabular-nums text-warning">{ojtStudents.filter(s => s.status === 'laporan_dikirim').length}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Laporan Masuk</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border/60 shadow-none card-interactive animate-slide-up">
-          <CardContent className="p-4 text-center">
-            <p className="text-2xl font-semibold tabular-nums text-success">{ojtStudents.filter(s => s.status === 'disetujui').length}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">Selesai</p>
-          </CardContent>
-        </Card>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        <Input placeholder="Cari mahasiswa..." className="pl-9 h-8 text-xs" value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <div className="space-y-3 stagger-children">
-        {ojtStudents.map(student => {
-          const st = statusLabel[student.status] || statusLabel.belum_mulai;
-          return (
-            <Card key={student.id} className="border border-border/60 shadow-none card-glow overflow-hidden animate-slide-up">
-              <CardContent className="p-5">
-                <div className="flex flex-col sm:flex-row sm:items-start gap-4">
-                  <div className="flex items-start gap-3 flex-1 min-w-0">
-                    <div className="p-2.5 rounded-lg bg-muted/60 shrink-0">
-                      <Briefcase className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2 flex-wrap mb-1">
-                        <h3 className="text-sm font-semibold">{student.nama}</h3>
-                        <span className="text-[10px] text-muted-foreground font-mono">{student.nim}</span>
-                        <Badge variant="outline" className={`text-[10px] ${st.cls}`}>{st.label}</Badge>
-                      </div>
-                      <p className="text-sm text-foreground/80">{student.hotel}</p>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px] text-muted-foreground">
-                        <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{student.kota}, {student.negara}</span>
-                        <span className="flex items-center gap-1"><Briefcase className="w-3 h-3" />{student.posisi}</span>
-                        <span className="flex items-center gap-1">
-                          {Array.from({ length: student.bintang }).map((_, i) => <Star key={i} className="w-2.5 h-2.5 text-warning fill-warning" />)}
-                        </span>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <Progress value={student.progress} className="h-1.5 flex-1" />
-                        <span className="text-[11px] font-medium tabular-nums text-muted-foreground">{student.progress}%</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+      <Card className="border border-border shadow-none overflow-hidden">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" /><p className="text-xs text-muted-foreground">Memuat data OJT...</p></div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center"><Briefcase className="w-10 h-10 mx-auto mb-3 text-muted-foreground/15" /><p className="text-xs text-muted-foreground font-medium">{data.length === 0 ? 'Tidak ada mahasiswa OJT di bimbingan Anda' : 'Tidak ada hasil'}</p></div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="formal-table">
+                <TableHeader><TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead>Mahasiswa</TableHead><TableHead>Perusahaan</TableHead><TableHead>Posisi</TableHead><TableHead className="text-center">Status</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {filtered.map(o => (
+                    <TableRow key={o.id} className="hover:bg-accent/40 group">
+                      <TableCell><p className="text-[13px] font-medium">{o.mahasiswa?.nama_lengkap || '—'}</p><p className="text-[10px] text-muted-foreground font-mono">{o.mahasiswa?.nim || ''}</p></TableCell>
+                      <TableCell><p className="text-[12px]">{o.nama_perusahaan}</p><p className="text-[10px] text-muted-foreground">{o.negara}</p></TableCell>
+                      <TableCell className="text-[12px]">{o.posisi || '—'}</TableCell>
+                      <TableCell className="text-center"><span className={`status-indicator text-[8px] ${statusMap[o.status_laporan]?.cls || 'status-info'}`}>{statusMap[o.status_laporan]?.label || o.status_laporan}</span></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

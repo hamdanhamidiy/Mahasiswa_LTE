@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
-import { Anchor, Eye, EyeOff, LogIn, Loader2, Ship, GraduationCap, Globe, Award, ChevronRight } from 'lucide-react';
+import { Anchor, Eye, EyeOff, LogIn, Loader2, GraduationCap, Globe, Award } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -84,16 +84,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left — Brand Panel */}
-      <div className="hidden lg:flex lg:w-[46%] bg-institutional-banner relative items-center justify-center p-12 overflow-hidden">
-        {/* Animated background elements */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+      <div className="hidden lg:flex lg:w-[45%] bg-institutional-banner relative items-center justify-center p-12 overflow-hidden">
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23fff' fill-opacity='1'/%3E%3C/svg%3E")`,
           backgroundSize: '40px 40px',
         }} />
 
         {/* Radial glow */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-400/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-gold/5 rounded-full blur-3xl" />
+        <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-blue-400/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-gold/5 rounded-full blur-3xl" />
 
         {/* Wave decoration */}
         <div className="wave-decoration" />
@@ -101,166 +101,141 @@ export default function LoginPage() {
         <div className="relative z-10 text-center max-w-sm">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="w-24 h-24 rounded-2xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shadow-lg shadow-black/10 animate-float">
-              <Anchor className="w-12 h-12 text-white/80" />
+            <div className="w-20 h-20 rounded-2xl bg-white/[0.06] border border-white/[0.08] flex items-center justify-center shadow-lg shadow-black/10 animate-float">
+              <Anchor className="w-10 h-10 text-white/80" />
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold text-white tracking-tight">LTE CRUISE</h1>
-          <p className="text-[10px] text-white/30 font-semibold mt-2 tracking-[0.28em] uppercase">Leading Tourism Education</p>
+          <h1 className="text-2xl font-bold text-white tracking-tight">LTE CRUISE</h1>
+          <p className="text-[9px] text-white/25 font-semibold mt-2 tracking-[0.3em] uppercase">Leading Tourism Education</p>
 
-          {/* Stats — Premium Grid */}
-          <div className="mt-10 grid grid-cols-3 gap-3">
+          {/* Stats */}
+          <div className="mt-10 grid grid-cols-3 gap-2.5">
             {[
               { value: '500+', label: 'Alumni', icon: GraduationCap },
               { value: '12+', label: 'Negara', icon: Globe },
               { value: '96%', label: 'Tersalurkan', icon: Award },
             ].map((stat, i) => (
-              <div key={i} className="text-center p-4 rounded-xl bg-white/[0.04] border border-white/[0.06] hover:bg-white/[0.07] transition-all duration-300 group cursor-default">
-                <stat.icon className="w-4 h-4 text-white/25 mx-auto mb-2 group-hover:text-white/40 transition-colors" />
-                <p className="text-xl font-bold text-white/85 tabular-nums">{stat.value}</p>
-                <p className="text-[9px] text-white/28 mt-1 uppercase tracking-[0.15em] font-semibold">{stat.label}</p>
+              <div key={i} className="text-center p-3.5 rounded-xl bg-white/[0.04] border border-white/[0.06] group cursor-default">
+                <stat.icon className="w-3.5 h-3.5 text-white/20 mx-auto mb-1.5" />
+                <p className="text-lg font-bold text-white/80 tabular-nums">{stat.value}</p>
+                <p className="text-[8px] text-white/25 mt-0.5 uppercase tracking-[0.15em] font-semibold">{stat.label}</p>
               </div>
             ))}
           </div>
 
-          {/* Testimonial Carousel */}
-          <div className="mt-8 glass rounded-xl p-5 min-h-[120px] flex flex-col justify-center">
+          {/* Testimonial */}
+          <div className="mt-8 rounded-xl bg-white/[0.04] border border-white/[0.06] p-5 min-h-[110px] flex flex-col justify-center">
             <div key={currentTestimonial} className="animate-fade-in">
-              <p className="text-white/55 text-sm leading-relaxed italic">
+              <p className="text-white/45 text-[13px] leading-relaxed italic">
                 &ldquo;{testimonials[currentTestimonial].text}&rdquo;
               </p>
               <div className="mt-3 flex items-center justify-center gap-2">
-                <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-[10px] font-bold text-white/60">
+                <div className="w-5 h-5 rounded-full bg-white/10 flex items-center justify-center text-[9px] font-bold text-white/50">
                   {testimonials[currentTestimonial].name.charAt(0)}
                 </div>
                 <div className="text-left">
-                  <p className="text-[11px] text-white/50 font-medium">{testimonials[currentTestimonial].name}</p>
-                  <p className="text-[9px] text-white/25">{testimonials[currentTestimonial].role}</p>
+                  <p className="text-[10px] text-white/40 font-medium">{testimonials[currentTestimonial].name}</p>
+                  <p className="text-[8px] text-white/20">{testimonials[currentTestimonial].role}</p>
                 </div>
               </div>
             </div>
             {/* Dots */}
             <div className="flex justify-center gap-1.5 mt-3">
               {testimonials.map((_, i) => (
-                <button key={i} onClick={() => setCurrentTestimonial(i)} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${i === currentTestimonial ? 'bg-white/50 w-4' : 'bg-white/15 hover:bg-white/25'}`} />
+                <button key={i} onClick={() => setCurrentTestimonial(i)} className={`h-1 rounded-full transition-all duration-300 ${i === currentTestimonial ? 'bg-white/40 w-4' : 'bg-white/10 w-1 hover:bg-white/20'}`} />
               ))}
             </div>
           </div>
 
           {/* Bottom info */}
-          <div className="mt-10 space-y-1.5 text-white/20 text-[10px]">
-            <p className="font-semibold text-white/28">Sekolah Perhotelan & Kapal Pesiar</p>
+          <div className="mt-10 space-y-1 text-white/20 text-[9px]">
+            <p className="font-semibold text-white/25">Sekolah Perhotelan & Kapal Pesiar</p>
             <p>Kampung Inggris, Pare — Kediri</p>
-            <div className="w-10 h-px bg-white/10 mx-auto my-2.5" />
-            <p className="text-white/15">Berdiri Sejak 2013</p>
           </div>
         </div>
       </div>
 
       {/* Right — Login Form */}
-      <div className="w-full lg:w-[54%] flex items-center justify-center p-6 sm:p-10 bg-background relative">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 opacity-[0.015]" style={{
+      <div className="w-full lg:w-[55%] flex items-center justify-center p-6 sm:p-10 bg-background relative">
+        {/* Dot pattern */}
+        <div className="absolute inset-0 opacity-[0.012]" style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, var(--primary) 1px, transparent 0)`,
           backgroundSize: '32px 32px',
         }} />
 
-        <div className="w-full max-w-[420px] space-y-7 animate-fade-in relative z-10">
+        <div className="w-full max-w-[400px] space-y-7 animate-fade-in relative z-10">
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
-            <div className="inline-flex w-16 h-16 rounded-2xl bg-primary items-center justify-center mb-4 shadow-lg shadow-primary/20">
-              <Anchor className="w-8 h-8 text-white" />
+            <div className="inline-flex w-14 h-14 rounded-xl bg-primary items-center justify-center mb-3 shadow-lg shadow-primary/20">
+              <Anchor className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-xl font-bold text-primary tracking-tight">LTE CRUISE</h1>
-            <p className="text-[10px] text-muted-foreground mt-1 tracking-[0.2em] uppercase font-semibold">Academic Information System</p>
+            <h1 className="text-lg font-bold text-primary tracking-tight">LTE CRUISE</h1>
+            <p className="text-[9px] text-muted-foreground mt-1 tracking-[0.2em] uppercase font-semibold">Academic Information System</p>
           </div>
 
           <div className="text-center lg:text-left">
-            <h2 className="text-2xl font-bold text-foreground tracking-tight">Masuk ke Sistem</h2>
-            <p className="mt-1.5 text-sm text-muted-foreground">Sistem Informasi Akademik LTE Cruise</p>
+            <h2 className="text-xl font-bold text-foreground tracking-tight">Masuk ke Sistem</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Sistem Informasi Akademik LTE Cruise</p>
           </div>
 
-          <Card className="border border-border shadow-md hover:shadow-lg transition-shadow duration-300">
-            <CardContent className="p-6 sm:p-7">
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-                <div className="space-y-2">
+          <Card className="border border-border shadow-sm">
+            <CardContent className="p-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                <div className="space-y-1.5">
                   <Label htmlFor="nim" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">NIM (Nomor Induk Mahasiswa)</Label>
                   <Input
                     id="nim"
                     placeholder="LTE-2024-001"
-                    className="h-11 text-sm border-border focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all duration-200"
+                    className="h-10 text-sm"
                     {...register('nim')}
                     disabled={isLoading}
                   />
-                  {errors.nim && <p className="text-[11px] text-error font-medium mt-1 animate-fade-in">{errors.nim.message}</p>}
+                  {errors.nim && <p className="text-[11px] text-error font-medium mt-0.5">{errors.nim.message}</p>}
                 </div>
 
-                <div className="space-y-2">
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="password" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Password</Label>
-                    <button type="button" className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors hover-underline">Lupa Password?</button>
+                    <button type="button" className="text-[11px] text-primary hover:text-primary/80 font-medium transition-colors">Lupa Password?</button>
                   </div>
                   <div className="relative">
                     <Input
                       id="password"
                       type={showPassword ? 'text' : 'password'}
                       placeholder="Masukkan password"
-                      className="h-11 text-sm pr-11 border-border focus:border-primary focus:ring-2 focus:ring-primary/10 transition-all duration-200"
+                      className="h-10 text-sm pr-10"
                       {...register('password')}
                       disabled={isLoading}
                     />
-                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-muted">
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-0.5 rounded">
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  {errors.password && <p className="text-[11px] text-error font-medium mt-1 animate-fade-in">{errors.password.message}</p>}
+                  {errors.password && <p className="text-[11px] text-error font-medium mt-0.5">{errors.password.message}</p>}
                 </div>
 
-                {/* Remember me */}
-                <label className="flex items-center gap-2.5 cursor-pointer group">
-                  <input type="checkbox" className="sr-only peer" />
-                  <div className="w-4 h-4 rounded border border-border bg-background peer-checked:bg-primary peer-checked:border-primary transition-all duration-200 flex items-center justify-center group-hover:border-primary/50">
-                    <svg className="w-2.5 h-2.5 text-white opacity-0 peer-checked:opacity-100 transition-opacity" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-                  </div>
-                  <span className="text-xs text-muted-foreground group-hover:text-foreground transition-colors">Ingat saya di perangkat ini</span>
-                </label>
-
                 {error && (
-                  <div className="bg-error/5 border border-error/10 rounded-lg p-3.5 animate-fade-in-scale">
+                  <div className="bg-error/5 border border-error/10 rounded-lg p-3">
                     <p className="text-[12px] text-error font-medium">{error}</p>
                   </div>
                 )}
 
-                <Button type="submit" className="w-full h-11 text-xs font-semibold bg-primary hover:bg-primary/90 btn-press shadow-md shadow-primary/15 uppercase tracking-wider" disabled={isLoading}>
+                <Button type="submit" className="w-full h-10 text-xs font-semibold bg-primary hover:bg-primary/90 btn-press shadow-sm uppercase tracking-wider" disabled={isLoading}>
                   {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...</> : <><LogIn className="w-4 h-4 mr-2" /> Masuk</>}
                 </Button>
               </form>
             </CardContent>
           </Card>
 
-          {/* Quick info */}
-          <div className="flex items-center justify-center gap-6 text-[11px] text-muted-foreground">
-            {[
-              { icon: Ship, text: 'Kapal Pesiar' },
-              { icon: GraduationCap, text: 'Perhotelan' },
-              { icon: Globe, text: 'Internasional' },
-            ].map((item, i) => (
-              <div key={i} className="flex items-center gap-1.5 opacity-50 hover:opacity-80 transition-opacity">
-                <item.icon className="w-3.5 h-3.5" />
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-
           {/* Footer */}
-          <div className="text-center space-y-1.5">
-            <p className="text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">LTE Cruise AIS v1.0</p>
-            <p className="text-[10px] text-muted-foreground/40">Jl. Pancawarna, Perumahan Oasis Cluster, Tulungrejo, Pare, Kab. Kediri</p>
-            <div className="flex items-center justify-center gap-3 text-[10px] text-muted-foreground/40">
-              <a href="https://ltecruise.sch.id" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors hover-underline">ltecruise.sch.id</a>
+          <div className="text-center space-y-1">
+            <p className="text-[9px] text-muted-foreground font-semibold tracking-wider uppercase">LTE Cruise AIS v1.0</p>
+            <p className="text-[9px] text-muted-foreground/40">Jl. Pancawarna, Perumahan Oasis Cluster, Tulungrejo, Pare, Kab. Kediri</p>
+            <div className="flex items-center justify-center gap-3 text-[9px] text-muted-foreground/40">
+              <a href="https://ltecruise.sch.id" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors">ltecruise.sch.id</a>
               <span className="opacity-30">•</span>
-              <a href="mailto:ltecruise@gmail.com" className="hover:text-primary transition-colors hover-underline">ltecruise@gmail.com</a>
+              <a href="mailto:ltecruise@gmail.com" className="hover:text-primary transition-colors">ltecruise@gmail.com</a>
             </div>
           </div>
         </div>

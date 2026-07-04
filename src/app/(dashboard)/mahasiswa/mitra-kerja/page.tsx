@@ -27,121 +27,7 @@ interface MitraKerja {
   is_featured: boolean;
 }
 
-// Demo data when no API data
-const DEMO_MITRA: MitraKerja[] = [
-  {
-    id: '1',
-    nama: 'The Ritz-Carlton Bali',
-    jenis: 'hotel',
-    bintang: 5,
-    kota: 'Nusa Dua',
-    negara: 'Indonesia',
-    deskripsi: 'Hotel bintang 5 internasional yang berada di area Nusa Dua, Bali. Menjadi mitra OJT dan penempatan kerja utama bagi alumni LTE Cruise.',
-    posisi_tersedia: ['Housekeeping', 'F&B Service', 'Front Office'],
-    alumni_bekerja: 12,
-    logo_url: null,
-    website_url: 'https://www.ritzcarlton.com',
-    is_featured: true,
-  },
-  {
-    id: '2',
-    nama: 'Royal Caribbean International',
-    jenis: 'kapal_pesiar',
-    bintang: 5,
-    kota: 'Miami',
-    negara: 'Amerika Serikat',
-    deskripsi: 'Perusahaan kapal pesiar terbesar kedua di dunia. Alumni LTE Cruise bekerja di berbagai kapal dalam fleet Royal Caribbean.',
-    posisi_tersedia: ['Cabin Steward', 'Waiter', 'Cook', 'Housekeeping'],
-    alumni_bekerja: 28,
-    logo_url: null,
-    website_url: 'https://www.royalcaribbean.com',
-    is_featured: true,
-  },
-  {
-    id: '3',
-    nama: 'Carnival Cruise Line',
-    jenis: 'kapal_pesiar',
-    bintang: 5,
-    kota: 'Miami',
-    negara: 'Amerika Serikat',
-    deskripsi: 'Salah satu perusahaan kapal pesiar terbesar di dunia dengan fleet lebih dari 20 kapal.',
-    posisi_tersedia: ['Cabin Steward', 'Assistant Waiter', 'Utility'],
-    alumni_bekerja: 18,
-    logo_url: null,
-    website_url: 'https://www.carnival.com',
-    is_featured: true,
-  },
-  {
-    id: '4',
-    nama: 'Four Seasons Resort Bali',
-    jenis: 'resort',
-    bintang: 5,
-    kota: 'Jimbaran',
-    negara: 'Indonesia',
-    deskripsi: 'Resort mewah bintang 5 di Jimbaran Bay, Bali. Menerima mahasiswa OJT dan alumni LTE Cruise untuk penempatan kerja.',
-    posisi_tersedia: ['Housekeeping', 'F&B Product', 'Spa Attendant'],
-    alumni_bekerja: 8,
-    logo_url: null,
-    website_url: 'https://www.fourseasons.com',
-    is_featured: false,
-  },
-  {
-    id: '5',
-    nama: 'MSC Cruises',
-    jenis: 'kapal_pesiar',
-    bintang: 4,
-    kota: 'Geneva',
-    negara: 'Swiss',
-    deskripsi: 'Perusahaan kapal pesiar Eropa dengan fleet modern dan rute di Mediterania, Karibia, dan Asia.',
-    posisi_tersedia: ['Cabin Steward', 'Galley Steward', 'Bar Waiter'],
-    alumni_bekerja: 15,
-    logo_url: null,
-    website_url: 'https://www.msccruises.com',
-    is_featured: false,
-  },
-  {
-    id: '6',
-    nama: 'The Mulia Bali',
-    jenis: 'resort',
-    bintang: 5,
-    kota: 'Nusa Dua',
-    negara: 'Indonesia',
-    deskripsi: 'Resort all-suite mewah di Nusa Dua, Bali. Salah satu resort terbaik di Indonesia.',
-    posisi_tersedia: ['Housekeeping', 'F&B Service', 'Butler'],
-    alumni_bekerja: 6,
-    logo_url: null,
-    website_url: 'https://www.themulia.com',
-    is_featured: false,
-  },
-  {
-    id: '7',
-    nama: 'Norwegian Cruise Line',
-    jenis: 'kapal_pesiar',
-    bintang: 4,
-    kota: 'Miami',
-    negara: 'Amerika Serikat',
-    deskripsi: 'Perusahaan kapal pesiar yang dikenal dengan konsep freestyle cruising dan kapal-kapal modern.',
-    posisi_tersedia: ['Cabin Steward', 'Restaurant Steward', 'Utility'],
-    alumni_bekerja: 10,
-    logo_url: null,
-    website_url: 'https://www.ncl.com',
-    is_featured: false,
-  },
-  {
-    id: '8',
-    nama: 'Bulgari Resort Bali',
-    jenis: 'resort',
-    bintang: 5,
-    kota: 'Uluwatu',
-    negara: 'Indonesia',
-    deskripsi: 'Resort ultra-luxury di tebing Uluwatu, Bali. Menerima mahasiswa OJT dari program D1 LTE Cruise.',
-    posisi_tersedia: ['Housekeeping', 'F&B Product'],
-    alumni_bekerja: 4,
-    logo_url: null,
-    website_url: 'https://www.bulgarihotels.com',
-    is_featured: false,
-  },
-];
+
 
 const JENIS_ICON: Record<string, typeof Hotel> = {
   hotel: Hotel,
@@ -163,11 +49,7 @@ export default function MitraKerjaPage() {
 
   useEffect(() => {
     fetchData<MitraKerja[]>('mitra_kerja').then(d => {
-      if (d && d.length > 0) {
-        setData(d);
-      } else {
-        setData(DEMO_MITRA);
-      }
+      setData(d || []);
       setLoading(false);
     });
   }, []);

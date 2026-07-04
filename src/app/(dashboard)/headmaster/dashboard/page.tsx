@@ -1,12 +1,14 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAppStore } from '@/lib/store';
+import { fetchData } from '@/lib/api';
 import {
   Users, TrendingUp, Award, Ship, Globe,
   BarChart3, GraduationCap, Briefcase, Clock,
-  ArrowUpRight, ChevronRight,
+  Loader2, ChevronRight,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -19,153 +21,100 @@ function getGreeting() {
 
 export default function HeadmasterDashboard() {
   const { user } = useAppStore();
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  const stats = [
-    { label: 'Total Mahasiswa', value: '156', sub: '5 angkatan aktif', icon: Users, color: 'text-primary', bgColor: 'bg-primary/8' },
-    { label: 'Tingkat Kelulusan', value: '96%', sub: 'rata-rata 3 tahun', icon: GraduationCap, color: 'text-success', bgColor: 'bg-success/8' },
-    { label: 'Penyaluran Kerja', value: '89%', sub: 'alumni bekerja', icon: Award, color: 'text-chart-4', bgColor: 'bg-chart-4/8' },
-    { label: 'Negara Tujuan', value: '12', sub: 'destinasi alumni', icon: Globe, color: 'text-chart-5', bgColor: 'bg-chart-5/8' },
-  ];
+  useEffect(() => {
+    fetchData('admin_stats').then(d => {
+      setStats(d || { total_mahasiswa: 0, total_instruktur: 0, total_ojt: 0, total_alumni: 0 });
+      setLoading(false);
+    });
+  }, []);
 
-  const topStudents = [
-    { nama: 'Rina Maharani', jurusan: 'Housekeeping', nilai: 92.5, angkatan: '24' },
-    { nama: 'Dimas Pratama', jurusan: 'F&B Product', nilai: 89.3, angkatan: '24' },
-    { nama: 'Siti Nurhaliza', jurusan: 'F&B Service', nilai: 87.8, angkatan: '24' },
+  const statCards = [
+    { label: 'Total Mahasiswa', value: stats?.total_mahasiswa || 0, sub: 'Terdaftar di sistem', icon: Users, color: 'text-primary', bgColor: 'bg-primary/8' },
+    { label: 'Total Instruktur', value: stats?.total_instruktur || 0, sub: 'Pengajar aktif', icon: GraduationCap, color: 'text-success', bgColor: 'bg-success/8' },
+    { label: 'Mahasiswa OJT', value: stats?.total_ojt || 0, sub: 'Sedang magang', icon: Briefcase, color: 'text-warning', bgColor: 'bg-warning/8' },
+    { label: 'Total Alumni', value: stats?.total_alumni || 0, sub: 'Lulusan bersertifikat', icon: Award, color: 'text-chart-4', bgColor: 'bg-chart-4/8' },
   ];
 
   return (
-    <div className="space-y-7 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="bg-hero-pattern rounded-xl p-6 sm:p-8 text-white relative overflow-hidden">
+      <div className="bg-hero-pattern rounded-xl p-6 sm:p-7 text-white relative overflow-hidden">
         <div className="wave-decoration" />
         <div className="relative z-10">
           <div className="flex items-center gap-2.5 mb-2">
-            <Badge variant="outline" className="border-white/15 text-white/55 text-[10px] bg-white/[0.05]">Dashboard Eksekutif</Badge>
+            <Badge variant="outline" className="border-white/15 text-white/55 text-[10px] bg-white/[0.05]">Panel Headmaster</Badge>
             <div className="flex items-center gap-1.5 text-[10px] text-white/30">
               <Clock className="w-3 h-3" />
-              {new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+              <span>{new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span>
             </div>
           </div>
           <h1 className="text-xl sm:text-2xl font-bold tracking-tight">
-            {getGreeting()}, {user?.nama_lengkap?.split(' ')[0] || 'Direktur'} 👋
+            {getGreeting()}, {user?.nama_lengkap?.split(' ')[0] || 'Headmaster'} 👋
           </h1>
-          <p className="text-white/50 text-sm mt-1.5">
-            Ringkasan kinerja LTE Cruise — Sistem Informasi Akademik
-          </p>
+          <p className="text-white/50 text-sm mt-1.5">Ringkasan performa dan statistik kampus LTE Cruise</p>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-        {stats.map((s, i) => (
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 stagger-children">
+        {statCards.map((s, i) => (
           <Card key={i} className="border border-border shadow-sm card-metric animate-slide-up">
-            <CardContent className="p-5">
+            <CardContent className="p-4">
               <div className="flex items-start justify-between">
                 <div>
                   <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">{s.label}</p>
-                  <p className="text-2xl font-bold mt-1.5 tracking-tight metric-value">{s.value}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">{s.sub}</p>
+                  <p className="text-2xl font-bold mt-1 tabular-nums">{loading ? <Loader2 className="w-5 h-5 animate-spin" /> : s.value}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">{s.sub}</p>
                 </div>
-                <div className={`p-2.5 rounded-xl ${s.bgColor}`}>
-                  <s.icon className={`w-[18px] h-[18px] ${s.color}`} />
-                </div>
+                <div className={`p-2 rounded-xl ${s.bgColor}`}><s.icon className={`w-4 h-4 ${s.color}`} /></div>
               </div>
             </CardContent>
           </Card>
         ))}
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-5">
-        {/* Trend Chart */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Quick Links */}
         <Card className="border border-border shadow-sm">
-          <CardHeader className="pb-3 px-5 pt-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <BarChart3 className="w-4 h-4 text-muted-foreground" /> Tren Pertumbuhan Pendaftar
-              </CardTitle>
-              <Badge variant="outline" className="text-[10px] font-normal">5 Tahun</Badge>
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-4">
+              <div className="p-1.5 rounded-md bg-primary/8"><BarChart3 className="w-4 h-4 text-primary" /></div>
+              <h3 className="font-semibold">Laporan & Analitik</h3>
             </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <div className="bar-chart" style={{ height: '180px' }}>
-              {[
-                { label: '2021', value: 85 },
-                { label: '2022', value: 102 },
-                { label: '2023', value: 128 },
-                { label: '2024', value: 156 },
-                { label: '2025', value: 142 },
-              ].map((b, i) => {
-                const maxVal = 170;
-                const pct = (b.value / maxVal) * 100;
-                return (
-                  <div key={i} className="bar-item group">
-                    <span className="bar-value">{b.value}</span>
-                    <div className="bar-track">
-                      <div className="bar-fill animate-bar-grow group-hover:brightness-110" style={{ height: `${pct}%`, animationDelay: `${i * 100}ms` }} />
-                    </div>
-                    <span className="bar-label">{b.label}</span>
-                  </div>
-                );
-              })}
+            <div className="grid grid-cols-2 gap-3">
+              <Link href="/headmaster/statistik">
+                <div className="p-4 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors group cursor-pointer text-center">
+                  <TrendingUp className="w-6 h-6 mx-auto mb-2 text-primary group-hover:scale-110 transition-transform" />
+                  <p className="text-sm font-semibold">Statistik</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Data detail kampus</p>
+                </div>
+              </Link>
+              <Link href="/headmaster/laporan">
+                <div className="p-4 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors group cursor-pointer text-center">
+                  <Award className="w-6 h-6 mx-auto mb-2 text-chart-4 group-hover:scale-110 transition-transform" />
+                  <p className="text-sm font-semibold">Laporan</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">Rekap OJT & Alumni</p>
+                </div>
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        {/* Top students */}
-        <Card className="border border-border shadow-sm">
-          <CardHeader className="pb-3 px-5 pt-5">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                <Award className="w-4 h-4 text-muted-foreground" /> Top Performing Students
-              </CardTitle>
-              <Link href="/headmaster/statistik" className="text-[11px] text-muted-foreground hover:text-primary transition-colors flex items-center gap-0.5 font-medium hover-underline">
-                Lihat Semua <ChevronRight className="w-3.5 h-3.5" />
-              </Link>
-            </div>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 space-y-2">
-            {topStudents.map((s, i) => (
-              <div key={i} className="flex items-center gap-3 p-3.5 rounded-lg border border-border hover:border-primary/20 transition-all card-interactive group">
-                <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center text-primary font-bold text-sm shrink-0 group-hover:scale-105 transition-transform">
-                  {i + 1}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[13px] font-semibold group-hover:text-primary transition-colors">{s.nama}</p>
-                  <p className="text-[11px] text-muted-foreground">{s.jurusan} · Angkatan {s.angkatan}</p>
-                </div>
-                <Badge variant="outline" className="text-xs font-semibold text-primary border-primary/20 tabular-nums">{s.nilai}</Badge>
-              </div>
-            ))}
+        {/* Global Network */}
+        <Card className="border border-border shadow-sm bg-gradient-to-br from-background to-muted/30">
+          <CardContent className="p-5 flex flex-col justify-center h-full text-center">
+            <Globe className="w-10 h-10 mx-auto mb-3 text-chart-5" />
+            <h3 className="font-bold text-lg">Jaringan Global LTE Cruise</h3>
+            <p className="text-[11px] text-muted-foreground mt-1.5 max-w-xs mx-auto">Pantau persebaran mahasiswa OJT dan Alumni di berbagai mitra kapal pesiar dan perhotelan internasional.</p>
+            <Link href="/headmaster/alumni" className="mt-4 inline-flex items-center gap-1.5 text-xs text-primary font-medium hover:underline justify-center">
+              Lihat Persebaran <ChevronRight className="w-3.5 h-3.5" />
+            </Link>
           </CardContent>
         </Card>
       </div>
-
-      {/* Alumni distribution */}
-      <Card className="border border-border shadow-sm">
-        <CardHeader className="pb-3 px-5 pt-5">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <Globe className="w-4 h-4 text-muted-foreground" /> Sebaran Alumni Bekerja per Negara
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 stagger-children">
-            {[
-              { flag: '🇮🇩', negara: 'Indonesia', jumlah: 45 },
-              { flag: '🇲🇾', negara: 'Malaysia', jumlah: 32 },
-              { flag: '🇹🇭', negara: 'Thailand', jumlah: 18 },
-              { flag: '🇦🇪', negara: 'Dubai', jumlah: 28 },
-              { flag: '🇺🇸', negara: 'Amerika', jumlah: 15 },
-              { flag: '🇪🇺', negara: 'Eropa', jumlah: 22 },
-            ].map((a, i) => (
-              <div key={i} className="text-center p-4 rounded-xl border border-border hover:border-primary/20 transition-all card-interactive animate-slide-up group">
-                <p className="text-2xl mb-1.5 group-hover:scale-110 transition-transform inline-block">{a.flag}</p>
-                <p className="text-xl font-bold tabular-nums metric-value">{a.jumlah}</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5 font-medium">{a.negara}</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

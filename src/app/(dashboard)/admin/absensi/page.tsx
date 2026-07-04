@@ -1,94 +1,94 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { ClipboardCheck, CheckCircle2, XCircle, AlertCircle, Clock, Download, Users } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ClipboardCheck, Calendar, Search, Loader2, Users } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { fetchData } from '@/lib/api';
+
+interface AbsensiItem {
+  id: string; tanggal: string; status: string; metode: string;
+  mahasiswa?: { nama_lengkap: string; nim: string } | null;
+  jadwal?: { kelas: string; mata_pelajaran?: { nama_mapel: string } | null } | null;
+}
+
+const statusCls: Record<string, string> = { hadir: 'status-aktif', izin: 'status-pending', sakit: 'status-info', alpha: 'status-nonaktif' };
 
 export default function AdminAbsensiPage() {
-  const classes = [
-    { kelas: 'D1-ALL-25A', mapel: 'English for Hospitality', hadir: 28, izin: 2, sakit: 1, alpha: 1, total: 32 },
-    { kelas: 'D1-HK-25A', mapel: 'Housekeeping Management', hadir: 18, izin: 1, sakit: 0, alpha: 1, total: 20 },
-    { kelas: 'D1-FP-25A', mapel: 'F&B Product', hadir: 22, izin: 0, sakit: 2, alpha: 0, total: 24 },
-    { kelas: 'D1-FS-25A', mapel: 'Restaurant Service', hadir: 15, izin: 1, sakit: 1, alpha: 1, total: 18 },
-    { kelas: 'D1-FS-24A', mapel: 'Bartending & Mixology', hadir: 20, izin: 2, sakit: 0, alpha: 0, total: 22 },
-  ];
+  const [data, setData] = useState<AbsensiItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
 
-  const totals = classes.reduce((a, c) => ({ hadir: a.hadir + c.hadir, izin: a.izin + c.izin, sakit: a.sakit + c.sakit, alpha: a.alpha + c.alpha, total: a.total + c.total }), { hadir: 0, izin: 0, sakit: 0, alpha: 0, total: 0 });
-  const overallPct = totals.total > 0 ? Math.round((totals.hadir / totals.total) * 100) : 0;
+  useEffect(() => { fetchData<AbsensiItem[]>('admin_absensi').then(d => { setData(d || []); setLoading(false); }); }, []);
+
+  const filtered = data.filter(a => {
+    if (search && !a.mahasiswa?.nama_lengkap?.toLowerCase().includes(search.toLowerCase())) return false;
+    if (filterStatus !== 'all' && a.status !== filterStatus) return false;
+    return true;
+  });
 
   return (
-    <div className="space-y-7 animate-fade-in">
-      <div className="page-header">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-          <div>
-            <h1>Rekap Absensi</h1>
-            <p>Monitoring kehadiran seluruh kelas LTE Cruise</p>
-          </div>
-          <Button variant="outline" className="btn-press text-xs h-9"><Download className="w-3.5 h-3.5 mr-1.5" /> Export Data</Button>
+    <div className="space-y-6 animate-fade-in">
+      <div className="page-header"><h1>Rekap Absensi</h1><p>Monitor kehadiran mahasiswa di semua kelas</p></div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><ClipboardCheck className="w-4 h-4 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{loading ? '—' : data.length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Total Record</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Users className="w-4 h-4 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{loading ? '—' : data.filter(a => a.status === 'hadir').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Hadir</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Calendar className="w-4 h-4 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">{loading ? '—' : data.filter(a => a.status === 'izin' || a.status === 'sakit').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Izin/Sakit</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><ClipboardCheck className="w-4 h-4 mx-auto mb-1 text-error" /><p className="text-xl font-bold">{loading ? '—' : data.filter(a => a.status === 'alpha').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Alpha</p></CardContent></Card>
+      </div>
+
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+          <Input placeholder="Cari mahasiswa..." className="pl-9 h-8 text-xs" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
+        <Select value={filterStatus} onValueChange={v => setFilterStatus(v ?? 'all')}>
+          <SelectTrigger className="w-full sm:w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua</SelectItem>
+            <SelectItem value="hadir">Hadir</SelectItem>
+            <SelectItem value="izin">Izin</SelectItem>
+            <SelectItem value="sakit">Sakit</SelectItem>
+            <SelectItem value="alpha">Alpha</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 stagger-children">
-        <Card className="border border-border shadow-sm card-stat-highlight col-span-2 lg:col-span-1 animate-slide-up">
-          <CardContent className="p-5 text-center">
-            <p className="stat-label">Kehadiran</p>
-            <p className="stat-value mt-1">{overallPct}%</p>
-          </CardContent>
-        </Card>
-        {[
-          { label: 'Hadir', count: totals.hadir, cls: 'text-success', bgCls: 'bg-success/8', icon: CheckCircle2 },
-          { label: 'Izin', count: totals.izin, cls: 'text-primary', bgCls: 'bg-primary/8', icon: Clock },
-          { label: 'Sakit', count: totals.sakit, cls: 'text-warning', bgCls: 'bg-warning/8', icon: AlertCircle },
-          { label: 'Alpha', count: totals.alpha, cls: 'text-error', bgCls: 'bg-error/8', icon: XCircle },
-        ].map(s => (
-          <Card key={s.label} className="border border-border shadow-sm card-metric animate-slide-up">
-            <CardContent className="p-5">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">{s.label}</p>
-                  <p className={`text-2xl font-bold mt-1.5 metric-value ${s.cls}`}>{s.count}</p>
-                </div>
-                <div className={`p-2.5 rounded-xl ${s.bgCls}`}><s.icon className={`w-[18px] h-[18px] ${s.cls}`} /></div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      <Card className="border border-border shadow-sm">
-        <CardHeader className="pb-3 px-5 pt-5">
-          <CardTitle className="text-sm font-semibold flex items-center gap-2">
-            <ClipboardCheck className="w-4 h-4 text-muted-foreground" /> Rekap per Kelas
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="px-5 pb-5 space-y-3">
-          {classes.map((c, i) => {
-            const pct = Math.round((c.hadir / c.total) * 100);
-            return (
-              <div key={i} className="p-4 rounded-xl border border-border hover:border-primary/20 transition-all card-interactive group">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-[13px] font-semibold group-hover:text-primary transition-colors">{c.mapel}</p>
-                    <p className="text-[11px] text-muted-foreground mt-0.5">{c.kelas} · {c.total} mahasiswa</p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center gap-2.5 text-[11px] font-medium">
-                      <span className="text-success tabular-nums">{c.hadir}H</span>
-                      <span className="text-primary tabular-nums">{c.izin}I</span>
-                      <span className="text-warning tabular-nums">{c.sakit}S</span>
-                      <span className="text-error tabular-nums">{c.alpha}A</span>
-                    </div>
-                    <Badge variant="outline" className={`text-xs font-semibold tabular-nums ${pct >= 80 ? 'text-success border-success/20' : 'text-error border-error/20'}`}>{pct}%</Badge>
-                  </div>
-                </div>
-                <div className="h-2 rounded-full bg-muted/40 overflow-hidden">
-                  <div className={`h-full rounded-full transition-all duration-700 ${pct >= 80 ? 'bg-success' : 'bg-error'}`} style={{ width: `${pct}%` }} />
-                </div>
-              </div>
-            );
-          })}
+      <Card className="border border-border shadow-none overflow-hidden">
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" /><p className="text-xs text-muted-foreground">Memuat absensi...</p></div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center"><ClipboardCheck className="w-10 h-10 mx-auto mb-3 text-muted-foreground/15" /><p className="text-xs text-muted-foreground font-medium">{data.length === 0 ? 'Belum ada data absensi' : 'Tidak ada hasil'}</p></div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="formal-table">
+                <TableHeader><TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead>Mahasiswa</TableHead><TableHead>Mata Pelajaran</TableHead><TableHead>Kelas</TableHead><TableHead className="text-center">Tanggal</TableHead><TableHead className="text-center">Status</TableHead><TableHead className="text-center">Metode</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {filtered.map(a => (
+                    <TableRow key={a.id} className="hover:bg-accent/40">
+                      <TableCell><p className="text-[13px] font-medium">{a.mahasiswa?.nama_lengkap || '—'}</p><p className="text-[10px] text-muted-foreground font-mono">{a.mahasiswa?.nim || ''}</p></TableCell>
+                      <TableCell className="text-[12px]">{a.jadwal?.mata_pelajaran?.nama_mapel || '—'}</TableCell>
+                      <TableCell className="text-[12px]">{a.jadwal?.kelas || '—'}</TableCell>
+                      <TableCell className="text-center text-[11px] tabular-nums">{a.tanggal ? new Date(a.tanggal).toLocaleDateString('id-ID') : '—'}</TableCell>
+                      <TableCell className="text-center"><span className={`status-indicator text-[8px] capitalize ${statusCls[a.status] || ''}`}>{a.status}</span></TableCell>
+                      <TableCell className="text-center"><Badge variant="outline" className="text-[9px] capitalize">{a.metode || '—'}</Badge></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+          {!loading && filtered.length > 0 && (
+            <div className="px-4 py-2.5 border-t border-border bg-muted/20"><p className="text-[10px] text-muted-foreground">Menampilkan {filtered.length} dari {data.length} record</p></div>
+          )}
         </CardContent>
       </Card>
     </div>

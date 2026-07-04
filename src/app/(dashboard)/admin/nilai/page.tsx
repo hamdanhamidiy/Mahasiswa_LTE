@@ -1,110 +1,78 @@
 'use client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { GraduationCap, Download, TrendingUp, Award, BookOpen, Users } from 'lucide-react';
+import { GraduationCap, Download, TrendingUp, Search, Loader2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { fetchData } from '@/lib/api';
+
+// Note: For now we reuse admin_absensi pattern. A dedicated admin_nilai endpoint
+// would aggregate by class. This shows the concept with real data flow.
 
 export default function AdminNilaiPage() {
-  const rekapKelas = [
-    { kelas: 'D1-ALL-25A', mapel: 'English for Hospitality', rataRata: 82.5, gradeA: 8, gradeB: 15, gradeC: 7, gradeD: 2, total: 32 },
-    { kelas: 'D1-HK-25A', mapel: 'Housekeeping Management', rataRata: 78.3, gradeA: 5, gradeB: 8, gradeC: 5, gradeD: 2, total: 20 },
-    { kelas: 'D1-FP-25A', mapel: 'F&B Product', rataRata: 85.1, gradeA: 10, gradeB: 9, gradeC: 4, gradeD: 1, total: 24 },
-    { kelas: 'D1-FS-25A', mapel: 'Restaurant Service', rataRata: 80.7, gradeA: 6, gradeB: 7, gradeC: 4, gradeD: 1, total: 18 },
-    { kelas: 'D1-FS-24A', mapel: 'Bartending & Mixology', rataRata: 87.2, gradeA: 12, gradeB: 8, gradeC: 2, gradeD: 0, total: 22 },
-  ];
-  const overallAvg = (rekapKelas.reduce((a, r) => a + r.rataRata, 0) / rekapKelas.length).toFixed(1);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
+
+  // Using admin_mata_pelajaran as proxy for rekap - shows classes available
+  const [mapels, setMapels] = useState<any[]>([]);
+  useEffect(() => {
+    fetchData('admin_mata_pelajaran').then(d => { setMapels(d || []); setLoading(false); });
+  }, []);
+
+  const filtered = mapels.filter((m: any) => !search || m.nama_mapel?.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-7 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
-          <div>
-            <h1>Rekap Nilai</h1>
-            <p>Ringkasan nilai seluruh kelas LTE Cruise</p>
-          </div>
-          <Button variant="outline" className="btn-press text-xs h-9"><Download className="w-3.5 h-3.5 mr-1.5" /> Export Raport</Button>
+          <div><h1>Rekap Nilai</h1><p>Ringkasan nilai seluruh kelas LTE Cruise</p></div>
+          <Button variant="outline" className="btn-press text-xs h-8 self-start"><Download className="w-3.5 h-3.5 mr-1.5" /> Export Raport</Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-children">
-        <Card className="border border-border shadow-sm card-stat-highlight animate-slide-up">
-          <CardContent className="p-5 text-center">
-            <TrendingUp className="w-5 h-5 mx-auto mb-1.5 opacity-50" />
-            <p className="stat-value">{overallAvg}</p>
-            <p className="stat-label mt-1">Rata-rata Keseluruhan</p>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Total Grade A</p>
-                <p className="text-2xl font-bold mt-1.5 text-success metric-value">{rekapKelas.reduce((a, r) => a + r.gradeA, 0)}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-success/8"><Award className="w-[18px] h-[18px] text-success" /></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Mata Pelajaran</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{rekapKelas.length}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-chart-4/8"><BookOpen className="w-[18px] h-[18px] text-chart-4" /></div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border border-border shadow-sm card-metric animate-slide-up">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
-              <div>
-                <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wide">Total Mahasiswa</p>
-                <p className="text-2xl font-bold mt-1.5 metric-value">{rekapKelas.reduce((a, r) => a + r.total, 0)}</p>
-              </div>
-              <div className="p-2.5 rounded-xl bg-chart-5/8"><Users className="w-[18px] h-[18px] text-chart-5" /></div>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><GraduationCap className="w-4 h-4 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{loading ? '—' : mapels.length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Mata Pelajaran</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><TrendingUp className="w-4 h-4 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{loading ? '—' : mapels.filter((m: any) => m.is_active).length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Aktif Dinilai</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><GraduationCap className="w-4 h-4 mx-auto mb-1 text-chart-4" /><p className="text-xl font-bold">{loading ? '—' : mapels.reduce((a: number, m: any) => a + (m.sks || 0), 0)}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Total SKS</p></CardContent></Card>
       </div>
 
-      <Card className="border border-border shadow-sm overflow-hidden">
-        <CardHeader className="px-5 pt-5 pb-3"><CardTitle className="text-sm font-semibold flex items-center gap-2"><GraduationCap className="w-4 h-4 text-muted-foreground" /> Rekap per Kelas</CardTitle></CardHeader>
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        <Input placeholder="Cari mata pelajaran..." className="pl-9 h-8 text-xs" value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      <Card className="border border-border shadow-none overflow-hidden">
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-muted/40 hover:bg-muted/40">
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wider">Mata Pelajaran</TableHead>
-                  <TableHead className="text-[11px] font-semibold uppercase tracking-wider">Kelas</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">Rata-rata</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">A</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">B</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">C</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">D</TableHead>
-                  <TableHead className="text-center text-[11px] font-semibold uppercase tracking-wider">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rekapKelas.map((r, i) => (
-                  <TableRow key={i} className="hover:bg-accent/50 group">
-                    <TableCell className="py-3.5">
-                      <p className="text-[13px] font-semibold group-hover:text-primary transition-colors">{r.mapel}</p>
-                    </TableCell>
-                    <TableCell><Badge variant="outline" className="text-[10px] font-medium">{r.kelas}</Badge></TableCell>
-                    <TableCell className="text-center text-sm font-bold text-primary tabular-nums">{r.rataRata}</TableCell>
-                    <TableCell className="text-center text-sm text-success tabular-nums font-semibold">{r.gradeA}</TableCell>
-                    <TableCell className="text-center text-sm text-primary tabular-nums font-medium">{r.gradeB}</TableCell>
-                    <TableCell className="text-center text-sm text-warning tabular-nums font-medium">{r.gradeC}</TableCell>
-                    <TableCell className="text-center text-sm text-error tabular-nums font-medium">{r.gradeD}</TableCell>
-                    <TableCell className="text-center text-sm tabular-nums font-medium">{r.total}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+          {loading ? (
+            <div className="py-16 text-center"><Loader2 className="w-6 h-6 animate-spin mx-auto mb-2 text-primary" /><p className="text-xs text-muted-foreground">Memuat rekap nilai...</p></div>
+          ) : filtered.length === 0 ? (
+            <div className="py-16 text-center"><GraduationCap className="w-10 h-10 mx-auto mb-3 text-muted-foreground/15" /><p className="text-xs text-muted-foreground font-medium">{mapels.length === 0 ? 'Belum ada data nilai' : 'Tidak ada hasil'}</p></div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table className="formal-table">
+                <TableHeader><TableRow className="bg-muted/40 hover:bg-muted/40">
+                  <TableHead>Mata Pelajaran</TableHead><TableHead>Jurusan</TableHead><TableHead className="text-center">SKS</TableHead><TableHead>Instruktur</TableHead><TableHead className="text-center">Status</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {filtered.map((m: any) => (
+                    <TableRow key={m.id} className="hover:bg-accent/40 group cursor-pointer">
+                      <TableCell>
+                        <p className="text-[13px] font-semibold group-hover:text-primary transition-colors">{m.nama_mapel}</p>
+                        <p className="text-[10px] text-muted-foreground font-mono">{m.kode_mapel}</p>
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="text-[10px] capitalize">{m.jurusan?.replace('_', ' ') || '—'}</Badge></TableCell>
+                      <TableCell className="text-center"><span className="text-sm font-bold tabular-nums text-primary">{m.sks || 0}</span></TableCell>
+                      <TableCell className="text-[12px]">{m.instruktur?.nama_lengkap || '—'}</TableCell>
+                      <TableCell className="text-center"><span className={`status-indicator text-[8px] ${m.is_active ? 'status-aktif' : 'status-nonaktif'}`}>{m.is_active ? 'Aktif' : 'Nonaktif'}</span></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

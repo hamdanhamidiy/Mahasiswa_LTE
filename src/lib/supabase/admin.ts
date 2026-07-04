@@ -6,9 +6,14 @@ import { createClient } from '@supabase/supabase-js';
  * NEVER import this in client components or expose the key.
  */
 export function createAdminClient() {
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceRoleKey) {
+    throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY environment variable');
+  }
+
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9hbmxwaXdiY2lheHZjemN6a29tIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3ODk3MDk0OSwiZXhwIjoyMDk0NTQ2OTQ5fQ.Z7M11syzihmXtMLHjAJbcVTwhLQ6TT-CxzGOGySov70',
+    serviceRoleKey,
     { auth: { autoRefreshToken: false, persistSession: false } }
   );
 }
