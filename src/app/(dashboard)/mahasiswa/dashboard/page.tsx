@@ -47,7 +47,7 @@ export default function MahasiswaDashboard() {
   return (
     <div className="space-y-7 animate-fade-in">
       {/* Header Banner — Premium Institutional */}
-      <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-400 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-blue-200/30">
+      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-blue-200/30">
         <div className="wave-decoration" />
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

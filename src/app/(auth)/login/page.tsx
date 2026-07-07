@@ -135,7 +135,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left — Brand Panel (Light Modern Gradient) */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-400 relative items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 relative items-center justify-center p-12 overflow-hidden">
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23fff' fill-opacity='1'/%3E%3C/svg%3E")`,

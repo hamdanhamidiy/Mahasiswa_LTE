@@ -66,7 +66,7 @@ export default function InstrukturDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-400 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-blue-200/30">
+      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-blue-200/30">
         <div className="wave-decoration" />
         <div className="relative z-10">
           <div className="flex items-center gap-2.5 mb-2">
