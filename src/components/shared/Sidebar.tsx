@@ -182,7 +182,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
         className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all duration-200 group relative',
           isActive
-            ? 'bg-sky-50 text-sky-600 font-semibold'
+            ? 'bg-blue-50 text-blue-600 font-semibold'
             : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
         )}
       >
@@ -190,17 +190,17 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
         <div className={cn(
           'absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300',
           isActive
-            ? 'h-5 opacity-100 bg-sky-500'
-            : 'h-0 opacity-0 bg-sky-300'
+            ? 'h-5 opacity-100 bg-blue-500'
+            : 'h-0 opacity-0 bg-blue-300'
         )} />
 
         <item.icon className={cn(
           'w-4 h-4 shrink-0 transition-colors duration-200',
-          isActive ? 'text-sky-500' : 'text-slate-400 group-hover:text-slate-600'
+          isActive ? 'text-blue-500' : 'text-slate-400 group-hover:text-slate-600'
         )} />
         {sidebarOpen && <span className="truncate leading-none">{item.label}</span>}
         {item.badge && sidebarOpen && (
-          <span className="ml-auto text-[9px] font-bold bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded-full">{item.badge}</span>
+          <span className="ml-auto text-[9px] font-bold bg-blue-100 text-blue-600 px-1.5 py-0.5 rounded-full">{item.badge}</span>
         )}
       </Link>
     );
@@ -238,7 +238,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           {/* Header */}
           <div className="flex items-center justify-between px-4 h-[60px] border-b border-slate-100 shrink-0">
             <Link href={`/${role}/dashboard`} className="flex items-center gap-2.5 min-w-0 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-sky-200 transition-all">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-blue-200 transition-all">
                 <Anchor className="w-4 h-4 text-white" />
               </div>
               {sidebarOpen && (
@@ -271,7 +271,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
             <div className="px-4 py-3 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center shrink-0 text-[11px] font-bold text-sky-600">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center shrink-0 text-[11px] font-bold text-blue-600">
                     {initials}
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white" />

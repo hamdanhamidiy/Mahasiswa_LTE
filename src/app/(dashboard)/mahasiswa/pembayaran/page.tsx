@@ -103,7 +103,7 @@ export default function PembayaranPage() {
 
       {/* Summary Banner */}
       <Card className="border border-border shadow-sm overflow-hidden">
-        <div className="bg-gradient-to-br from-sky-500 via-cyan-500 to-sky-400 p-6 sm:p-7 text-white">
+        <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-blue-400 p-6 sm:p-7 text-white">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="flex items-start gap-4">
               <div className="p-3.5 rounded-xl bg-white/[0.06] border border-white/[0.08] shrink-0">

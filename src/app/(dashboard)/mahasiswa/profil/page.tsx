@@ -43,7 +43,7 @@ export default function ProfilPage() {
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Left Panel — Identity Card */}
         <Card className="border border-border shadow-none lg:col-span-1 overflow-hidden">
-          <div className="h-16 bg-gradient-to-r from-sky-500 via-cyan-500 to-sky-400" />
+          <div className="h-16 bg-gradient-to-r from-blue-500 via-indigo-500 to-blue-400" />
           <CardContent className="pt-0 pb-5 text-center -mt-8">
             <Avatar className="w-16 h-16 mx-auto border-[3px] border-card shadow-sm">
               <AvatarFallback className="bg-primary text-white text-base font-bold">{initials}</AvatarFallback>
