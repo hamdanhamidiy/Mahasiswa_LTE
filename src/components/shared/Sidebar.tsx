@@ -182,25 +182,25 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
         className={cn(
           'flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] transition-all duration-200 group relative',
           isActive
-            ? 'bg-white/[0.10] text-white font-semibold'
-            : 'text-white/45 hover:text-white/75 hover:bg-white/[0.05]'
+            ? 'bg-sky-50 text-sky-600 font-semibold'
+            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
         )}
       >
         {/* Active indicator line */}
         <div className={cn(
           'absolute left-0 top-1/2 -translate-y-1/2 w-[3px] rounded-r-full transition-all duration-300',
           isActive
-            ? 'h-5 opacity-100 bg-white'
-            : 'h-0 opacity-0 bg-white/50'
+            ? 'h-5 opacity-100 bg-sky-500'
+            : 'h-0 opacity-0 bg-sky-300'
         )} />
 
         <item.icon className={cn(
           'w-4 h-4 shrink-0 transition-colors duration-200',
-          isActive ? 'text-white' : 'text-white/35 group-hover:text-white/60'
+          isActive ? 'text-sky-500' : 'text-slate-400 group-hover:text-slate-600'
         )} />
         {sidebarOpen && <span className="truncate leading-none">{item.label}</span>}
         {item.badge && sidebarOpen && (
-          <span className="ml-auto text-[9px] font-bold bg-white/15 text-white/70 px-1.5 py-0.5 rounded-full">{item.badge}</span>
+          <span className="ml-auto text-[9px] font-bold bg-sky-100 text-sky-600 px-1.5 py-0.5 rounded-full">{item.badge}</span>
         )}
       </Link>
     );
@@ -222,67 +222,67 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
       {/* Mobile overlay backdrop */}
       {isMobile && sidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside className={cn(
         'fixed top-0 left-0 h-full z-50 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]',
-        'bg-[var(--sidebar)] border-r border-white/[0.04]',
+        'bg-white border-r border-slate-200',
         sidebarOpen ? 'w-[256px]' : 'w-[68px]',
         isMobile && !sidebarOpen && '-translate-x-full',
-        isMobile && sidebarOpen && 'w-[272px] shadow-2xl shadow-black/40'
+        isMobile && sidebarOpen && 'w-[272px] shadow-2xl shadow-black/10'
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 h-[60px] border-b border-white/[0.06] shrink-0">
+          <div className="flex items-center justify-between px-4 h-[60px] border-b border-slate-100 shrink-0">
             <Link href={`/${role}/dashboard`} className="flex items-center gap-2.5 min-w-0 group">
-              <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 group-hover:bg-white/[0.12] transition-colors border border-white/[0.06]">
-                <Anchor className="w-4 h-4 text-white/80" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-500 to-cyan-500 flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-sky-200 transition-all">
+                <Anchor className="w-4 h-4 text-white" />
               </div>
               {sidebarOpen && (
                 <div className="min-w-0">
-                  <h1 className="text-[13px] font-bold tracking-tight text-white/90 leading-none">LTE CRUISE</h1>
-                  <p className="text-[8px] text-white/25 tracking-[0.18em] font-semibold mt-1 leading-none">ACADEMIC INFO SYSTEM</p>
+                  <h1 className="text-[13px] font-bold tracking-tight text-slate-800 leading-none">LTE CRUISE</h1>
+                  <p className="text-[8px] text-slate-400 tracking-[0.18em] font-semibold mt-1 leading-none">ACADEMIC INFO SYSTEM</p>
                 </div>
               )}
             </Link>
             {sidebarOpen && (
               <button
                 onClick={isMobile ? () => setSidebarOpen(false) : toggleSidebar}
-                className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors shrink-0"
+                className="p-1.5 rounded-md hover:bg-slate-100 transition-colors shrink-0"
               >
                 {isMobile
-                  ? <X className="w-4 h-4 text-white/40" />
-                  : <PanelLeftClose className="w-4 h-4 text-white/30 hover:text-white/50 transition-colors" />
+                  ? <X className="w-4 h-4 text-slate-400" />
+                  : <PanelLeftClose className="w-4 h-4 text-slate-400 hover:text-slate-600 transition-colors" />
                 }
               </button>
             )}
             {!sidebarOpen && !isMobile && (
-              <button onClick={toggleSidebar} className="p-1.5 rounded-md hover:bg-white/[0.08] transition-colors">
-                <PanelLeft className="w-3.5 h-3.5 text-white/30 hover:text-white/50 transition-colors" />
+              <button onClick={toggleSidebar} className="p-1.5 rounded-md hover:bg-slate-100 transition-colors">
+                <PanelLeft className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors" />
               </button>
             )}
           </div>
 
           {/* User info */}
           {sidebarOpen && (
-            <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
+            <div className="px-4 py-3 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="w-8 h-8 rounded-lg bg-white/[0.08] flex items-center justify-center shrink-0 text-[11px] font-bold text-white/60">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-sky-100 to-cyan-100 flex items-center justify-center shrink-0 text-[11px] font-bold text-sky-600">
                     {initials}
                   </div>
-                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-[var(--sidebar)]" />
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-[12px] font-semibold truncate text-white/85 leading-tight">{userName}</p>
+                  <p className="text-[12px] font-semibold truncate text-slate-700 leading-tight">{userName}</p>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] font-semibold text-white/30 uppercase tracking-wider">
+                    <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-wider">
                       {roleLabels[role]}
                     </span>
-                    {userNim && <span className="text-[9px] text-white/20 font-mono">· {userNim}</span>}
+                    {userNim && <span className="text-[9px] text-slate-300 font-mono">· {userNim}</span>}
                   </div>
                 </div>
               </div>
@@ -296,13 +296,13 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
                 <div key={gi}>
                   {sidebarOpen && gi > 0 && (
                     <div className="px-3 pt-4 pb-1.5">
-                      <span className="text-[9px] font-semibold text-white/20 uppercase tracking-[0.14em]">
+                      <span className="text-[9px] font-semibold text-slate-400 uppercase tracking-[0.14em]">
                         {group.title}
                       </span>
                     </div>
                   )}
                   {!sidebarOpen && gi > 0 && (
-                    <div className="my-2 mx-3 border-t border-white/[0.06]" />
+                    <div className="my-2 mx-3 border-t border-slate-100" />
                   )}
                   <div className="space-y-0.5">
                     {group.items.map((item) => <NavLink key={item.href} item={item} />)}
@@ -313,11 +313,11 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           </ScrollArea>
 
           {/* Footer */}
-          <div className="p-2.5 border-t border-white/[0.06] shrink-0">
+          <div className="p-2.5 border-t border-slate-100 shrink-0">
             <Button
               variant="ghost"
               className={cn(
-                'w-full text-white/35 hover:text-white/60 hover:bg-white/[0.05] text-[12px] h-9 transition-all duration-200 rounded-lg',
+                'w-full text-slate-400 hover:text-red-500 hover:bg-red-50 text-[12px] h-9 transition-all duration-200 rounded-lg',
                 sidebarOpen ? 'justify-start px-3' : 'justify-center px-0'
               )}
               onClick={async () => {

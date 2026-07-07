@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Banner */}
-      <div className="bg-hero-pattern rounded-xl p-6 sm:p-7 text-white relative overflow-hidden">
+      <div className="bg-gradient-to-br from-sky-500 via-cyan-500 to-sky-400 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-sky-200/30">
         <div className="wave-decoration" />
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
             <div className="space-y-4">
               {[
                 { label: 'Housekeeping', count: '—', pct: 40, color: 'bg-primary' },
-                { label: 'F&B Product', count: '—', pct: 30, color: 'bg-ocean-light' },
+                { label: 'F&B Product', count: '—', pct: 30, color: 'bg-chart-2' },
                 { label: 'F&B Service', count: '—', pct: 30, color: 'bg-chart-3' },
               ].map((j, i) => (
                 <div key={i} className="group">

@@ -111,7 +111,7 @@ export default function TranskripPage() {
 
       {/* Identity Strip */}
       <Card className="border border-border shadow-none overflow-hidden">
-        <div className="h-1 bg-institutional-banner" />
+        <div className="h-1 bg-gradient-to-r from-sky-500 to-cyan-500" />
         <CardContent className="p-4 sm:p-5">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div>

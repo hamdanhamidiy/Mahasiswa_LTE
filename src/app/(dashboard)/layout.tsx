@@ -28,9 +28,9 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         <div className="text-center space-y-4 animate-fade-in">
           {/* Logo spinner */}
           <div className="relative mx-auto w-14 h-14">
-            <div className="absolute inset-0 rounded-xl border-2 border-transparent border-t-primary/40 animate-spin" style={{ animationDuration: '1.2s' }} />
+            <div className="absolute inset-0 rounded-xl border-2 border-transparent border-t-sky-400/60 animate-spin" style={{ animationDuration: '1.2s' }} />
             <div className="absolute inset-0 rounded-xl flex items-center justify-center">
-              <Anchor className="w-6 h-6 text-primary/50" />
+              <Anchor className="w-6 h-6 text-sky-500/60" />
             </div>
           </div>
           <div>

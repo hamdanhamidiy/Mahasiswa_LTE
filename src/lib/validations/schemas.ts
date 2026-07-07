@@ -12,6 +12,18 @@ export const loginSchema = z.object({
 
 export type LoginFormValues = z.infer<typeof loginSchema>;
 
+export const staffLoginSchema = z.object({
+  email: z
+    .string()
+    .min(1, 'Email wajib diisi')
+    .email('Format email tidak valid'),
+  password: z
+    .string()
+    .min(6, 'Password minimal 6 karakter'),
+});
+
+export type StaffLoginFormValues = z.infer<typeof staffLoginSchema>;
+
 export const onboardingSchema = z.object({
   tempat_lahir: z.string().min(1, 'Tempat lahir wajib diisi'),
   tanggal_lahir: z.string().min(1, 'Tanggal lahir wajib diisi'),
