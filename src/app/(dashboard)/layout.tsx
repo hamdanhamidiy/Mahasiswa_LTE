@@ -22,20 +22,27 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     loadUser();
   }, [setUser]);
 
-  if (loading) {
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!loading && !user) {
+      window.location.href = '/login';
+    }
+  }, [loading, user]);
+
+  if (loading || !user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center space-y-4 animate-fade-in">
           {/* Logo spinner */}
           <div className="relative mx-auto w-14 h-14">
-            <div className="absolute inset-0 rounded-xl border-2 border-transparent border-t-blue-400/60 animate-spin" style={{ animationDuration: '1.2s' }} />
+            <div className="absolute inset-0 rounded-xl border-2 border-transparent border-t-primary/60 animate-spin" style={{ animationDuration: '1.2s' }} />
             <div className="absolute inset-0 rounded-xl flex items-center justify-center">
-              <Anchor className="w-6 h-6 text-blue-500/60" />
+              <Anchor className="w-6 h-6 text-primary/60" />
             </div>
           </div>
           <div>
             <p className="text-sm font-semibold text-foreground tracking-tight">LTE Cruise AIS</p>
-            <p className="text-xs text-muted-foreground mt-0.5">Memuat data...</p>
+            <p className="text-xs text-muted-foreground mt-0.5">{!loading && !user ? 'Mengarahkan ke halaman login...' : 'Memuat data...'}</p>
           </div>
           {/* Loading bar */}
           <div className="w-28 mx-auto h-0.5 rounded-full bg-muted overflow-hidden">

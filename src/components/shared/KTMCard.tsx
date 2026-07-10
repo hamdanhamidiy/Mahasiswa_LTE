@@ -71,7 +71,7 @@ export function KTMCard({
 
         <div className="flex-1 min-w-0 space-y-0.5">
           <p className="text-sm font-bold text-white truncate">{nama}</p>
-          <p className="text-xs font-mono text-sky-200">{nim}</p>
+          <p className="text-xs font-mono text-white/80">{nim}</p>
           <p className="text-[10px] text-white/75">{program}</p>
           <p className="text-[10px] text-white/75">{jurusan} • {angkatan}</p>
         </div>
@@ -87,7 +87,7 @@ export function KTMCard({
           </div>
         </div>
         <div className="w-14 h-14 bg-white rounded-lg p-1 flex items-center justify-center">
-          <QrCode className="w-10 h-10 text-sky-600" />
+          <QrCode className="w-10 h-10 text-[#1e3a5f]" />
         </div>
       </div>
 

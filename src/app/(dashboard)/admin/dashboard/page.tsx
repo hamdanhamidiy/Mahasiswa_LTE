@@ -60,7 +60,7 @@ export default function AdminDashboard() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header Banner */}
-      <div className="bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-blue-200/30">
+      <div className="bg-gradient-to-br from-[#1e3a5f] via-[#1e3a5f] to-[#2563eb] rounded-xl p-6 sm:p-7 text-white relative overflow-hidden shadow-lg shadow-[#1e3a5f]/20">
         <div className="wave-decoration" />
         <div className="relative z-10">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">

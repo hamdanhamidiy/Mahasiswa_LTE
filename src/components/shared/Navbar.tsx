@@ -43,17 +43,17 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-card/90 backdrop-blur-xl">
+    <header className="sticky top-0 z-40 border-b border-border bg-card/90 backdrop-blur-xl">
       <div className="flex items-center justify-between h-[60px] px-4 sm:px-6 lg:px-8">
         {/* Left */}
         <div className="flex items-center gap-3">
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden h-9 w-9 hover:bg-muted transition-colors"
+            className="lg:hidden h-10 w-10 hover:bg-muted transition-colors relative z-50"
             onClick={() => setSidebarOpen(!sidebarOpen)}
           >
-            <Menu className="w-[18px] h-[18px]" />
+            <Menu className="w-[20px] h-[20px]" />
           </Button>
           <Breadcrumb />
         </div>

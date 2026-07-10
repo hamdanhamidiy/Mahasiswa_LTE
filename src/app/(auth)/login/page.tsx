@@ -135,7 +135,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left — Brand Panel (Light Modern Gradient) */}
-      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-blue-800 via-blue-700 to-blue-600 relative items-center justify-center p-12 overflow-hidden">
+      <div className="hidden lg:flex lg:w-[45%] bg-gradient-to-br from-[#1e3a5f] via-[#1e3a5f] to-[#2563eb] relative items-center justify-center p-12 overflow-hidden">
         {/* Subtle grid pattern */}
         <div className="absolute inset-0 opacity-[0.04]" style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h40v40H0V0zm1 1h38v38H1V1z' fill='%23fff' fill-opacity='1'/%3E%3C/svg%3E")`,
@@ -144,7 +144,7 @@ export default function LoginPage() {
 
         {/* Radial glow */}
         <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-blue-300/15 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 right-1/4 w-60 h-60 bg-[#2563eb]/15 rounded-full blur-3xl" />
 
         {/* Wave decoration */}
         <div className="wave-decoration" />
@@ -152,7 +152,7 @@ export default function LoginPage() {
         <div className="relative z-10 text-center max-w-sm">
           {/* Logo */}
           <div className="mb-8 flex justify-center">
-            <div className="w-20 h-20 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shadow-lg shadow-blue-600/10 animate-float backdrop-blur-sm">
+            <div className="w-20 h-20 rounded-2xl bg-white/15 border border-white/25 flex items-center justify-center shadow-lg shadow-[#1e3a5f]/20 animate-float backdrop-blur-sm">
               <Anchor className="w-10 h-10 text-white" />
             </div>
           </div>
@@ -218,10 +218,10 @@ export default function LoginPage() {
         <div className="w-full max-w-[400px] space-y-7 animate-fade-in relative z-10">
           {/* Mobile logo */}
           <div className="lg:hidden text-center">
-            <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-500 items-center justify-center mb-3 shadow-lg shadow-blue-300/25">
+            <div className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] items-center justify-center mb-3 shadow-lg shadow-[#1e3a5f]/25">
               <Anchor className="w-7 h-7 text-white" />
             </div>
-            <h1 className="text-lg font-bold text-blue-600 tracking-tight">LTE CRUISE</h1>
+            <h1 className="text-lg font-bold text-primary tracking-tight">LTE CRUISE</h1>
             <p className="text-[9px] text-muted-foreground mt-1 tracking-[0.2em] uppercase font-semibold">Academic Information System</p>
           </div>
 
@@ -302,7 +302,7 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full h-10 text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-cyan-600 btn-press shadow-md shadow-blue-300/20 uppercase tracking-wider" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-10 text-xs font-semibold bg-gradient-to-r from-[#1e3a5f] to-[#2563eb] hover:from-[#172e4a] hover:to-[#1e3a5f] btn-press shadow-md shadow-[#1e3a5f]/20 uppercase tracking-wider" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...</> : <><LogIn className="w-4 h-4 mr-2" /> Masuk</>}
                   </Button>
                 </form>
@@ -351,7 +351,7 @@ export default function LoginPage() {
                     </div>
                   )}
 
-                  <Button type="submit" className="w-full h-10 text-xs font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-cyan-600 btn-press shadow-md shadow-blue-300/20 uppercase tracking-wider" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-10 text-xs font-semibold bg-gradient-to-r from-[#1e3a5f] to-[#2563eb] hover:from-[#172e4a] hover:to-[#1e3a5f] btn-press shadow-md shadow-[#1e3a5f]/20 uppercase tracking-wider" disabled={isLoading}>
                     {isLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Memproses...</> : <><LogIn className="w-4 h-4 mr-2" /> Masuk</>}
                   </Button>
 
