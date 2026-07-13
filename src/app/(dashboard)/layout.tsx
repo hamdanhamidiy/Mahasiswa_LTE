@@ -5,6 +5,7 @@ import { Sidebar } from '@/components/shared/Sidebar';
 import { Navbar } from '@/components/shared/Navbar';
 import { useAppStore } from '@/lib/store';
 import { fetchData } from '@/lib/api';
+import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
 import { Anchor } from 'lucide-react';
@@ -23,9 +24,19 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [setUser]);
 
   // Redirect to login if not authenticated
+  // Sign out first to clear any stale session and prevent redirect loop with middleware
   useEffect(() => {
     if (!loading && !user) {
-      window.location.href = '/login';
+      const signOutAndRedirect = async () => {
+        try {
+          const supabase = createClient();
+          await supabase.auth.signOut();
+        } catch {
+          // ignore sign-out errors
+        }
+        window.location.href = '/login';
+      };
+      signOutAndRedirect();
     }
   }, [loading, user]);
 
