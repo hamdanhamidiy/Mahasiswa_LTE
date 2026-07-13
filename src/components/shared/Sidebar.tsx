@@ -257,34 +257,45 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
       )}>
         <div className="flex flex-col h-full">
           {/* Header */}
-          <div className="flex items-center justify-between px-4 h-[60px] border-b border-slate-100 shrink-0">
-            <Link href={`/${role}/dashboard`} className="flex items-center gap-2.5 min-w-0 group">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-primary/20 transition-all">
-                <Anchor className="w-4 h-4 text-white" />
-              </div>
-              {sidebarOpen && (
-                <div className="min-w-0">
-                  <h1 className="text-[13px] font-bold tracking-tight text-slate-800 leading-none">LTE CRUISE</h1>
-                  <p className="text-[8px] text-slate-400 tracking-[0.18em] font-semibold mt-1 leading-none">ACADEMIC INFO SYSTEM</p>
-                </div>
-              )}
-            </Link>
-            {sidebarOpen && (
+          <div className={cn(
+            "flex items-center h-[60px] border-b border-slate-100 shrink-0 transition-all",
+            sidebarOpen ? "justify-between px-4" : "justify-center px-0"
+          )}>
+            {sidebarOpen ? (
+              <>
+                <Link href={`/${role}/dashboard`} className="flex items-center gap-2.5 min-w-0 group">
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-primary/20 transition-all">
+                    <Anchor className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="min-w-0">
+                    <h1 className="text-[13px] font-bold tracking-tight text-slate-800 leading-none">LTE CRUISE</h1>
+                    <p className="text-[8px] text-slate-400 tracking-[0.18em] font-semibold mt-1 leading-none">ACADEMIC INFO SYSTEM</p>
+                  </div>
+                </Link>
+                <button
+                  onClick={isMobile ? () => setSidebarOpen(false) : toggleSidebar}
+                  className="p-1.5 rounded-md hover:bg-slate-100 transition-colors shrink-0"
+                >
+                  {isMobile
+                    ? <X className="w-4 h-4 text-slate-400" />
+                    : <PanelLeftClose className="w-4 h-4 text-slate-400 hover:text-slate-600 transition-colors" />
+                  }
+                </button>
+              </>
+            ) : !isMobile ? (
               <button
-                onClick={isMobile ? () => setSidebarOpen(false) : toggleSidebar}
-                className="p-1.5 rounded-md hover:bg-slate-100 transition-colors shrink-0"
+                onClick={toggleSidebar}
+                title="Expand Sidebar"
+                className="p-2 rounded-lg hover:bg-slate-50 transition-colors flex items-center justify-center group"
               >
-                {isMobile
-                  ? <X className="w-4 h-4 text-slate-400" />
-                  : <PanelLeftClose className="w-4 h-4 text-slate-400 hover:text-slate-600 transition-colors" />
-                }
+                <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2563eb] flex items-center justify-center shrink-0 group-hover:shadow-md group-hover:shadow-primary/20 transition-all">
+                  <Anchor className="w-4.5 h-4.5 text-white" />
+                  <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-0.5 shadow-sm border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PanelLeft className="w-3 h-3 text-slate-600" />
+                  </div>
+                </div>
               </button>
-            )}
-            {!sidebarOpen && !isMobile && (
-              <button onClick={toggleSidebar} className="p-1.5 rounded-md hover:bg-slate-100 transition-colors">
-                <PanelLeft className="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 transition-colors" />
-              </button>
-            )}
+            ) : null}
           </div>
 
           {/* User info */}
