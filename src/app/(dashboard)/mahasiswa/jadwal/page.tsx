@@ -16,9 +16,9 @@ export default function JadwalPage() {
   const [todayHari, setTodayHari] = useState('');
 
   useEffect(() => {
-    const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
-    setTodayHari(days[new Date().getDay()]);
     fetchData<JadwalItem[]>('jadwal').then(data => {
+      const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+      setTodayHari(days[new Date().getDay()]);
       if (data && data.length > 0) {
         const grouped: Record<string, JadwalItem[]> = {};
         for (const j of data) { if (!grouped[j.hari]) grouped[j.hari] = []; grouped[j.hari].push(j); }

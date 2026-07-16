@@ -29,10 +29,19 @@ interface OJTData {
 export default function OJTTrackerPage() {
   const [loading, setLoading] = useState(true);
   const [ojtData, setOjtData] = useState<OJTData | null>(null);
+  const [progress, setProgress] = useState(65);
 
   useEffect(() => {
     fetchData<OJTData[]>('ojt_record').then(data => {
-      if (data && data.length > 0) setOjtData(data[0]);
+      if (data && data.length > 0) {
+        const ojtRec = data[0];
+        setOjtData(ojtRec);
+        const start = new Date(ojtRec.tanggal_mulai).getTime();
+        const end = new Date(ojtRec.tanggal_selesai).getTime();
+        const now = Date.now();
+        const calcProgress = Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));
+        setProgress(calcProgress);
+      }
       setLoading(false);
     });
   }, []);
@@ -46,12 +55,7 @@ export default function OJTTrackerPage() {
     posisi: ojtData.posisi_magang || 'Housekeeping Attendant',
     tanggal_mulai: new Date(ojtData.tanggal_mulai).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
     tanggal_selesai: new Date(ojtData.tanggal_selesai).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }),
-    progress: (() => {
-      const start = new Date(ojtData.tanggal_mulai).getTime();
-      const end = new Date(ojtData.tanggal_selesai).getTime();
-      const now = Date.now();
-      return Math.min(100, Math.max(0, Math.round(((now - start) / (end - start)) * 100)));
-    })(),
+    progress: progress,
     status: ojtData.status_laporan,
     supervisor: ojtData.nama_supervisor || 'Belum ditentukan',
     evaluasi: [
