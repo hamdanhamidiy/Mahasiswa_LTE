@@ -322,7 +322,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 py-2">
+          <ScrollArea className="flex-1 min-h-0 py-2">
             <nav className="px-2.5 space-y-0.5">
               {navGroups.map((group, gi) => (
                 <div key={gi}>

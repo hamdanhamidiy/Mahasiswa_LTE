@@ -11,6 +11,16 @@ import { getProgramLabel, getJurusanLabel, formatDate } from '@/lib/utils/helper
 
 interface Profile { tempat_lahir: string | null; tanggal_lahir: string | null; jenis_kelamin: string | null; alamat_lengkap: string | null; kota_asal: string | null; provinsi_asal: string | null; no_hp: string | null; no_hp_darurat: string | null; nama_wali: string | null; hubungan_wali: string | null; no_hp_wali: string | null; asal_sekolah: string | null; tahun_lulus: number | null; ukuran_seragam: string | null; is_onboarded: boolean }
 
+const Field = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: React.ElementType }) => (
+  <div className="data-field">
+    <span className="data-label">{label}</span>
+    <span className="data-value flex items-center gap-1.5">
+      {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground/40" />}
+      {value || <span className="text-muted-foreground/40 italic text-xs">Belum diisi</span>}
+    </span>
+  </div>
+);
+
 export default function ProfilPage() {
   const { user } = useAppStore();
   const [loading, setLoading] = useState(true);
@@ -21,16 +31,6 @@ export default function ProfilPage() {
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
 
   const initials = user?.nama_lengkap?.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'U';
-
-  const Field = ({ label, value, icon: Icon }: { label: string; value: string | null | undefined; icon?: React.ElementType }) => (
-    <div className="data-field">
-      <span className="data-label">{label}</span>
-      <span className="data-value flex items-center gap-1.5">
-        {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground/40" />}
-        {value || <span className="text-muted-foreground/40 italic text-xs">Belum diisi</span>}
-      </span>
-    </div>
-  );
 
   return (
     <div className="space-y-6 animate-fade-in">
