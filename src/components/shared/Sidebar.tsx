@@ -13,7 +13,6 @@ import {
 } from 'lucide-react';
 import type { UserRole } from '@/lib/types';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavItem { label: string; href: string; icon: React.ElementType; badge?: string }
@@ -322,7 +321,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <ScrollArea className="flex-1 min-h-0 py-2">
+          <div className="flex-1 min-h-0 overflow-y-auto py-2">
             <nav className="px-2.5 space-y-0.5">
               {navGroups.map((group, gi) => (
                 <div key={gi}>
@@ -342,7 +341,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
                 </div>
               ))}
             </nav>
-          </ScrollArea>
+          </div>
 
           {/* Footer */}
           <div className="p-2.5 border-t border-slate-100 shrink-0">
