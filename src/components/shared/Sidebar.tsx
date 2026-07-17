@@ -14,6 +14,7 @@ import {
 import type { UserRole } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NavItem { label: string; href: string; icon: React.ElementType; badge?: string }
 interface NavGroup { title: string; items: NavItem[] }
@@ -321,7 +322,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
           )}
 
           {/* Navigation */}
-          <div className="flex-1 min-h-0 overflow-y-auto py-2">
+          <ScrollArea className="flex-1 min-h-0 py-2">
             <nav className="px-2.5 space-y-0.5">
               {navGroups.map((group, gi) => (
                 <div key={gi}>
@@ -341,7 +342,7 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
                 </div>
               ))}
             </nav>
-          </div>
+          </ScrollArea>
 
           {/* Footer */}
           <div className="p-2.5 border-t border-slate-100 shrink-0">

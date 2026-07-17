@@ -542,6 +542,14 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json(data);
       }
 
+      case 'profile': {
+        if (role !== 'mahasiswa' && role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const targetId = role === 'admin' ? id : user.id;
+        const { data, error } = await admin.from('mahasiswa_profile').update(payload).eq('id', targetId).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
       case 'pembayaran_verify': {
         if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         const { data, error } = await admin.from('pembayaran').update({
