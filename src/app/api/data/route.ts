@@ -583,6 +583,42 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(data);
       }
 
+      case 'tambah_mahasiswa': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        
+        // 1. Create auth user
+        const { data: authData, error: authError } = await admin.auth.admin.createUser({
+          email: payload.email,
+          password: payload.password,
+          email_confirm: true,
+          user_metadata: { role: 'mahasiswa' }
+        });
+        
+        if (authError) return NextResponse.json({ error: authError.message }, { status: 400 });
+        if (!authData.user) return NextResponse.json({ error: 'Gagal membuat user' }, { status: 400 });
+
+        // 2. Insert into users table
+        const { data: dbData, error: dbError } = await admin.from('users').insert({
+          id: authData.user.id,
+          email: payload.email,
+          nama_lengkap: payload.nama_lengkap,
+          nim: payload.nim,
+          program: payload.program,
+          jurusan: payload.jurusan,
+          angkatan: payload.angkatan,
+          role: 'mahasiswa',
+          status_aktif: true
+        }).select().single();
+
+        if (dbError) {
+          // If DB insert fails, we should ideally rollback auth creation, but for simplicity here we just return error
+          await admin.auth.admin.deleteUser(authData.user.id);
+          return NextResponse.json({ error: dbError.message }, { status: 400 });
+        }
+
+        return NextResponse.json(dbData);
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for POST' }, { status: 400 });
     }

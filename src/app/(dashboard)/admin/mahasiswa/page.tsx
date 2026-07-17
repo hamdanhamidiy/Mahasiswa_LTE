@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2 } from 'lucide-react';
+import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2, Save, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { fetchData, updateData } from '@/lib/api';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { fetchData, updateData, createData } from '@/lib/api';
 
 interface MahasiswaItem {
   id: string; nama_lengkap: string; nim: string; email: string; program: string; jurusan: string; angkatan: string; status_aktif: boolean; created_at: string;
@@ -23,14 +24,40 @@ export default function AdminMahasiswaPage() {
   const [mahasiswa, setMahasiswa] = useState<MahasiswaItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const load = async () => {
+    setLoading(true);
+    const data = await fetchData<MahasiswaItem[]>('admin_mahasiswa');
+    setMahasiswa(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    const load = async () => {
-      const data = await fetchData<MahasiswaItem[]>('admin_mahasiswa');
-      setMahasiswa(data || []);
-      setLoading(false);
-    };
     load();
   }, []);
+
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [form, setForm] = useState({ 
+    nama_lengkap: '', email: '', password: '', nim: '', 
+    program: 'diploma1', jurusan: 'general', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` 
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.nama_lengkap || !form.email || !form.password) return;
+    setSaving(true);
+    const { data, error } = await createData('tambah_mahasiswa', form);
+    setSaving(false);
+    
+    if (error) {
+      alert('Gagal menambahkan mahasiswa: ' + error);
+      return;
+    }
+    
+    setIsFormOpen(false);
+    setForm({ nama_lengkap: '', email: '', password: '', nim: '', program: 'diploma1', jurusan: 'general', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` });
+    load();
+  };
 
   const filtered = mahasiswa.filter(m => {
     if (search && !m.nama_lengkap?.toLowerCase().includes(search.toLowerCase()) && !m.nim?.toLowerCase().includes(search.toLowerCase())) return false;
@@ -62,7 +89,7 @@ export default function AdminMahasiswaPage() {
           <Button variant="outline" size="sm" className="text-xs h-8">
             <Download className="w-3.5 h-3.5 mr-1.5" /> Export
           </Button>
-          <Button size="sm" className="bg-primary text-xs h-8 btn-press">
+          <Button size="sm" className="bg-primary text-xs h-8 btn-press" onClick={() => setIsFormOpen(true)}>
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Mahasiswa
           </Button>
         </div>
@@ -205,6 +232,61 @@ export default function AdminMahasiswaPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Form Tambah Mahasiswa */}
+      <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Tambah Mahasiswa Baru</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Nama Lengkap</Label><Input placeholder="Nama..." value={form.nama_lengkap} onChange={e => setForm(p => ({ ...p, nama_lengkap: e.target.value }))} required /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold">NIM</Label><Input placeholder="NIM..." value={form.nim} onChange={e => setForm(p => ({ ...p, nim: e.target.value }))} required /></div>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Email</Label><Input type="email" placeholder="Email..." value={form.email} onChange={e => setForm(p => ({ ...p, email: e.target.value }))} required /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold">Password</Label><Input type="text" placeholder="Password untuk login..." value={form.password} onChange={e => setForm(p => ({ ...p, password: e.target.value }))} required /></div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Program</Label>
+                <Select value={form.program} onValueChange={(v) => { if (v) setForm(p => ({ ...p, program: v })); }}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="diploma1">Diploma 1</SelectItem>
+                    <SelectItem value="executive">Executive</SelectItem>
+                    <SelectItem value="english_cruise">English for Cruise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Jurusan</Label>
+                <Select value={form.jurusan} onValueChange={(v) => { if (v) setForm(p => ({ ...p, jurusan: v })); }}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="housekeeping">Housekeeping</SelectItem>
+                    <SelectItem value="fnb_product">F&B Product</SelectItem>
+                    <SelectItem value="fnb_service">F&B Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-2"><Label className="text-xs font-semibold">Angkatan</Label><Input placeholder="Angkatan 2026-2027" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))} required /></div>
+            
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}><X className="w-3.5 h-3.5 mr-1" />Batal</Button>
+              <Button type="submit" className="bg-primary" disabled={saving}>
+                {saving ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1" />}Tambah Mahasiswa
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
