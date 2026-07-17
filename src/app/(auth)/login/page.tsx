@@ -65,7 +65,7 @@ export default function LoginPage() {
 
       const userData = lookupResult?.[0];
       if (lookupError || !userData) {
-        setError('NIM tidak ditemukan. Pastikan format NIM benar (LTE-YYYY-XXX).');
+        setError('NIM/CARD NO tidak ditemukan. Pastikan data yang dimasukkan benar.');
         setIsLoading(false);
         return;
       }
@@ -264,10 +264,10 @@ export default function LoginPage() {
               {loginMode === 'nim' && (
                 <form onSubmit={nimForm.handleSubmit(onNimSubmit)} className="space-y-4 animate-fade-in">
                   <div className="space-y-1.5">
-                    <Label htmlFor="nim" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">NIM (Nomor Induk Mahasiswa)</Label>
+                    <Label htmlFor="nim" className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">NIM / CARD NO</Label>
                     <Input
                       id="nim"
-                      placeholder="LTE-2024-001"
+                      placeholder="Masukkan NIM atau CARD NO"
                       className="h-10 text-sm"
                       {...nimForm.register('nim')}
                       disabled={isLoading}

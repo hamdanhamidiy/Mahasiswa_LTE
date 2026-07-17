@@ -3,8 +3,7 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   nim: z
     .string()
-    .min(1, 'NIM wajib diisi')
-    .regex(/^LTE-\d{4}-\d{3}$/, 'Format NIM harus LTE-YYYY-XXX (contoh: LTE-2024-001)'),
+    .min(1, 'NIM/CARD NO wajib diisi'),
   password: z
     .string()
     .min(6, 'Password minimal 6 karakter'),
