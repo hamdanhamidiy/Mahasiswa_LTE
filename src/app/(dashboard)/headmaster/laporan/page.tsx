@@ -1,36 +1,99 @@
 'use client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useEffect, useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Calendar, BarChart3, TrendingUp, Users, Briefcase, Award } from 'lucide-react';
+import { FileText, Download, Calendar, Loader2 } from 'lucide-react';
+import { fetchData } from '@/lib/api';
+
+interface ReportItem {
+  title: string;
+  type: string;
+  date: string;
+  description: string;
+}
+
+const typeCfg: Record<string, string> = {
+  Akademik: 'text-primary border-primary/20', Absensi: 'text-chart-3 border-chart-3/20',
+  Alumni: 'text-chart-5 border-chart-5/20', OJT: 'text-warning border-warning/20',
+  Statistik: 'text-success border-success/20', Interview: 'text-chart-2 border-chart-2/20',
+};
 
 export default function HeadmasterLaporanPage() {
-  const reports = [
-    { title: 'Laporan Akademik Semester Ganjil 2024/2025', type: 'Akademik', date: '15 Jan 2025', size: '2.4 MB' },
-    { title: 'Rekap Kehadiran Mahasiswa Semester Ganjil', type: 'Absensi', date: '10 Jan 2025', size: '1.8 MB' },
-    { title: 'Laporan Penyaluran Alumni 2024', type: 'Alumni', date: '28 Des 2024', size: '3.1 MB' },
-    { title: 'Evaluasi Program OJT Batch 24', type: 'OJT', date: '20 Des 2024', size: '4.2 MB' },
-    { title: 'Laporan Keuangan Q4 2024', type: 'Keuangan', date: '5 Des 2024', size: '1.5 MB' },
-    { title: 'Laporan Interview Kapal Pesiar 2024', type: 'Interview', date: '15 Nov 2024', size: '2.0 MB' },
-  ];
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState<any>(null);
+  const [reports, setReports] = useState<ReportItem[]>([]);
 
-  const typeCfg: Record<string, string> = {
-    Akademik: 'text-primary border-primary/20', Absensi: 'text-chart-3 border-chart-3/20',
-    Alumni: 'text-chart-5 border-chart-5/20', OJT: 'text-warning border-warning/20',
-    Keuangan: 'text-success border-success/20', Interview: 'text-chart-2 border-chart-2/20',
+  useEffect(() => {
+    fetchData('headmaster_stats').then(d => {
+      setStats(d);
+      // Generate dynamic reports based on real data
+      const today = new Date();
+      const dateStr = today.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+      const monthYear = today.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+      
+      const dynamicReports: ReportItem[] = [
+        { 
+          title: `Rekap Mahasiswa Aktif — ${monthYear}`, 
+          type: 'Akademik', 
+          date: dateStr, 
+          description: `Total ${d?.totalMahasiswa || 0} mahasiswa aktif terdaftar di sistem` 
+        },
+        { 
+          title: `Laporan Kehadiran — ${monthYear}`, 
+          type: 'Absensi', 
+          date: dateStr, 
+          description: `Rata-rata kehadiran: ${d?.avgKehadiran || 0}%` 
+        },
+        { 
+          title: `Status OJT Mahasiswa — ${monthYear}`, 
+          type: 'OJT', 
+          date: dateStr, 
+          description: `${d?.totalOJT || 0} mahasiswa sedang menjalani OJT di ${d?.uniqueCountries || 0} negara` 
+        },
+        { 
+          title: `Rekap Alumni & Penyaluran Kerja`, 
+          type: 'Alumni', 
+          date: dateStr, 
+          description: `Total ${d?.totalAlumni || 0} alumni bersertifikat terdaftar` 
+        },
+        { 
+          title: `Statistik Instruktur — ${monthYear}`, 
+          type: 'Statistik', 
+          date: dateStr, 
+          description: `${d?.totalInstruktur || 0} instruktur aktif mengajar` 
+        },
+      ];
+      setReports(dynamicReports);
+      setLoading(false);
+    });
+  }, []);
+
+  const handleDownload = (report: ReportItem) => {
+    // Generate a simple text report for download
+    const content = `LAPORAN ${report.type.toUpperCase()}\nLTE Cruise — Kampung Inggris, Pare, Kediri\n${'='.repeat(50)}\n\nJudul: ${report.title}\nTanggal: ${report.date}\n\n${report.description}\n\n${'='.repeat(50)}\nGenerated: ${new Date().toLocaleString('id-ID')}\n`;
+    
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `laporan-${report.type.toLowerCase()}-${new Date().toISOString().split('T')[0]}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   const quickStats = [
     { label: 'Total Laporan', value: reports.length.toString(), icon: FileText },
-    { label: 'Bulan Ini', value: '2', icon: Calendar },
-    { label: 'Terunduh', value: '45', icon: Download },
+    { label: 'Bulan Ini', value: reports.length.toString(), icon: Calendar },
+    { label: 'Unduhan', value: '—', icon: Download },
   ];
+
+  if (loading) return <div className="flex items-center justify-center py-24"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div><h1 className="text-xl font-semibold tracking-tight">Laporan</h1><p className="text-muted-foreground text-sm mt-0.5">Unduh dan tinjau laporan institusi</p></div>
-        <Button className="bg-primary btn-press"><FileText className="w-4 h-4 mr-2" /> Generate Laporan</Button>
       </div>
 
       <div className="grid grid-cols-3 gap-4 stagger-children">
@@ -56,14 +119,14 @@ export default function HeadmasterLaporanPage() {
                   </div>
                   <div>
                     <h3 className="text-sm font-semibold leading-snug">{r.title}</h3>
+                    <p className="text-[11px] text-muted-foreground mt-1">{r.description}</p>
                     <div className="flex items-center gap-2 mt-1.5">
                       <Badge variant="outline" className={`text-[10px] ${typeCfg[r.type] || ''}`}>{r.type}</Badge>
                       <span className="text-[11px] text-muted-foreground flex items-center gap-1"><Calendar className="w-3 h-3" />{r.date}</span>
-                      <span className="text-[11px] text-muted-foreground">{r.size}</span>
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" className="btn-press shrink-0">
+                <Button variant="outline" size="sm" className="btn-press shrink-0" onClick={() => handleDownload(r)}>
                   <Download className="w-3 h-3 mr-1.5" /> Unduh
                 </Button>
               </div>

@@ -1,12 +1,16 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchData } from '@/lib/api';
+import { fetchData, createData } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Megaphone, Pin, Calendar, Eye, Search, Loader2, Plus } from 'lucide-react';
+import { Megaphone, Pin, Calendar, Eye, Search, Plus, Loader2, Save, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface PengumumanItem { id: string; judul: string; konten: string; kategori: string; is_pinned: boolean; publish_at: string; views_count: number; penulis: { nama_lengkap: string } | null }
 
@@ -26,9 +30,40 @@ export default function InstrukturPengumumanPage() {
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
 
-  useEffect(() => { fetchData<PengumumanItem[]>('pengumuman').then(d => { if (d) setData(d); setLoading(false); }); }, []);
+  // Create dialog
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({ judul: '', konten: '', kategori: 'umum' });
+  const [creating, setCreating] = useState(false);
+
+  const loadData = () => {
+    fetchData<PengumumanItem[]>('pengumuman').then(d => { if (d) setData(d); setLoading(false); });
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const filtered = data.filter(p => !search || p.judul.toLowerCase().includes(search.toLowerCase()));
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!createForm.judul.trim() || !createForm.konten.trim()) return;
+    setCreating(true);
+    const { error } = await createData('pengumuman', {
+      judul: createForm.judul,
+      konten: createForm.konten,
+      kategori: createForm.kategori,
+      is_pinned: false,
+      publish_at: new Date().toISOString(),
+      views_count: 0,
+    });
+    setCreating(false);
+    if (!error) {
+      setIsCreateOpen(false);
+      setCreateForm({ judul: '', konten: '', kategori: 'umum' });
+      loadData();
+    } else {
+      alert('Gagal membuat pengumuman: ' + error);
+    }
+  };
 
   if (loading) return <div className="page-loading"><div className="loading-content"><div className="spinner-modern mx-auto mb-3" /><p className="text-xs text-muted-foreground">Memuat pengumuman...</p></div></div>;
 
@@ -40,7 +75,7 @@ export default function InstrukturPengumumanPage() {
             <h1>Pengumuman</h1>
             <p>Informasi terbaru dari LTE Cruise</p>
           </div>
-          <Button className="bg-primary btn-press text-xs h-9 shadow-md shadow-primary/15">
+          <Button className="bg-primary btn-press text-xs h-9 shadow-md shadow-primary/15" onClick={() => setIsCreateOpen(true)}>
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Buat Pengumuman
           </Button>
         </div>
@@ -78,6 +113,38 @@ export default function InstrukturPengumumanPage() {
           );
         })}
       </div>
+
+      {/* Dialog Buat Pengumuman */}
+      <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader><DialogTitle>Buat Pengumuman Baru</DialogTitle></DialogHeader>
+          <form onSubmit={handleCreate} className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Judul</Label>
+              <Input placeholder="Judul pengumuman..." value={createForm.judul} onChange={e => setCreateForm(p => ({ ...p, judul: e.target.value }))} required />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Kategori</Label>
+              <Select value={createForm.kategori} onValueChange={(v) => { if (v) setCreateForm(p => ({ ...p, kategori: v })); }}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {Object.entries(KAT).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Konten</Label>
+              <Textarea placeholder="Isi pengumuman..." rows={6} value={createForm.konten} onChange={e => setCreateForm(p => ({ ...p, konten: e.target.value }))} required />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}><X className="w-3.5 h-3.5 mr-1" />Batal</Button>
+              <Button type="submit" className="bg-primary" disabled={creating}>
+                {creating ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1" />}Terbitkan
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

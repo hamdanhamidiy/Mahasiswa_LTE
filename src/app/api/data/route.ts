@@ -410,6 +410,82 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(data || []);
       }
 
+      case 'instruktur_mahasiswa_by_jadwal': {
+        if (role !== 'instruktur' && role !== 'admin') {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        // Get the jadwal_id from query params
+        const jadwalId = request.nextUrl.searchParams.get('jadwal_id');
+        const mapelId = request.nextUrl.searchParams.get('mapel_id');
+        if (!jadwalId && !mapelId) return NextResponse.json({ error: 'jadwal_id or mapel_id required' }, { status: 400 });
+
+        // Get the jadwal to know which program/jurusan students belong to
+        let targetJurusan: string | null = null;
+        let targetProgram: string | null = null;
+        if (jadwalId) {
+          const { data: jadwalData } = await admin.from('jadwal').select('mata_pelajaran:mata_pelajaran_id(jurusan, program)').eq('id', jadwalId).single();
+          targetJurusan = (jadwalData as any)?.mata_pelajaran?.jurusan || null;
+          targetProgram = (jadwalData as any)?.mata_pelajaran?.program || null;
+        } else if (mapelId) {
+          const { data: mapelData } = await admin.from('mata_pelajaran').select('jurusan, program').eq('id', mapelId).single();
+          targetJurusan = mapelData?.jurusan || null;
+          targetProgram = mapelData?.program || null;
+        }
+
+        // Get mahasiswa filtered by matching program (jurusan 'general' matches all)
+        let query = admin.from('users').select('id, nim, nama_lengkap').eq('role', 'mahasiswa').eq('status_aktif', true);
+        if (targetProgram) query = query.eq('program', targetProgram);
+        if (targetJurusan && targetJurusan !== 'general') query = query.or(`jurusan.eq.${targetJurusan},jurusan.eq.general`);
+        query = query.order('nama_lengkap');
+        const { data: students } = await query;
+        return NextResponse.json(students || []);
+      }
+
+      // ============================================================
+      // HEADMASTER QUERIES
+      // ============================================================
+
+      case 'headmaster_stats': {
+        if (role !== 'headmaster' && role !== 'admin') {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+        const { count: totalMhs } = await admin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'mahasiswa').eq('status_aktif', true);
+        const { count: totalInstr } = await admin.from('users').select('*', { count: 'exact', head: true }).eq('role', 'instruktur').eq('status_aktif', true);
+        const { count: totalOjtActive } = await admin.from('ojt_records').select('*', { count: 'exact', head: true }).in('status_laporan', ['sedang_berjalan', 'laporan_dikirim']);
+        const { count: totalAlumni } = await admin.from('sertifikat_alumni').select('*', { count: 'exact', head: true });
+
+        // Kehadiran rata-rata
+        const { data: allAbsensi } = await admin.from('absensi').select('status');
+        const totalAbs = allAbsensi?.length || 0;
+        const totalHadir = allAbsensi?.filter((a: any) => a.status === 'hadir').length || 0;
+        const avgKehadiran = totalAbs > 0 ? Math.round((totalHadir / totalAbs) * 100) : 0;
+
+        // Distribusi jurusan
+        const { data: mhsByJurusan } = await admin.from('users').select('jurusan').eq('role', 'mahasiswa').eq('status_aktif', true);
+        const jurusanCount: Record<string, number> = {};
+        (mhsByJurusan || []).forEach((m: any) => { jurusanCount[m.jurusan || 'general'] = (jurusanCount[m.jurusan || 'general'] || 0) + 1; });
+
+        // Distribusi program
+        const { data: mhsByProgram } = await admin.from('users').select('program').eq('role', 'mahasiswa').eq('status_aktif', true);
+        const programCount: Record<string, number> = {};
+        (mhsByProgram || []).forEach((m: any) => { programCount[m.program || 'diploma1'] = (programCount[m.program || 'diploma1'] || 0) + 1; });
+
+        // OJT negara unik
+        const { data: ojtCountries } = await admin.from('ojt_records').select('negara');
+        const uniqueCountries = new Set((ojtCountries || []).map((o: any) => o.negara)).size;
+
+        return NextResponse.json({
+          totalMahasiswa: totalMhs || 0,
+          totalInstruktur: totalInstr || 0,
+          totalOJT: totalOjtActive || 0,
+          totalAlumni: totalAlumni || 0,
+          avgKehadiran,
+          uniqueCountries,
+          jurusanCount,
+          programCount,
+        });
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid query type' }, { status: 400 });
     }
@@ -494,6 +570,15 @@ export async function POST(request: NextRequest) {
       case 'absensi': {
         if (role !== 'admin' && role !== 'instruktur') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         const { data, error } = await admin.from('absensi').insert({ ...payload, dicatat_oleh: user.id }).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
+      case 'absensi_bulk': {
+        if (role !== 'admin' && role !== 'instruktur') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const records = (payload.records || []).map((r: any) => ({ ...r, dicatat_oleh: user.id }));
+        if (records.length === 0) return NextResponse.json({ error: 'No records provided' }, { status: 400 });
+        const { data, error } = await admin.from('absensi').upsert(records, { onConflict: 'mahasiswa_id,jadwal_id,tanggal' }).select();
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
         return NextResponse.json(data);
       }
@@ -589,6 +674,13 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json(data);
       }
 
+      case 'interview': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { data, error } = await admin.from('interview_sessions').update(payload).eq('id', id).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for PUT' }, { status: 400 });
     }
@@ -635,6 +727,9 @@ export async function DELETE(request: NextRequest) {
       jadwal: 'jadwal',
       interview: 'interview_sessions',
       mitra_kerja: 'mitra_kerja',
+      nilai: 'nilai',
+      absensi: 'absensi',
+      ojt_records: 'ojt_records',
     };
 
     const table = tableMap[type];

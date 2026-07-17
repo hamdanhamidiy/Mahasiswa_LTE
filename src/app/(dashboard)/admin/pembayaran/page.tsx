@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchData } from '@/lib/api';
+import { fetchData, updateData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -56,12 +56,21 @@ export default function AdminPembayaranPage() {
   const [data, setData] = useState<PembayaranRecord[]>([]);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
+  const loadData = () => {
+    setLoading(true);
     fetchData<PembayaranRecord[]>('admin_pembayaran').then(d => {
       setData(d && d.length > 0 ? d : DEMO);
       setLoading(false);
     });
-  }, []);
+  };
+  useEffect(() => { loadData(); }, []);
+
+  const handleConfirm = async (id: string) => {
+    if (!confirm('Konfirmasi pembayaran ini sebagai terverifikasi?')) return;
+    const { error } = await updateData('pembayaran_verify', id, {});
+    if (error) alert('Gagal: ' + error);
+    else loadData();
+  };
 
   if (loading) return (
     <div className="flex items-center justify-center py-24">
@@ -200,7 +209,7 @@ export default function AdminPembayaranPage() {
                           <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 outline-none"><MoreHorizontal className="w-4 h-4" /></DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem className="text-[13px] cursor-pointer py-2"><Eye className="w-3.5 h-3.5 mr-2" /> Detail</DropdownMenuItem>
-                            <DropdownMenuItem className="text-[13px] cursor-pointer py-2"><CheckCircle2 className="w-3.5 h-3.5 mr-2" /> Konfirmasi</DropdownMenuItem>
+                            <DropdownMenuItem className="text-[13px] cursor-pointer py-2" onClick={() => handleConfirm(p.id)}><CheckCircle2 className="w-3.5 h-3.5 mr-2" /> Konfirmasi</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

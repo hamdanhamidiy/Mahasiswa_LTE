@@ -5,10 +5,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Briefcase, MapPin, Calendar, Globe, Loader2, Search, MoreHorizontal } from 'lucide-react';
+import { Briefcase, MapPin, Calendar, Globe, Loader2, Search, MoreHorizontal, Save, X, CheckCircle2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { fetchData } from '@/lib/api';
+import { fetchData, updateData } from '@/lib/api';
 
 interface OJTItem {
   id: string; nama_perusahaan: string; negara: string; posisi: string; tanggal_mulai: string; tanggal_selesai: string | null; status_laporan: string;
@@ -17,19 +20,53 @@ interface OJTItem {
 }
 
 const statusMap: Record<string, { label: string; cls: string }> = {
+  belum_mulai: { label: 'Belum Mulai', cls: 'status-info' },
   sedang_berjalan: { label: 'Berjalan', cls: 'status-pending' },
   laporan_dikirim: { label: 'Laporan Terkirim', cls: 'status-info' },
+  disetujui: { label: 'Disetujui', cls: 'status-aktif' },
+  ditolak: { label: 'Ditolak', cls: 'status-nonaktif' },
   selesai: { label: 'Selesai', cls: 'status-aktif' },
-  dibatalkan: { label: 'Dibatalkan', cls: 'status-nonaktif' },
 };
+
+const statusOptions = [
+  { value: 'belum_mulai', label: 'Belum Mulai' },
+  { value: 'sedang_berjalan', label: 'Sedang Berjalan' },
+  { value: 'laporan_dikirim', label: 'Laporan Dikirim' },
+  { value: 'disetujui', label: 'Disetujui' },
+  { value: 'ditolak', label: 'Ditolak' },
+];
 
 export default function AdminOJTPage() {
   const [data, setData] = useState<OJTItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  useEffect(() => { fetchData<OJTItem[]>('admin_ojt').then(d => { setData(d || []); setLoading(false); }); }, []);
+  // Update status dialog
+  const [isStatusOpen, setIsStatusOpen] = useState(false);
+  const [selectedOjt, setSelectedOjt] = useState<OJTItem | null>(null);
+  const [newStatus, setNewStatus] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  const loadData = () => { setLoading(true); fetchData<OJTItem[]>('admin_ojt').then(d => { setData(d || []); setLoading(false); }); };
+  useEffect(() => { loadData(); }, []);
+
   const filtered = data.filter(o => !search || o.mahasiswa?.nama_lengkap?.toLowerCase().includes(search.toLowerCase()) || o.nama_perusahaan?.toLowerCase().includes(search.toLowerCase()));
+
+  const openStatusDialog = (ojt: OJTItem) => {
+    setSelectedOjt(ojt);
+    setNewStatus(ojt.status_laporan);
+    setIsStatusOpen(true);
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedOjt || !newStatus) return;
+    setSaving(true);
+    const { error } = await updateData('ojt_status', selectedOjt.id, { status_laporan: newStatus });
+    setSaving(false);
+    if (error) { alert('Gagal: ' + error); return; }
+    setIsStatusOpen(false);
+    loadData();
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -39,7 +76,7 @@ export default function AdminOJTPage() {
         <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Briefcase className="w-4 h-4 mx-auto mb-1 text-primary" /><p className="text-xl font-bold">{loading ? '—' : data.length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Total OJT</p></CardContent></Card>
         <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Calendar className="w-4 h-4 mx-auto mb-1 text-warning" /><p className="text-xl font-bold">{loading ? '—' : data.filter(o => o.status_laporan === 'sedang_berjalan').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Berjalan</p></CardContent></Card>
         <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><Globe className="w-4 h-4 mx-auto mb-1 text-chart-3" /><p className="text-xl font-bold">{loading ? '—' : new Set(data.map(o => o.negara)).size}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Negara</p></CardContent></Card>
-        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><MapPin className="w-4 h-4 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{loading ? '—' : data.filter(o => o.status_laporan === 'selesai').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Selesai</p></CardContent></Card>
+        <Card className="border border-border shadow-none card-interactive"><CardContent className="p-3.5 text-center"><MapPin className="w-4 h-4 mx-auto mb-1 text-success" /><p className="text-xl font-bold">{loading ? '—' : data.filter(o => o.status_laporan === 'disetujui').length}</p><p className="text-[9px] text-muted-foreground uppercase tracking-wider font-medium mt-0.5">Disetujui</p></CardContent></Card>
       </div>
 
       <div className="relative max-w-md">
@@ -67,7 +104,14 @@ export default function AdminOJTPage() {
                       <TableCell className="text-[12px]">{o.posisi || '—'}</TableCell>
                       <TableCell className="text-center text-[11px] tabular-nums">{o.tanggal_mulai ? new Date(o.tanggal_mulai).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: '2-digit' }) : '—'}</TableCell>
                       <TableCell className="text-center"><span className={`status-indicator text-[8px] ${statusMap[o.status_laporan]?.cls || 'status-info'}`}>{statusMap[o.status_laporan]?.label || o.status_laporan}</span></TableCell>
-                      <TableCell><DropdownMenu><DropdownMenuTrigger className="h-7 w-7 inline-flex items-center justify-center rounded-md hover:bg-accent outline-none"><MoreHorizontal className="w-3.5 h-3.5" /></DropdownMenuTrigger><DropdownMenuContent align="end"><DropdownMenuItem className="text-[11px]">Detail</DropdownMenuItem><DropdownMenuItem className="text-[11px]">Update Status</DropdownMenuItem></DropdownMenuContent></DropdownMenu></TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="h-7 w-7 inline-flex items-center justify-center rounded-md hover:bg-accent outline-none"><MoreHorizontal className="w-3.5 h-3.5" /></DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem className="text-[11px] cursor-pointer" onClick={() => openStatusDialog(o)}>Update Status</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -76,6 +120,33 @@ export default function AdminOJTPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Update Status Dialog */}
+      <Dialog open={isStatusOpen} onOpenChange={setIsStatusOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-base">Update Status OJT</DialogTitle>
+            <p className="text-xs text-muted-foreground">{selectedOjt?.mahasiswa?.nama_lengkap} — {selectedOjt?.nama_perusahaan}</p>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Status Laporan</Label>
+              <Select value={newStatus} onValueChange={(v) => { if (v) setNewStatus(v); }}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map(o => <SelectItem key={o.value} value={o.value} className="text-sm">{o.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => setIsStatusOpen(false)}><X className="w-3 h-3 mr-1" />Batal</Button>
+              <Button size="sm" className="bg-primary" onClick={handleUpdateStatus} disabled={saving}>
+                {saving ? <Loader2 className="w-3 h-3 mr-1 animate-spin" /> : <Save className="w-3 h-3 mr-1" />}Simpan
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
