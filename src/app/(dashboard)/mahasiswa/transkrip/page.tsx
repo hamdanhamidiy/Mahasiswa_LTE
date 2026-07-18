@@ -13,8 +13,6 @@ import {
   Award, BookOpen, Loader2, CheckCircle2, BarChart3,
 } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel } from '@/lib/utils/helpers';
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
 
 interface NilaiItem {
   id: string;
@@ -46,28 +44,11 @@ export default function TranskripPage() {
   const { user } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [nilaiData, setNilaiData] = useState<NilaiItem[]>([]);
-  const [downloadingPdf, setDownloadingPdf] = useState(false);
 
   const handleDownloadPDF = async () => {
-    const element = document.getElementById('transkrip-content');
-    if (!element) return;
-    
-    setDownloadingPdf(true);
-    const opt = {
-      margin:       10,
-      filename:     `Transkrip_Nilai_${user?.nim || 'Mahasiswa'}.pdf`,
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-    };
-    
-    try {
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('Gagal mengunduh PDF:', error);
-    } finally {
-      setDownloadingPdf(false);
-    }
+    // Rely on native print functionality for PDF export since it supports modern CSS colors,
+    // whereas html2pdf/html2canvas crashes on Tailwind v4's oklab/oklch colors.
+    window.print();
   };
 
   const handlePrint = () => {
@@ -128,8 +109,8 @@ export default function TranskripPage() {
             <p>Rekap akademik lengkap — seluruh mata pelajaran</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleDownloadPDF} disabled={downloadingPdf} className="bg-primary hover:bg-primary/90 btn-press text-xs h-9">
-              {downloadingPdf ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+            <Button onClick={handleDownloadPDF} className="bg-primary hover:bg-primary/90 btn-press text-xs h-9">
+              <Download className="w-3.5 h-3.5 mr-1.5" />
               Unduh PDF
             </Button>
             <Button onClick={handlePrint} variant="outline" className="btn-press text-xs h-9">

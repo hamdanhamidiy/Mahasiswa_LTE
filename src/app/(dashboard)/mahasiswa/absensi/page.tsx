@@ -8,8 +8,6 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ClipboardCheck, QrCode, CheckCircle2, XCircle, AlertCircle, Clock, TrendingUp, Loader2, Download, Printer } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-// @ts-ignore
-import html2pdf from 'html2pdf.js';
 
 interface AbsensiRecord { id: string; tanggal: string; status: string; metode: string; jadwal: { mata_pelajaran: { nama_mapel: string; kode_mapel: string } } }
 interface RekapMapel { mapel: string; kode: string; hadir: number; izin: number; sakit: number; alpha: number; total: number; persen: number }
@@ -19,30 +17,11 @@ export default function AbsensiPage() {
   const [rekap, setRekap] = useState<RekapMapel[]>([]);
   const [recent, setRecent] = useState<AbsensiRecord[]>([]);
   const [stats, setStats] = useState({ hadir: 0, izin: 0, sakit: 0, alpha: 0, total: 0 });
-  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
 
   const handleDownloadPDF = async () => {
-    const element = document.getElementById('absensi-content');
-    if (!element) return;
-    
-    setDownloadingPdf(true);
-    const opt = {
-      margin:       10,
-      filename:     'Riwayat_Absensi_Mahasiswa.pdf',
-      image:        { type: 'jpeg' as const, quality: 0.98 },
-      html2canvas:  { scale: 2, useCORS: true },
-      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
-    };
-    
-    try {
-      await html2pdf().set(opt).from(element).save();
-    } catch (error) {
-      console.error('Gagal mengunduh PDF:', error);
-    } finally {
-      setDownloadingPdf(false);
-    }
+    window.print();
   };
 
   const handleScanQR = () => {
@@ -99,8 +78,8 @@ export default function AbsensiPage() {
             <p>Rekap kehadiran dan riwayat absensi</p>
           </div>
           <div className="flex gap-2">
-            <Button onClick={handleDownloadPDF} disabled={downloadingPdf} variant="outline" className="btn-press shadow-sm h-10 text-xs">
-              {downloadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+            <Button onClick={handleDownloadPDF} variant="outline" className="btn-press shadow-sm h-10 text-xs">
+              <Download className="w-4 h-4 mr-2" />
               Unduh Riwayat
             </Button>
             
