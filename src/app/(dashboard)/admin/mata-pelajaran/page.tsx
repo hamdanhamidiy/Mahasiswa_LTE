@@ -156,7 +156,13 @@ export default function AdminMataPelajaranPage() {
         <div className="space-y-2">
           <Label className="text-xs font-semibold">Instruktur</Label>
           <Select value={formData.instruktur_id || 'none'} onValueChange={v => { if (v) setFormData(p => ({ ...p, instruktur_id: v === 'none' ? '' : v })); }}>
-            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Pilih instruktur..." /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm">
+              <div data-slot="select-value" className="flex flex-1 text-left line-clamp-1">
+                {formData.instruktur_id 
+                  ? instrukturList.find(i => i.id === formData.instruktur_id)?.nama_lengkap || '— Belum ditentukan —'
+                  : <span className="text-muted-foreground">Pilih instruktur...</span>}
+              </div>
+            </SelectTrigger>
             <SelectContent>
               <SelectItem value="none">— Belum ditentukan —</SelectItem>
               {instrukturList.map(i => <SelectItem key={i.id} value={i.id}>{i.nama_lengkap}</SelectItem>)}

@@ -133,7 +133,13 @@ export default function AdminJadwalPage() {
         <div className="space-y-2">
           <Label className="text-xs font-semibold">Mata Pelajaran *</Label>
           <Select value={formData.mata_pelajaran_id} onValueChange={v => { if (v) setFormData(p => ({ ...p, mata_pelajaran_id: v })); }}>
-            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Pilih mapel..." /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm">
+              <div data-slot="select-value" className="flex flex-1 text-left line-clamp-1">
+                {formData.mata_pelajaran_id 
+                  ? mapelList.find(m => m.id === formData.mata_pelajaran_id)?.nama_mapel || 'Pilih mapel...'
+                  : <span className="text-muted-foreground">Pilih mapel...</span>}
+              </div>
+            </SelectTrigger>
             <SelectContent>
               {mapelList.map(m => <SelectItem key={m.id} value={m.id}>{m.nama_mapel} ({m.kode_mapel})</SelectItem>)}
             </SelectContent>
@@ -142,7 +148,13 @@ export default function AdminJadwalPage() {
         <div className="space-y-2">
           <Label className="text-xs font-semibold">Instruktur *</Label>
           <Select value={formData.instruktur_id} onValueChange={v => { if (v) setFormData(p => ({ ...p, instruktur_id: v })); }}>
-            <SelectTrigger className="h-9 text-sm"><SelectValue placeholder="Pilih instruktur..." /></SelectTrigger>
+            <SelectTrigger className="h-9 text-sm">
+              <div data-slot="select-value" className="flex flex-1 text-left line-clamp-1">
+                {formData.instruktur_id 
+                  ? instrukturList.find(i => i.id === formData.instruktur_id)?.nama_lengkap || 'Pilih instruktur...'
+                  : <span className="text-muted-foreground">Pilih instruktur...</span>}
+              </div>
+            </SelectTrigger>
             <SelectContent>
               {instrukturList.map(i => <SelectItem key={i.id} value={i.id}>{i.nama_lengkap}</SelectItem>)}
             </SelectContent>
