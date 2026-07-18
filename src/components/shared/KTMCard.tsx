@@ -61,7 +61,7 @@ export function KTMCard({
         {/* Photo */}
         <div className="w-16 h-20 rounded-lg bg-white/15 border border-white/25 overflow-hidden shrink-0 flex items-center justify-center">
           {fotoUrl ? (
-            <img src={fotoUrl} alt={nama} className="w-full h-full object-cover" />
+            <img src={fotoUrl} alt={nama} crossOrigin="anonymous" className="w-full h-full object-cover" />
           ) : (
             <div className="text-white/40 text-2xl font-bold">
               {nama.charAt(0)}

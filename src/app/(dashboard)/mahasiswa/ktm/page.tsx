@@ -66,7 +66,7 @@ export default function KTMPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="flex flex-col items-center gap-5">
-          <div ref={ktmRef} className="rounded-xl overflow-hidden shadow-xl" style={{ backgroundColor: '#fff' }}>
+          <div ref={ktmRef} className="rounded-xl w-fit shadow-xl">
             <KTMCard
               nama={user?.nama_lengkap || 'Nama Mahasiswa'}
               nim={user?.nim || 'LTE-2025-001'}

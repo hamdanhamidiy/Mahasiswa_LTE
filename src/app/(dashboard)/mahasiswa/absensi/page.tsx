@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { ClipboardCheck, QrCode, CheckCircle2, XCircle, AlertCircle, Clock, TrendingUp, Loader2, Download, Printer } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 interface AbsensiRecord { id: string; tanggal: string; status: string; metode: string; jadwal: { mata_pelajaran: { nama_mapel: string; kode_mapel: string } } }
 interface RekapMapel { mapel: string; kode: string; hadir: number; izin: number; sakit: number; alpha: number; total: number; persen: number }
@@ -27,17 +27,17 @@ export default function AbsensiPage() {
     const element = document.getElementById('absensi-content');
     if (!element) return;
     
+    setDownloadingPdf(true);
+    const opt = {
+      margin:       10,
+      filename:     'Riwayat_Absensi_Mahasiswa.pdf',
+      image:        { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+    };
+    
     try {
-      setDownloadingPdf(true);
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save('Riwayat_Absensi_Mahasiswa.pdf');
+      await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('Gagal mengunduh PDF:', error);
     } finally {

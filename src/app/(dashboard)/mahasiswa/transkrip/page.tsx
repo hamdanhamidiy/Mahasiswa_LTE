@@ -13,8 +13,8 @@ import {
   Award, BookOpen, Loader2, CheckCircle2, BarChart3,
 } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel } from '@/lib/utils/helpers';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
 
 interface NilaiItem {
   id: string;
@@ -52,22 +52,17 @@ export default function TranskripPage() {
     const element = document.getElementById('transkrip-content');
     if (!element) return;
     
+    setDownloadingPdf(true);
+    const opt = {
+      margin:       10,
+      filename:     `Transkrip_Nilai_${user?.nim || 'Mahasiswa'}.pdf`,
+      image:        { type: 'jpeg' as const, quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' as const }
+    };
+    
     try {
-      setDownloadingPdf(true);
-      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-      const imgData = canvas.toDataURL('image/png');
-      
-      const pdf = new jsPDF({
-        orientation: 'portrait',
-        unit: 'mm',
-        format: 'a4'
-      });
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`Transkrip_Nilai_${user?.nim || 'Mahasiswa'}.pdf`);
+      await html2pdf().set(opt).from(element).save();
     } catch (error) {
       console.error('Gagal mengunduh PDF:', error);
     } finally {
