@@ -13,6 +13,8 @@ import {
   Award, BookOpen, Loader2, CheckCircle2, BarChart3,
 } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel } from '@/lib/utils/helpers';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface NilaiItem {
   id: string;
@@ -44,6 +46,38 @@ export default function TranskripPage() {
   const { user } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [nilaiData, setNilaiData] = useState<NilaiItem[]>([]);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('transkrip-content');
+    if (!element) return;
+    
+    try {
+      setDownloadingPdf(true);
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Transkrip_Nilai_${user?.nim || 'Mahasiswa'}.pdf`);
+    } catch (error) {
+      console.error('Gagal mengunduh PDF:', error);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
 
   useEffect(() => {
     fetchData<NilaiItem[]>('nilai').then(data => {
@@ -99,18 +133,20 @@ export default function TranskripPage() {
             <p>Rekap akademik lengkap — seluruh mata pelajaran</p>
           </div>
           <div className="flex gap-2">
-            <Button className="bg-primary hover:bg-primary/90 btn-press text-xs h-9">
-              <Download className="w-3.5 h-3.5 mr-1.5" /> Unduh PDF
+            <Button onClick={handleDownloadPDF} disabled={downloadingPdf} className="bg-primary hover:bg-primary/90 btn-press text-xs h-9">
+              {downloadingPdf ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Download className="w-3.5 h-3.5 mr-1.5" />}
+              Unduh PDF
             </Button>
-            <Button variant="outline" className="btn-press text-xs h-9">
+            <Button onClick={handlePrint} variant="outline" className="btn-press text-xs h-9">
               <Printer className="w-3.5 h-3.5 mr-1.5" /> Cetak
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Identity Strip */}
-      <Card className="border border-border shadow-none overflow-hidden">
+      <div id="transkrip-content" className="space-y-6">
+        {/* Identity Strip */}
+        <Card className="border border-border shadow-none overflow-hidden">
         <div className="h-1 bg-gradient-to-r from-[#1e3a5f] to-[#2563eb]" />
         <CardContent className="p-4 sm:p-5">
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
@@ -326,6 +362,7 @@ export default function TranskripPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

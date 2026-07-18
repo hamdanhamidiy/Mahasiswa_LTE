@@ -6,7 +6,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ClipboardCheck, QrCode, CheckCircle2, XCircle, AlertCircle, Clock, TrendingUp, Loader2 } from 'lucide-react';
+import { ClipboardCheck, QrCode, CheckCircle2, XCircle, AlertCircle, Clock, TrendingUp, Loader2, Download, Printer } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 interface AbsensiRecord { id: string; tanggal: string; status: string; metode: string; jadwal: { mata_pelajaran: { nama_mapel: string; kode_mapel: string } } }
 interface RekapMapel { mapel: string; kode: string; hadir: number; izin: number; sakit: number; alpha: number; total: number; persen: number }
@@ -16,6 +19,41 @@ export default function AbsensiPage() {
   const [rekap, setRekap] = useState<RekapMapel[]>([]);
   const [recent, setRecent] = useState<AbsensiRecord[]>([]);
   const [stats, setStats] = useState({ hadir: 0, izin: 0, sakit: 0, alpha: 0, total: 0 });
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const [isScanning, setIsScanning] = useState(false);
+  const [scanResult, setScanResult] = useState<string | null>(null);
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('absensi-content');
+    if (!element) return;
+    
+    try {
+      setDownloadingPdf(true);
+      const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save('Riwayat_Absensi_Mahasiswa.pdf');
+    } catch (error) {
+      console.error('Gagal mengunduh PDF:', error);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
+
+  const handleScanQR = () => {
+    setIsScanning(true);
+    setScanResult(null);
+    // Simulate scanning delay
+    setTimeout(() => {
+      setIsScanning(false);
+      setScanResult('Berhasil! Anda telah tercatat hadir pada kelas ini.');
+    }, 2500);
+  };
 
   useEffect(() => {
     fetchData<AbsensiRecord[]>('absensi').then(data => {
@@ -60,12 +98,60 @@ export default function AbsensiPage() {
             <h1>Absensi</h1>
             <p>Rekap kehadiran dan riwayat absensi</p>
           </div>
-          <Button className="bg-primary hover:bg-primary/90 btn-press shadow-md shadow-primary/15 h-10 text-xs">
-            <QrCode className="w-4 h-4 mr-2" /> Scan QR Absensi
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleDownloadPDF} disabled={downloadingPdf} variant="outline" className="btn-press shadow-sm h-10 text-xs">
+              {downloadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              Unduh Riwayat
+            </Button>
+            
+            <Dialog onOpenChange={(open) => !open && setScanResult(null)}>
+              <DialogTrigger
+                render={
+                  <Button className="bg-primary hover:bg-primary/90 btn-press shadow-md shadow-primary/15 h-10 text-xs">
+                    <QrCode className="w-4 h-4 mr-2" /> Scan QR Absensi
+                  </Button>
+                }
+              />
+              <DialogContent className="sm:max-w-md text-center">
+                <DialogHeader>
+                  <DialogTitle className="text-center">Pemindai QR Absensi</DialogTitle>
+                </DialogHeader>
+                <div className="flex flex-col items-center justify-center py-8">
+                  {scanResult ? (
+                    <div className="animate-in zoom-in duration-300">
+                      <div className="w-16 h-16 rounded-full bg-success/15 flex items-center justify-center mx-auto mb-4">
+                        <CheckCircle2 className="w-8 h-8 text-success" />
+                      </div>
+                      <p className="text-sm font-semibold">{scanResult}</p>
+                    </div>
+                  ) : isScanning ? (
+                    <div className="space-y-4 w-full max-w-[200px]">
+                      <div className="relative w-full aspect-square border-2 border-primary rounded-xl overflow-hidden flex items-center justify-center bg-muted/20">
+                        <div className="absolute inset-0 bg-primary/10 animate-pulse" />
+                        <div className="w-full h-0.5 bg-primary absolute top-0 animate-scan-line shadow-[0_0_8px_2px_rgba(37,99,235,0.5)]" />
+                        <QrCode className="w-16 h-16 text-primary/40" />
+                      </div>
+                      <p className="text-xs text-muted-foreground animate-pulse">Memindai QR Code...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <div className="w-20 h-20 bg-muted rounded-2xl flex items-center justify-center mx-auto">
+                        <QrCode className="w-10 h-10 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground px-4">
+                        Arahkan kamera ke QR Code yang ditampilkan oleh instruktur di kelas.
+                      </p>
+                      <Button onClick={handleScanQR} className="mt-2 w-full">Mulai Scan</Button>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </div>
 
+      <div id="absensi-content" className="space-y-7">
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 stagger-children">
         <Card className="border border-border shadow-sm col-span-2 lg:col-span-1 card-stat-highlight animate-slide-up">
@@ -149,6 +235,7 @@ export default function AbsensiPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

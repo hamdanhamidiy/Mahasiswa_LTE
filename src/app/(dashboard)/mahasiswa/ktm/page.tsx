@@ -1,14 +1,59 @@
 'use client';
 
+import { useState, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
 import { KTMCard } from '@/components/shared/KTMCard';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, Printer, CreditCard } from 'lucide-react';
+import { Download, Printer, CreditCard, Loader2 } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel, formatDate } from '@/lib/utils/helpers';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 export default function KTMPage() {
   const { user } = useAppStore();
+  const [downloadingPng, setDownloadingPng] = useState(false);
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
+  const ktmRef = useRef<HTMLDivElement>(null);
+
+  const handleDownloadPNG = async () => {
+    if (!ktmRef.current) return;
+    try {
+      setDownloadingPng(true);
+      const canvas = await html2canvas(ktmRef.current, { scale: 3, useCORS: true, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      const link = document.createElement('a');
+      link.href = imgData;
+      link.download = `KTM_${user?.nim || 'Digital'}.png`;
+      link.click();
+    } catch (error) {
+      console.error('Failed to download PNG', error);
+    } finally {
+      setDownloadingPng(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (!ktmRef.current) return;
+    try {
+      setDownloadingPdf(true);
+      const canvas = await html2canvas(ktmRef.current, { scale: 3, useCORS: true, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'px',
+        format: [canvas.width, canvas.height]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`KTM_${user?.nim || 'Digital'}.pdf`);
+    } catch (error) {
+      console.error('Failed to download PDF', error);
+    } finally {
+      setDownloadingPdf(false);
+    }
+  };
 
   return (
     <div className="space-y-7 animate-fade-in">
@@ -21,23 +66,31 @@ export default function KTMPage() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         <div className="flex flex-col items-center gap-5">
-          <KTMCard
-            nama={user?.nama_lengkap || 'Nama Mahasiswa'}
-            nim={user?.nim || 'LTE-2025-001'}
-            program={user?.program ? getProgramLabel(user.program) : 'Diploma 1 (D1)'}
-            jurusan={user?.jurusan ? getJurusanLabel(user.jurusan) : 'Housekeeping'}
-            angkatan={user?.angkatan || 'Angkatan 25'}
-            periodeBerlaku={user?.periode_masuk ? formatDate(
-              new Date(new Date(user.periode_masuk).setFullYear(
-                new Date(user.periode_masuk).getFullYear() + 1
-              )).toISOString()
-            ) : '13 Januari 2026'}
-            fotoUrl={user?.avatar_url || undefined}
-            isActive={user?.status_aktif ?? true}
-          />
+          <div ref={ktmRef} className="rounded-xl overflow-hidden shadow-xl" style={{ backgroundColor: '#fff' }}>
+            <KTMCard
+              nama={user?.nama_lengkap || 'Nama Mahasiswa'}
+              nim={user?.nim || 'LTE-2025-001'}
+              program={user?.program ? getProgramLabel(user.program) : 'Diploma 1 (D1)'}
+              jurusan={user?.jurusan ? getJurusanLabel(user.jurusan) : 'Housekeeping'}
+              angkatan={user?.angkatan || 'Angkatan 25'}
+              periodeBerlaku={user?.periode_masuk ? formatDate(
+                new Date(new Date(user.periode_masuk).setFullYear(
+                  new Date(user.periode_masuk).getFullYear() + 1
+                )).toISOString()
+              ) : '13 Januari 2026'}
+              fotoUrl={user?.avatar_url || undefined}
+              isActive={user?.status_aktif ?? true}
+            />
+          </div>
           <div className="flex gap-3">
-            <Button className="bg-primary hover:bg-primary/90 btn-press"><Download className="w-4 h-4 mr-2" /> Unduh PNG</Button>
-            <Button variant="outline" className="btn-press"><Printer className="w-4 h-4 mr-2" /> Cetak PDF</Button>
+            <Button onClick={handleDownloadPNG} disabled={downloadingPng} className="bg-primary hover:bg-primary/90 btn-press">
+              {downloadingPng ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />} 
+              Unduh PNG
+            </Button>
+            <Button onClick={handleDownloadPDF} disabled={downloadingPdf} variant="outline" className="btn-press">
+              {downloadingPdf ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Printer className="w-4 h-4 mr-2" />} 
+              Cetak PDF
+            </Button>
           </div>
         </div>
 
