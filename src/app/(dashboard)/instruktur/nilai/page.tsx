@@ -36,6 +36,7 @@ export default function InstrukturNilaiPage() {
   const [jadwal, setJadwal] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [searchStudent, setSearchStudent] = useState('');
 
   // Dialog state
   const [isOpen, setIsOpen] = useState(false);
@@ -59,6 +60,7 @@ export default function InstrukturNilaiPage() {
     setIsOpen(true);
     setLoadingStudents(true);
     setSaveSuccess(false);
+    setSearchStudent('');
 
     const res = await fetch(`/api/data?type=instruktur_mahasiswa_by_jadwal&mapel_id=${cls.mapelId}`, { credentials: 'include' });
     const data = await res.json();
@@ -159,7 +161,13 @@ export default function InstrukturNilaiPage() {
             <div className="py-12 text-center"><p className="text-xs text-muted-foreground">Tidak ada mahasiswa untuk kelas ini</p></div>
           ) : (
             <>
-              <div className="text-[10px] text-muted-foreground mb-2">Bobot: Teori 30% • Praktek 40% • Attitude 15% • Bahasa Inggris 15%</div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+                <div className="text-[10px] text-muted-foreground">Bobot: Teori 30% • Praktek 40% • Attitude 15% • Bahasa Inggris 15%</div>
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                  <Input placeholder="Cari nama atau NIM..." className="pl-8 h-8 text-xs w-full sm:w-[250px]" value={searchStudent} onChange={e => setSearchStudent(e.target.value)} />
+                </div>
+              </div>
               <div className="overflow-x-auto border border-border rounded-lg">
                 <Table>
                   <TableHeader>
@@ -174,7 +182,7 @@ export default function InstrukturNilaiPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {students.map(s => {
+                    {students.filter(s => !searchStudent || s.nama_lengkap.toLowerCase().includes(searchStudent.toLowerCase()) || s.nim.toLowerCase().includes(searchStudent.toLowerCase())).map(s => {
                       const t = Number(s.nilai_teori) || 0, p = Number(s.nilai_praktek) || 0;
                       const a = Number(s.nilai_attitude) || 0, e = Number(s.nilai_bahasa_inggris) || 0;
                       const hasAny = !!(s.nilai_teori || s.nilai_praktek || s.nilai_attitude || s.nilai_bahasa_inggris);
