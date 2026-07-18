@@ -591,7 +591,8 @@ export async function POST(request: NextRequest) {
           email: payload.email,
           password: payload.password,
           email_confirm: true,
-          user_metadata: { role: 'mahasiswa' }
+          user_metadata: { nama: payload.nama_lengkap },
+          app_metadata: { role: 'mahasiswa' },
         });
         
         if (authError) return NextResponse.json({ error: authError.message }, { status: 400 });
@@ -611,12 +612,43 @@ export async function POST(request: NextRequest) {
         }).select().single();
 
         if (dbError) {
-          // If DB insert fails, we should ideally rollback auth creation, but for simplicity here we just return error
           await admin.auth.admin.deleteUser(authData.user.id);
           return NextResponse.json({ error: dbError.message }, { status: 400 });
         }
 
         return NextResponse.json(dbData);
+      }
+
+      case 'tambah_instruktur': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+        const { data: authData2, error: authError2 } = await admin.auth.admin.createUser({
+          email: payload.email,
+          password: payload.password,
+          email_confirm: true,
+          user_metadata: { nama: payload.nama_lengkap },
+          app_metadata: { role: 'instruktur' },
+        });
+
+        if (authError2) return NextResponse.json({ error: authError2.message }, { status: 400 });
+        if (!authData2.user) return NextResponse.json({ error: 'Gagal membuat user' }, { status: 400 });
+
+        const { data: dbData2, error: dbError2 } = await admin.from('users').insert({
+          id: authData2.user.id,
+          email: payload.email,
+          nama_lengkap: payload.nama_lengkap,
+          role: 'instruktur',
+          program: payload.program || 'diploma1',
+          jurusan: payload.jurusan || 'general',
+          status_aktif: true,
+        }).select().single();
+
+        if (dbError2) {
+          await admin.auth.admin.deleteUser(authData2.user.id);
+          return NextResponse.json({ error: dbError2.message }, { status: 400 });
+        }
+
+        return NextResponse.json(dbData2);
       }
 
       default:
@@ -717,6 +749,13 @@ export async function PUT(request: NextRequest) {
         return NextResponse.json(data);
       }
 
+      case 'mitra_kerja': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { data, error } = await admin.from('mitra_kerja').update(payload).eq('id', id).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for PUT' }, { status: 400 });
     }
@@ -757,6 +796,16 @@ export async function DELETE(request: NextRequest) {
   const admin = createAdminClient();
 
   try {
+    // Special case: deleting a user (mahasiswa/instruktur) requires auth cleanup
+    if (type === 'user') {
+      const { error: dbErr } = await admin.from('users').delete().eq('id', id);
+      if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 400 });
+      // Also delete from Supabase Auth
+      const { error: authErr } = await admin.auth.admin.deleteUser(id);
+      if (authErr) return NextResponse.json({ error: authErr.message }, { status: 400 });
+      return NextResponse.json({ success: true });
+    }
+
     const tableMap: Record<string, string> = {
       pengumuman: 'pengumuman',
       mata_pelajaran: 'mata_pelajaran',

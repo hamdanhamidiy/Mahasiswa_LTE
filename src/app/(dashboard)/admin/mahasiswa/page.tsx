@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2, Save, X } from 'lucide-react';
+import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2, Save, X, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { fetchData, updateData, createData } from '@/lib/api';
+import { fetchData, updateData, createData, deleteData } from '@/lib/api';
 
 interface MahasiswaItem {
   id: string; nama_lengkap: string; nim: string; email: string; program: string; jurusan: string; angkatan: string; status_aktif: boolean; created_at: string;
@@ -75,6 +75,44 @@ export default function AdminMahasiswaPage() {
     if (!error) {
       setMahasiswa(prev => prev.map(m => m.id === id ? { ...m, status_aktif: !currentStatus } : m));
     }
+  };
+
+  // --- EDIT ---
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState({ nama_lengkap: '', nim: '', program: 'diploma1', jurusan: 'general', angkatan: '', status_aktif: true });
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  const openEdit = (m: MahasiswaItem) => {
+    setEditId(m.id);
+    setEditForm({ nama_lengkap: m.nama_lengkap, nim: m.nim || '', program: m.program || 'diploma1', jurusan: m.jurusan || 'general', angkatan: m.angkatan || '', status_aktif: m.status_aktif });
+    setIsEditOpen(true);
+  };
+
+  const handleEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editId) return;
+    setSavingEdit(true);
+    const { error } = await updateData('user', editId, editForm);
+    setSavingEdit(false);
+    if (error) { alert('Gagal mengubah data: ' + error); return; }
+    setIsEditOpen(false);
+    setMahasiswa(prev => prev.map(m => m.id === editId ? { ...m, ...editForm } : m));
+  };
+
+  // --- HAPUS ---
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<MahasiswaItem | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    const { error } = await deleteData('user', deleteTarget.id);
+    setDeleting(false);
+    if (error) { alert('Gagal menghapus mahasiswa: ' + error); return; }
+    setIsDeleteOpen(false);
+    setMahasiswa(prev => prev.filter(m => m.id !== deleteTarget.id));
   };
 
   return (
@@ -206,12 +244,12 @@ export default function AdminMahasiswaPage() {
                               <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-7 w-7 outline-none">
                                 <MoreHorizontal className="w-3.5 h-3.5" />
                               </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem className="text-[11px]">Lihat Detail</DropdownMenuItem>
-                                <DropdownMenuItem className="text-[11px]">Edit Data</DropdownMenuItem>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuItem className="text-[11px]" onClick={() => openEdit(m)}><Pencil className="w-3 h-3 mr-2" />Edit Data</DropdownMenuItem>
                                 <DropdownMenuItem className="text-[11px]" onClick={() => toggleStatus(m.id, m.status_aktif)}>
                                   {m.status_aktif ? 'Nonaktifkan' : 'Aktifkan'}
                                 </DropdownMenuItem>
+                                <DropdownMenuItem className="text-[11px] text-error" onClick={() => { setDeleteTarget(m); setIsDeleteOpen(true); }}><Trash2 className="w-3 h-3 mr-2" />Hapus</DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </TableCell>
@@ -285,6 +323,77 @@ export default function AdminMahasiswaPage() {
               </Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Edit Mahasiswa */}
+      <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+        <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>Edit Data Mahasiswa</DialogTitle></DialogHeader>
+          <form onSubmit={handleEdit} className="space-y-4 pt-2">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Nama Lengkap</Label><Input value={editForm.nama_lengkap} onChange={e => setEditForm(p => ({ ...p, nama_lengkap: e.target.value }))} required /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold">NIM</Label><Input value={editForm.nim} onChange={e => setEditForm(p => ({ ...p, nim: e.target.value }))} /></div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Program</Label>
+                <Select value={editForm.program} onValueChange={v => { if (v) setEditForm(p => ({ ...p, program: v })); }}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="diploma1">Diploma 1</SelectItem>
+                    <SelectItem value="executive">Executive</SelectItem>
+                    <SelectItem value="english_cruise">English for Cruise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Jurusan</Label>
+                <Select value={editForm.jurusan} onValueChange={v => { if (v) setEditForm(p => ({ ...p, jurusan: v })); }}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="housekeeping">Housekeeping</SelectItem>
+                    <SelectItem value="fnb_product">F&B Product</SelectItem>
+                    <SelectItem value="fnb_service">F&B Service</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Angkatan</Label><Input value={editForm.angkatan} onChange={e => setEditForm(p => ({ ...p, angkatan: e.target.value }))} /></div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Status</Label>
+                <Select value={editForm.status_aktif ? 'aktif' : 'nonaktif'} onValueChange={v => setEditForm(p => ({ ...p, status_aktif: v === 'aktif' }))}>
+                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="aktif">Aktif</SelectItem>
+                    <SelectItem value="nonaktif">Nonaktif</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}><X className="w-3.5 h-3.5 mr-1" />Batal</Button>
+              <Button type="submit" className="bg-primary" disabled={savingEdit}>
+                {savingEdit ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Save className="w-3.5 h-3.5 mr-1" />}Simpan Perubahan
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog Konfirmasi Hapus */}
+      <Dialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader><DialogTitle>Hapus Mahasiswa?</DialogTitle></DialogHeader>
+          <p className="text-sm text-muted-foreground">Data <span className="font-semibold text-foreground">{deleteTarget?.nama_lengkap}</span> akan dihapus secara permanen termasuk akun login. Tindakan ini tidak dapat dibatalkan.</p>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" size="sm" onClick={() => setIsDeleteOpen(false)}>Batal</Button>
+            <Button size="sm" variant="destructive" onClick={handleDelete} disabled={deleting}>
+              {deleting ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Trash2 className="w-3.5 h-3.5 mr-1" />}Hapus
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
