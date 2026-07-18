@@ -8,6 +8,7 @@ interface AppState {
   sidebarOpen: boolean;
 
   setUser: (user: User | null) => void;
+  updateAvatarUrl: (url: string) => void;
   setNotifications: (notifications: Notification[]) => void;
   markNotificationRead: (id: string) => void;
   toggleSidebar: () => void;
@@ -21,6 +22,10 @@ export const useAppStore = create<AppState>((set) => ({
   sidebarOpen: true,
 
   setUser: (user) => set({ user }),
+
+  updateAvatarUrl: (url) => set((state) => ({
+    user: state.user ? { ...state.user, avatar_url: url } : null,
+  })),
 
   setNotifications: (notifications) =>
     set({

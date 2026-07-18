@@ -1,12 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/lib/store';
-import { fetchData, updateData } from '@/lib/api';
+import { fetchData, updateData, createData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, Mail, Phone, MapPin, School, Calendar, Shield, Loader2, GraduationCap, Heart, Shirt, Edit2, Lock } from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { User, Mail, Phone, MapPin, School, Calendar, Shield, Loader2, GraduationCap, Heart, Shirt, Edit2, Lock, Camera } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel, formatDate } from '@/lib/utils/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,7 @@ const Field = ({ label, value, icon: Icon }: { label: string; value: string | nu
 );
 
 export default function ProfilPage() {
-  const { user } = useAppStore();
+  const { user, updateAvatarUrl } = useAppStore();
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<Profile | null>(null);
 
@@ -40,6 +40,10 @@ export default function ProfilPage() {
   const [isPwdOpen, setIsPwdOpen] = useState(false);
   const [pwdForm, setPwdForm] = useState({ newPassword: '', confirmPassword: '' });
   const [pwdLoading, setPwdLoading] = useState(false);
+
+  // Avatar upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
 
   const supabase = createClient();
 
@@ -89,6 +93,52 @@ export default function ProfilPage() {
       setIsPwdOpen(false);
       setPwdForm({ newPassword: '', confirmPassword: '' });
     }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file
+    if (!file.type.startsWith('image/')) {
+      alert('Hanya file gambar yang diperbolehkan.');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Ukuran file maksimal 2MB.');
+      return;
+    }
+
+    setUploading(true);
+
+    // Convert to base64
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Full = reader.result as string;
+      const base64 = base64Full.split(',')[1]; // Remove data:image/...;base64, prefix
+      const mimeType = file.type;
+
+      const { data, error } = await createData('upload_avatar', { base64, mimeType });
+      setUploading(false);
+
+      if (error) {
+        alert('Gagal mengupload foto: ' + error);
+        return;
+      }
+
+      if (data && (data as any).avatar_url) {
+        updateAvatarUrl((data as any).avatar_url);
+        alert('Foto profil berhasil diperbarui!');
+      }
+    };
+    reader.onerror = () => {
+      setUploading(false);
+      alert('Gagal membaca file.');
+    };
+    reader.readAsDataURL(file);
+
+    // Reset file input
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   if (loading) return <div className="flex items-center justify-center py-20"><Loader2 className="w-5 h-5 animate-spin text-muted-foreground" /></div>;
@@ -199,10 +249,36 @@ export default function ProfilPage() {
         <Card className="border border-border shadow-none lg:col-span-1 overflow-hidden">
           <div className="h-16 bg-gradient-to-r from-[#1e3a5f] via-[#1e3a5f] to-[#2563eb]" />
           <CardContent className="pt-0 pb-5 text-center -mt-8">
-            <Avatar className="w-16 h-16 mx-auto border-[3px] border-card shadow-sm">
-              <AvatarFallback className="bg-primary text-white text-base font-bold">{initials}</AvatarFallback>
-            </Avatar>
-            <h2 className="text-sm font-bold mt-2.5 tracking-tight">{user?.nama_lengkap}</h2>
+            {/* Avatar with upload */}
+            <div className="relative inline-block group">
+              <Avatar className="w-16 h-16 mx-auto border-[3px] border-card shadow-sm">
+                <AvatarImage src={user?.avatar_url || undefined} />
+                <AvatarFallback className="bg-primary text-white text-base font-bold">{initials}</AvatarFallback>
+              </Avatar>
+              {/* Upload overlay */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-200 cursor-pointer"
+              >
+                {uploading ? (
+                  <Loader2 className="w-5 h-5 text-white animate-spin" />
+                ) : (
+                  <Camera className="w-5 h-5 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                )}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarUpload}
+              />
+            </div>
+            <p className="text-[9px] text-muted-foreground mt-1.5">Klik foto untuk mengubah</p>
+
+            <h2 className="text-sm font-bold mt-2 tracking-tight">{user?.nama_lengkap}</h2>
             <p className="text-[10px] text-muted-foreground font-mono mt-0.5">{user?.nim}</p>
             <div className="flex flex-wrap gap-1.5 justify-center mt-2">
               <Badge variant="outline" className="text-[9px] font-medium">{user?.program ? getProgramLabel(user.program) : 'D1'}</Badge>

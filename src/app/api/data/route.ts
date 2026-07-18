@@ -651,6 +651,43 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(dbData2);
       }
 
+      case 'upload_avatar': {
+        // Accept base64 image, upload to Supabase Storage, update users.avatar_url
+        const { base64, mimeType } = payload;
+        if (!base64) return NextResponse.json({ error: 'No image data provided' }, { status: 400 });
+
+        const ext = (mimeType || 'image/jpeg').split('/')[1] || 'jpg';
+        const fileName = `${user.id}_${Date.now()}.${ext}`;
+
+        // Decode base64 to buffer
+        const buffer = Buffer.from(base64, 'base64');
+
+        // Upload to Supabase Storage
+        const { error: uploadError } = await admin.storage
+          .from('avatars')
+          .upload(fileName, buffer, {
+            contentType: mimeType || 'image/jpeg',
+            upsert: true,
+          });
+
+        if (uploadError) return NextResponse.json({ error: 'Upload gagal: ' + uploadError.message }, { status: 400 });
+
+        // Get public URL
+        const { data: urlData } = admin.storage.from('avatars').getPublicUrl(fileName);
+        const avatarUrl = urlData.publicUrl;
+
+        // Update users table
+        const { data: userData, error: updateError } = await admin
+          .from('users')
+          .update({ avatar_url: avatarUrl, updated_at: new Date().toISOString() })
+          .eq('id', user.id)
+          .select()
+          .single();
+
+        if (updateError) return NextResponse.json({ error: updateError.message }, { status: 400 });
+        return NextResponse.json({ avatar_url: avatarUrl, user: userData });
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for POST' }, { status: 400 });
     }

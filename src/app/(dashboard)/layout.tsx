@@ -134,6 +134,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           role={user.role}
           userName={user.nama_lengkap}
           userNim={user.nim}
+          avatarUrl={user.avatar_url}
         />
       )}
       <div

@@ -64,6 +64,7 @@ const navGroupsByRole: Record<UserRole, NavGroup[]> = {
       title: 'Utama',
       items: [
         { label: 'Dashboard', href: '/instruktur/dashboard', icon: LayoutDashboard },
+        { label: 'Profil Saya', href: '/instruktur/profil', icon: User },
       ],
     },
     {
@@ -135,6 +136,7 @@ const navGroupsByRole: Record<UserRole, NavGroup[]> = {
       title: 'Utama',
       items: [
         { label: 'Dashboard', href: '/headmaster/dashboard', icon: LayoutDashboard },
+        { label: 'Profil Saya', href: '/headmaster/profil', icon: User },
       ],
     },
     {
@@ -148,9 +150,9 @@ const navGroupsByRole: Record<UserRole, NavGroup[]> = {
   ],
 };
 
-interface SidebarProps { role: UserRole; userName: string; userNim?: string | null }
+interface SidebarProps { role: UserRole; userName: string; userNim?: string | null; avatarUrl?: string | null }
 
-export function Sidebar({ role, userName, userNim }: SidebarProps) {
+export function Sidebar({ role, userName, userNim, avatarUrl }: SidebarProps) {
   const pathname = usePathname();
   const { sidebarOpen, toggleSidebar, setSidebarOpen } = useAppStore();
   const [isMobile, setIsMobile] = useState(false);
@@ -303,9 +305,13 @@ export function Sidebar({ role, userName, userNim }: SidebarProps) {
             <div className="px-4 py-3 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/15 to-primary/10 flex items-center justify-center shrink-0 text-[11px] font-bold text-primary">
-                    {initials}
-                  </div>
+                  {avatarUrl ? (
+                    <img src={avatarUrl} alt={userName} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/15 to-primary/10 flex items-center justify-center shrink-0 text-[11px] font-bold text-primary">
+                      {initials}
+                    </div>
+                  )}
                   <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white" />
                 </div>
                 <div className="min-w-0 flex-1">
