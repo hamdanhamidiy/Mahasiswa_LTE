@@ -688,6 +688,109 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ avatar_url: avatarUrl, user: userData });
       }
 
+      case 'interview_register': {
+        // Mahasiswa registers for an interview session
+        const sessionId = payload.session_id;
+        if (!sessionId) return NextResponse.json({ error: 'session_id required' }, { status: 400 });
+
+        // Get current session
+        const { data: session, error: sessErr } = await admin
+          .from('interview_sessions')
+          .select('pendaftar_ids, kuota')
+          .eq('id', sessionId)
+          .single();
+
+        if (sessErr || !session) return NextResponse.json({ error: 'Session not found' }, { status: 404 });
+
+        const currentIds: string[] = session.pendaftar_ids || [];
+        if (currentIds.includes(user.id)) {
+          return NextResponse.json({ error: 'Anda sudah terdaftar pada sesi ini' }, { status: 400 });
+        }
+        if (currentIds.length >= session.kuota) {
+          return NextResponse.json({ error: 'Kuota sesi sudah penuh' }, { status: 400 });
+        }
+
+        const updatedIds = [...currentIds, user.id];
+        const { data: updated, error: updateErr } = await admin
+          .from('interview_sessions')
+          .update({ pendaftar_ids: updatedIds })
+          .eq('id', sessionId)
+          .select()
+          .single();
+
+        if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 400 });
+        return NextResponse.json(updated);
+      }
+
+      case 'upload_bukti_pembayaran': {
+        // Upload bukti pembayaran image
+        const { pembayaran_id, base64, mimeType } = payload;
+        if (!pembayaran_id || !base64) return NextResponse.json({ error: 'pembayaran_id and base64 required' }, { status: 400 });
+
+        const ext = (mimeType || 'image/jpeg').split('/')[1] || 'jpg';
+        const fileName = `bukti_${pembayaran_id}_${Date.now()}.${ext}`;
+
+        const buffer = Buffer.from(base64, 'base64');
+        const { error: uploadErr } = await admin.storage
+          .from('bukti-pembayaran')
+          .upload(fileName, buffer, { contentType: mimeType || 'image/jpeg', upsert: true });
+
+        if (uploadErr) return NextResponse.json({ error: 'Upload gagal: ' + uploadErr.message }, { status: 400 });
+
+        const { data: urlData } = admin.storage.from('bukti-pembayaran').getPublicUrl(fileName);
+        const buktiUrl = urlData.publicUrl;
+
+        const { data: pembData, error: pembErr } = await admin
+          .from('pembayaran')
+          .update({
+            bukti_pembayaran_url: buktiUrl,
+            status: 'menunggu_verifikasi',
+            tanggal_bayar: new Date().toISOString().split('T')[0],
+          })
+          .eq('id', pembayaran_id)
+          .select()
+          .single();
+
+        if (pembErr) return NextResponse.json({ error: pembErr.message }, { status: 400 });
+        return NextResponse.json(pembData);
+      }
+
+      case 'upload_ojt_dokumen': {
+        // Upload OJT document (surat penerimaan or laporan akhir)
+        const { ojt_id, doc_type, base64: docBase64, mimeType: docMime } = payload;
+        if (!ojt_id || !docBase64 || !doc_type) return NextResponse.json({ error: 'ojt_id, doc_type, and base64 required' }, { status: 400 });
+
+        const fieldMap: Record<string, string> = {
+          surat_penerimaan: 'dokumen_surat_penerimaan_url',
+          laporan_akhir: 'dokumen_laporan_akhir_url',
+        };
+        const fieldName = fieldMap[doc_type];
+        if (!fieldName) return NextResponse.json({ error: 'Invalid doc_type' }, { status: 400 });
+
+        const docExt = (docMime || 'image/jpeg').split('/')[1] || 'jpg';
+        const docFileName = `ojt_${doc_type}_${ojt_id}_${Date.now()}.${docExt}`;
+
+        const docBuffer = Buffer.from(docBase64, 'base64');
+        const { error: docUploadErr } = await admin.storage
+          .from('ojt-documents')
+          .upload(docFileName, docBuffer, { contentType: docMime || 'image/jpeg', upsert: true });
+
+        if (docUploadErr) return NextResponse.json({ error: 'Upload gagal: ' + docUploadErr.message }, { status: 400 });
+
+        const { data: docUrlData } = admin.storage.from('ojt-documents').getPublicUrl(docFileName);
+        const docUrl = docUrlData.publicUrl;
+
+        const { data: ojtUpdated, error: ojtUpdateErr } = await admin
+          .from('ojt_records')
+          .update({ [fieldName]: docUrl })
+          .eq('id', ojt_id)
+          .select()
+          .single();
+
+        if (ojtUpdateErr) return NextResponse.json({ error: ojtUpdateErr.message }, { status: 400 });
+        return NextResponse.json(ojtUpdated);
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for POST' }, { status: 400 });
     }

@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/lib/store';
-import { fetchData } from '@/lib/api';
+import { fetchData, createData } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Ship, Calendar, MapPin, Users, FileText, Loader2, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface InterviewSession { id: string; nama_perusahaan_agensi: string; jenis: string; tanggal_interview: string; lokasi: string; kuota: number; deskripsi: string; requirements: string; dokumen_yang_dibutuhkan: string[]; pendaftar_ids: string[]; approved_ids: string[]; status: string }
 
@@ -16,6 +17,7 @@ export default function InterviewPage() {
   const [loading, setLoading] = useState(true);
   const [sessions, setSessions] = useState<InterviewSession[]>([]);
   const [expanded, setExpanded] = useState<string | null>(null);
+  const [registering, setRegistering] = useState<string | null>(null);
 
   useEffect(() => { fetchData<InterviewSession[]>('interview').then(d => { if (d) setSessions(d); setLoading(false); }); }, []);
 
@@ -76,7 +78,21 @@ export default function InterviewPage() {
                     </div>
                   </div>
                   <div className="flex gap-2 shrink-0">
-                    {s.status === 'akan_datang' && !isReg && <Button size="sm" className="bg-primary btn-press">Daftar</Button>}
+                    {s.status === 'akan_datang' && !isReg && (
+                      <Button size="sm" className="bg-primary btn-press" disabled={registering === s.id} onClick={async () => {
+                        setRegistering(s.id);
+                        const { error } = await createData('interview_register', { session_id: s.id });
+                        setRegistering(null);
+                        if (error) { toast.error(error); }
+                        else {
+                          toast.success(`Berhasil mendaftar interview ${s.nama_perusahaan_agensi}!`);
+                          setSessions(prev => prev.map(sess => sess.id === s.id ? { ...sess, pendaftar_ids: [...(sess.pendaftar_ids || []), user?.id || ''] } : sess));
+                        }
+                      }}>
+                        {registering === s.id ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : null}
+                        {registering === s.id ? 'Mendaftar...' : 'Daftar'}
+                      </Button>
+                    )}
                     {s.status === 'akan_datang' && isReg && <Button size="sm" variant="outline" disabled>Terdaftar</Button>}
                     <Button variant="ghost" size="sm" className="text-xs" onClick={() => setExpanded(isExp ? null : s.id)}>{isExp ? 'Tutup' : 'Detail'}</Button>
                   </div>

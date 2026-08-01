@@ -12,6 +12,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { fetchData, updateData, createData, deleteData } from '@/lib/api';
+import { toast } from 'sonner';
+import { exportToCSV } from '@/lib/export';
 
 interface MahasiswaItem {
   id: string; nama_lengkap: string; nim: string; email: string; program: string; jurusan: string; angkatan: string; status_aktif: boolean; created_at: string;
@@ -124,7 +126,18 @@ export default function AdminMahasiswaPage() {
           <p>Kelola data dan informasi seluruh mahasiswa LTE Cruise</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" className="text-xs h-8">
+          <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => {
+            exportToCSV(filtered, [
+              { header: 'Nama Lengkap', accessor: m => m.nama_lengkap },
+              { header: 'NIM', accessor: m => m.nim },
+              { header: 'Email', accessor: m => m.email },
+              { header: 'Program', accessor: m => m.program },
+              { header: 'Jurusan', accessor: m => m.jurusan },
+              { header: 'Angkatan', accessor: m => m.angkatan },
+              { header: 'Status', accessor: m => m.status_aktif ? 'Aktif' : 'Nonaktif' },
+            ], `mahasiswa-${new Date().toISOString().split('T')[0]}`);
+            toast.success('File CSV berhasil diunduh');
+          }}>
             <Download className="w-3.5 h-3.5 mr-1.5" /> Export
           </Button>
           <Button size="sm" className="bg-primary text-xs h-8 btn-press" onClick={() => setIsFormOpen(true)}>

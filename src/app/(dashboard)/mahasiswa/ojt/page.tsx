@@ -1,12 +1,15 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { fetchData } from '@/lib/api';
+import { useEffect, useState, useRef } from 'react';
+import { fetchData, createData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import { Briefcase, MapPin, Star, Calendar, Upload, FileText, CheckCircle2, Clock, Loader2, Ship } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Briefcase, MapPin, Star, Calendar, Upload, FileText, CheckCircle2, Clock, Loader2, Ship, X, Image as ImageIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 interface OJTData {
   id: string;
@@ -30,6 +33,11 @@ export default function OJTTrackerPage() {
   const [loading, setLoading] = useState(true);
   const [ojtData, setOjtData] = useState<OJTData | null>(null);
   const [progress, setProgress] = useState(65);
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [docType, setDocType] = useState<string>('surat_penerimaan');
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchData<OJTData[]>('ojt_record').then(data => {
@@ -64,8 +72,8 @@ export default function OJTTrackerPage() {
       { bulan: 'Akhir', skor: ojtData.nilai_ojt_akhir ?? 0, catatan: 'Nilai akhir OJT' },
     ].filter(e => e.skor > 0),
     dokumen: [
-      { nama: 'Surat Penerimaan', status: ojtData.dokumen_surat_penerimaan_url ? 'selesai' : 'belum_mulai' },
-      { nama: 'Laporan Akhir', status: ojtData.dokumen_laporan_akhir_url ? 'selesai' : ojtData.status_laporan === 'sedang_berjalan' ? 'sedang_dikerjakan' : 'belum_mulai' },
+      { nama: 'Surat Penerimaan', key: 'surat_penerimaan', status: ojtData.dokumen_surat_penerimaan_url ? 'selesai' : 'belum_mulai', url: ojtData.dokumen_surat_penerimaan_url },
+      { nama: 'Laporan Akhir', key: 'laporan_akhir', status: ojtData.dokumen_laporan_akhir_url ? 'selesai' : ojtData.status_laporan === 'sedang_berjalan' ? 'sedang_dikerjakan' : 'belum_mulai', url: ojtData.dokumen_laporan_akhir_url },
     ],
   } : {
     nama_hotel: 'The Ritz-Carlton Bali',
@@ -84,9 +92,9 @@ export default function OJTTrackerPage() {
       { bulan: 'Juni', skor: 90, catatan: 'Konsisten dan reliable' },
     ],
     dokumen: [
-      { nama: 'Surat Pengantar', status: 'selesai' },
-      { nama: 'Logbook Mingguan', status: 'sedang_dikerjakan' },
-      { nama: 'Laporan Akhir', status: 'belum_mulai' },
+      { nama: 'Surat Pengantar', key: 'surat_penerimaan', status: 'selesai', url: null },
+      { nama: 'Logbook Mingguan', key: 'logbook', status: 'sedang_dikerjakan', url: null },
+      { nama: 'Laporan Akhir', key: 'laporan_akhir', status: 'belum_mulai', url: null },
     ],
   };
 
@@ -95,6 +103,44 @@ export default function OJTTrackerPage() {
     selesai: { label: 'Selesai', cls: 'text-success', icon: CheckCircle2 },
     sedang_dikerjakan: { label: 'Progress', cls: 'text-primary', icon: Clock },
     belum_mulai: { label: 'Belum', cls: 'text-muted-foreground', icon: FileText },
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { toast.error('Ukuran file maksimal 10MB'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setPreviewUrl(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
+  const handleUpload = async () => {
+    if (!ojtData || !previewUrl) {
+      toast.info('Fitur upload dokumen memerlukan data OJT aktif');
+      setIsUploadOpen(false);
+      return;
+    }
+    setUploading(true);
+    try {
+      const base64 = previewUrl.split(',')[1];
+      const mimeType = previewUrl.split(';')[0].split(':')[1];
+
+      const { data, error } = await createData('upload_ojt_dokumen', {
+        ojt_id: ojtData.id,
+        doc_type: docType,
+        base64,
+        mimeType,
+      });
+      if (error) { toast.error('Gagal mengupload: ' + error); }
+      else {
+        toast.success('Dokumen berhasil diupload!');
+        // Refresh OJT data
+        fetchData<OJTData[]>('ojt_record').then(d => { if (d && d.length > 0) setOjtData(d[0]); });
+        setIsUploadOpen(false);
+        setPreviewUrl(null);
+      }
+    } catch { toast.error('Terjadi kesalahan'); }
+    finally { setUploading(false); }
   };
 
   if (loading) return <div className="page-loading"><div className="loading-content"><div className="spinner-modern mx-auto mb-3" /><p className="text-xs text-muted-foreground">Memuat data OJT...</p></div></div>;
@@ -169,7 +215,9 @@ export default function OJTTrackerPage() {
           <CardHeader className="pb-2 px-5 pt-5">
             <div className="flex items-center justify-between">
               <CardTitle className="text-sm font-medium">Dokumen</CardTitle>
-              <Button variant="ghost" size="sm" className="text-xs h-8 text-primary btn-press"><Upload className="w-3 h-3 mr-1.5" />Upload</Button>
+              <Button variant="ghost" size="sm" className="text-xs h-8 text-primary btn-press" onClick={() => { setIsUploadOpen(true); setPreviewUrl(null); }}>
+                <Upload className="w-3 h-3 mr-1.5" />Upload
+              </Button>
             </div>
           </CardHeader>
           <CardContent className="px-5 pb-5 space-y-2">
@@ -188,6 +236,64 @@ export default function OJTTrackerPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Upload Document Modal */}
+      <Dialog open={isUploadOpen} onOpenChange={(open) => { if (!open) { setIsUploadOpen(false); setPreviewUrl(null); } }}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base flex items-center gap-2"><Upload className="w-4 h-4 text-primary" /> Upload Dokumen OJT</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-5 pt-2">
+            {/* Document type selector */}
+            <div className="space-y-2">
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Jenis Dokumen</p>
+              <Select value={docType} onValueChange={(v) => { if (v) setDocType(v); }}>
+                <SelectTrigger className="h-10 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="surat_penerimaan">Surat Penerimaan</SelectItem>
+                  <SelectItem value="laporan_akhir">Laporan Akhir</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Upload area */}
+            <input ref={fileRef} type="file" accept="image/*,.pdf" className="hidden" onChange={handleFileSelect} />
+            {previewUrl ? (
+              <div className="relative">
+                {previewUrl.includes('application/pdf') ? (
+                  <div className="w-full p-8 rounded-xl border border-border bg-muted/20 text-center">
+                    <FileText className="w-12 h-12 mx-auto mb-2 text-primary/60" />
+                    <p className="text-sm font-medium">File PDF dipilih</p>
+                  </div>
+                ) : (
+                  <img src={previewUrl} alt="Dokumen" className="w-full rounded-xl border border-border max-h-[250px] object-contain bg-muted/20" />
+                )}
+                <Button variant="outline" size="sm" className="absolute top-2 right-2 h-7 text-xs" onClick={() => { setPreviewUrl(null); if (fileRef.current) fileRef.current.value = ''; }}>
+                  <X className="w-3 h-3 mr-1" /> Ganti
+                </Button>
+              </div>
+            ) : (
+              <div
+                className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-primary/[0.02] transition-all"
+                onClick={() => fileRef.current?.click()}
+              >
+                <ImageIcon className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
+                <p className="text-sm font-medium text-muted-foreground">Klik untuk memilih file dokumen</p>
+                <p className="text-xs text-muted-foreground/50 mt-1">Format: JPG, PNG, PDF • Maks: 10MB</p>
+              </div>
+            )}
+
+            {/* Actions */}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" size="sm" onClick={() => { setIsUploadOpen(false); setPreviewUrl(null); }}>Batal</Button>
+              <Button size="sm" className="bg-primary" onClick={handleUpload} disabled={!previewUrl || uploading}>
+                {uploading ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Upload className="w-3.5 h-3.5 mr-1.5" />}
+                {uploading ? 'Mengupload...' : 'Upload Dokumen'}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

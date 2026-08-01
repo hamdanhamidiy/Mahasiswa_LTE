@@ -8,6 +8,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { GraduationCap, Download, TrendingUp, Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { fetchData } from '@/lib/api';
+import { toast } from 'sonner';
+import { exportToCSV } from '@/lib/export';
 
 // Note: For now we reuse admin_absensi pattern. A dedicated admin_nilai endpoint
 // would aggregate by class. This shows the concept with real data flow.
@@ -29,7 +31,17 @@ export default function AdminNilaiPage() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div><h1>Rekap Nilai</h1><p>Ringkasan nilai seluruh kelas LTE Cruise</p></div>
-          <Button variant="outline" className="btn-press text-xs h-8 self-start"><Download className="w-3.5 h-3.5 mr-1.5" /> Export Raport</Button>
+          <Button variant="outline" className="btn-press text-xs h-8 self-start" onClick={() => {
+            exportToCSV(filtered, [
+              { header: 'Mata Pelajaran', accessor: (m: any) => m.nama_mapel },
+              { header: 'Kode', accessor: (m: any) => m.kode_mapel },
+              { header: 'Jurusan', accessor: (m: any) => m.jurusan || '-' },
+              { header: 'SKS', accessor: (m: any) => m.sks || 0 },
+              { header: 'Instruktur', accessor: (m: any) => m.instruktur?.nama_lengkap || '-' },
+              { header: 'Status', accessor: (m: any) => m.is_active ? 'Aktif' : 'Nonaktif' },
+            ], `rekap-nilai-${new Date().toISOString().split('T')[0]}`);
+            toast.success('File CSV berhasil diunduh');
+          }}><Download className="w-3.5 h-3.5 mr-1.5" /> Export Raport</Button>
         </div>
       </div>
 

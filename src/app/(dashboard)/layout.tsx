@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client';
 import { cn } from '@/lib/utils';
 import type { User } from '@/lib/types';
 import { Anchor } from 'lucide-react';
+import { Toaster } from '@/components/ui/sonner';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
@@ -154,6 +155,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </footer>
       </div>
+      <Toaster />
     </div>
   );
 }
