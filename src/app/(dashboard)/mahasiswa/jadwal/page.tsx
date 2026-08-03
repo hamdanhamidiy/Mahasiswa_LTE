@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { fetchData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Calendar, Clock, MapPin, Users, BookOpen } from 'lucide-react';
+import { Loader2, Calendar, Clock, MapPin, Users, BookOpen, Fingerprint } from 'lucide-react';
+import Link from 'next/link';
 
 interface JadwalItem { id: string; hari: string; jam_mulai: string; jam_selesai: string; ruangan: string; kelas: string; mata_pelajaran: { nama_mapel: string; kode_mapel: string; sks: number }; instruktur: { nama_lengkap: string } }
 
@@ -14,15 +15,24 @@ export default function JadwalPage() {
   const [loading, setLoading] = useState(true);
   const [jadwalByHari, setJadwalByHari] = useState<Record<string, JadwalItem[]>>({});
   const [todayHari, setTodayHari] = useState('');
+  const [activeSessions, setActiveSessions] = useState<string[]>([]);
 
   useEffect(() => {
-    fetchData<JadwalItem[]>('jadwal').then(data => {
+    Promise.all([
+      fetchData<JadwalItem[]>('jadwal'),
+      fetchData<any[]>('active_absensi_sessions')
+    ]).then(([jadwalData, sessionData]) => {
       const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
       setTodayHari(days[new Date().getDay()]);
-      if (data && data.length > 0) {
+      
+      if (jadwalData && jadwalData.length > 0) {
         const grouped: Record<string, JadwalItem[]> = {};
-        for (const j of data) { if (!grouped[j.hari]) grouped[j.hari] = []; grouped[j.hari].push(j); }
+        for (const j of jadwalData) { if (!grouped[j.hari]) grouped[j.hari] = []; grouped[j.hari].push(j); }
         setJadwalByHari(grouped);
+      }
+      
+      if (sessionData && sessionData.length > 0) {
+        setActiveSessions(sessionData.map(s => s.jadwal_id));
       }
       setLoading(false);
     });
@@ -102,6 +112,20 @@ export default function JadwalPage() {
                             </div>
                           )}
                         </div>
+                        
+                        {/* Live Attendance Button */}
+                        {activeSessions.includes(j.id) && (
+                          <div className="mt-4 pt-4 border-t border-border/50">
+                            <Link href="/mahasiswa/dashboard">
+                              <button className="w-full relative overflow-hidden bg-gradient-to-r from-success/90 to-emerald-600 hover:from-success hover:to-emerald-500 text-white shadow-md hover:shadow-lg transition-all rounded-lg py-2.5 px-3 flex items-center justify-center gap-2 group/btn btn-press text-xs font-semibold">
+                                <div className="absolute inset-0 bg-[linear-gradient(45deg,transparent_25%,rgba(255,255,255,0.2)_50%,transparent_75%)] bg-[length:250%_250%,100%_100%] animate-[shimmer_2s_infinite]" />
+                                <Fingerprint className="w-4 h-4 group-hover/btn:scale-110 transition-transform relative z-10" />
+                                <span className="relative z-10 tracking-wide">ABSEN SEKARANG</span>
+                                <span className="absolute top-0 right-0 w-1.5 h-1.5 bg-white rounded-full m-1 animate-ping" />
+                              </button>
+                            </Link>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
