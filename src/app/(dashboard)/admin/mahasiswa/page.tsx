@@ -44,7 +44,7 @@ export default function AdminMahasiswaPage() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ 
     nama_lengkap: '', email: '', password: '', nim: '', 
-    program: 'diploma1', jurusan: 'general', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` 
+    program: 'diploma1', jurusan: 'general', kelas: '', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` 
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -60,7 +60,7 @@ export default function AdminMahasiswaPage() {
     }
     
     setIsFormOpen(false);
-    setForm({ nama_lengkap: '', email: '', password: '', nim: '', program: 'diploma1', jurusan: 'general', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` });
+    setForm({ nama_lengkap: '', email: '', password: '', nim: '', program: 'diploma1', jurusan: 'general', kelas: '', angkatan: `Angkatan ${new Date().getFullYear()}-${new Date().getFullYear()+1}` });
     load();
   };
 
@@ -85,12 +85,12 @@ export default function AdminMahasiswaPage() {
   // --- EDIT ---
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
-  const [editForm, setEditForm] = useState({ nama_lengkap: '', nim: '', program: 'diploma1', jurusan: 'general', angkatan: '', status_aktif: true });
+  const [editForm, setEditForm] = useState({ nama_lengkap: '', nim: '', program: 'diploma1', jurusan: 'general', kelas: '', angkatan: '', status_aktif: true });
   const [savingEdit, setSavingEdit] = useState(false);
 
   const openEdit = (m: MahasiswaItem) => {
     setEditId(m.id);
-    setEditForm({ nama_lengkap: m.nama_lengkap, nim: m.nim || '', program: m.program || 'diploma1', jurusan: m.jurusan || 'general', angkatan: m.angkatan || '', status_aktif: m.status_aktif });
+    setEditForm({ nama_lengkap: m.nama_lengkap, nim: m.nim || '', program: m.program || 'diploma1', jurusan: m.jurusan || 'general', kelas: (m as any).kelas || '', angkatan: m.angkatan || '', status_aktif: m.status_aktif });
     setIsEditOpen(true);
   };
 
@@ -137,6 +137,7 @@ export default function AdminMahasiswaPage() {
               { header: 'Program', accessor: m => m.program },
               { header: 'Jurusan', accessor: m => m.jurusan },
               { header: 'Angkatan', accessor: m => m.angkatan },
+              { header: 'Kelas', accessor: m => (m as any).kelas || '-' },
               { header: 'Status', accessor: m => m.status_aktif ? 'Aktif' : 'Nonaktif' },
             ], `mahasiswa-${new Date().toISOString().split('T')[0]}`);
             toast.success('File CSV berhasil diunduh');
@@ -238,6 +239,7 @@ export default function AdminMahasiswaPage() {
                         <TableHead>Mahasiswa</TableHead>
                         <TableHead>Program</TableHead>
                         <TableHead>Jurusan</TableHead>
+                        <TableHead className="text-center">Kelas</TableHead>
                         <TableHead className="text-center">Angkatan</TableHead>
                         <TableHead className="text-center">Status</TableHead>
                         <TableHead className="w-10"></TableHead>
@@ -252,6 +254,7 @@ export default function AdminMahasiswaPage() {
                           </TableCell>
                           <TableCell className="text-[12px]">{m.program || '—'}</TableCell>
                           <TableCell className="text-[12px] capitalize">{m.jurusan?.replace('_', ' ') || '—'}</TableCell>
+                          <TableCell className="text-center text-[12px]">{(m as any).kelas || '-'}</TableCell>
                           <TableCell className="text-center"><Badge variant="outline" className="text-[9px] font-medium">{m.angkatan || '—'}</Badge></TableCell>
                           <TableCell className="text-center">
                             <span className={`status-indicator text-[8px] ${m.status_aktif ? 'status-aktif' : 'status-nonaktif'}`}>
@@ -333,7 +336,10 @@ export default function AdminMahasiswaPage() {
               </div>
             </div>
 
-            <div className="space-y-2"><Label className="text-xs font-semibold">Angkatan</Label><Input placeholder="Angkatan 2026-2027" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))} required /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Kelas</Label><Input placeholder="Contoh: CLASS A" value={form.kelas} onChange={e => setForm(p => ({ ...p, kelas: e.target.value }))} required /></div>
+              <div className="space-y-2"><Label className="text-xs font-semibold">Angkatan</Label><Input placeholder="Angkatan 2026-2027" value={form.angkatan} onChange={e => setForm(p => ({ ...p, angkatan: e.target.value }))} required /></div>
+            </div>
             
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setIsFormOpen(false)}><X className="w-3.5 h-3.5 mr-1" />Batal</Button>
@@ -380,17 +386,18 @@ export default function AdminMahasiswaPage() {
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2"><Label className="text-xs font-semibold">Kelas</Label><Input value={editForm.kelas} onChange={e => setEditForm(p => ({ ...p, kelas: e.target.value }))} /></div>
               <div className="space-y-2"><Label className="text-xs font-semibold">Angkatan</Label><Input value={editForm.angkatan} onChange={e => setEditForm(p => ({ ...p, angkatan: e.target.value }))} /></div>
-              <div className="space-y-2">
-                <Label className="text-xs font-semibold">Status</Label>
-                <Select value={editForm.status_aktif ? 'aktif' : 'nonaktif'} onValueChange={v => setEditForm(p => ({ ...p, status_aktif: v === 'aktif' }))}>
-                  <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="aktif">Aktif</SelectItem>
-                    <SelectItem value="nonaktif">Nonaktif</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Status</Label>
+              <Select value={editForm.status_aktif ? 'aktif' : 'nonaktif'} onValueChange={v => setEditForm(p => ({ ...p, status_aktif: v === 'aktif' }))}>
+                <SelectTrigger className="h-9 text-sm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="aktif">Aktif</SelectItem>
+                  <SelectItem value="nonaktif">Nonaktif</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}><X className="w-3.5 h-3.5 mr-1" />Batal</Button>

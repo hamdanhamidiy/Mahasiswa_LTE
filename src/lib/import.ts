@@ -174,6 +174,7 @@ export const MAHASISWA_FIELDS: TargetField[] = [
   { key: 'password', label: 'Password', required: false, defaultValue: 'ltecruise2025', aliases: ['password', 'pass', 'kata_sandi', 'sandi'] },
   { key: 'program', label: 'Program Studi', required: false, defaultValue: 'diploma1', aliases: ['program', 'program_studi', 'prodi', 'jenjang'] },
   { key: 'jurusan', label: 'Jurusan', required: false, defaultValue: 'general', aliases: ['jurusan', 'department', 'dept', 'major', 'konsentrasi'] },
+  { key: 'kelas', label: 'Kelas', required: false, defaultValue: 'CLASS A', aliases: ['kelas', 'class', 'kelompok', 'group'] },
   { key: 'angkatan', label: 'Angkatan', required: false, defaultValue: `Angkatan ${new Date().getFullYear()}`, aliases: ['angkatan', 'batch', 'tahun_masuk', 'tahun masuk', 'year'] },
 ];
 

@@ -70,11 +70,26 @@ export async function GET(request: NextRequest) {
       }
 
       case 'jadwal': {
-        const { data } = await admin
+        // Find user's kelas
+        let userKelas = null;
+        if (role === 'mahasiswa') {
+          const { data: userData } = await admin.from('users').select('kelas').eq('id', userId).single();
+          userKelas = userData?.kelas;
+        }
+
+        let query = admin
           .from('jadwal')
           .select('id, hari, jam_mulai, jam_selesai, ruangan, kelas, mata_pelajaran:mata_pelajaran_id(nama_mapel, kode_mapel, sks), instruktur:instruktur_id(nama_lengkap)')
           .eq('is_active', true)
-          .order('jam_mulai');
+          
+        if (userKelas) {
+          query = query.eq('kelas', userKelas);
+        } else if (role === 'mahasiswa') {
+          // If mahasiswa but no kelas assigned, return empty
+          return NextResponse.json([]);
+        }
+        
+        const { data } = await query.order('jam_mulai');
         return NextResponse.json(data || []);
       }
 
@@ -431,23 +446,30 @@ export async function GET(request: NextRequest) {
         const mapelId = request.nextUrl.searchParams.get('mapel_id');
         if (!jadwalId && !mapelId) return NextResponse.json({ error: 'jadwal_id or mapel_id required' }, { status: 400 });
 
-        // Get the jadwal to know which program/jurusan students belong to
+        // Get the jadwal to know which kelas students belong to
         let targetJurusan: string | null = null;
         let targetProgram: string | null = null;
+        let targetKelas: string | null = null;
+        
         if (jadwalId) {
-          const { data: jadwalData } = await admin.from('jadwal').select('mata_pelajaran:mata_pelajaran_id(jurusan, program)').eq('id', jadwalId).single();
+          const { data: jadwalData } = await admin.from('jadwal').select('kelas, mata_pelajaran:mata_pelajaran_id(jurusan, program)').eq('id', jadwalId).single();
           targetJurusan = (jadwalData as any)?.mata_pelajaran?.jurusan || null;
           targetProgram = (jadwalData as any)?.mata_pelajaran?.program || null;
+          targetKelas = (jadwalData as any)?.kelas || null;
         } else if (mapelId) {
           const { data: mapelData } = await admin.from('mata_pelajaran').select('jurusan, program').eq('id', mapelId).single();
           targetJurusan = mapelData?.jurusan || null;
           targetProgram = mapelData?.program || null;
         }
 
-        // Get mahasiswa filtered by matching program (jurusan 'general' matches all)
+        // Get mahasiswa filtered by matching kelas (if jadwalId) or program (if mapelId)
         let query = admin.from('users').select('id, nim, nama_lengkap').eq('role', 'mahasiswa').eq('status_aktif', true);
-        if (targetProgram) query = query.eq('program', targetProgram);
-        if (targetJurusan && targetJurusan !== 'general') query = query.or(`jurusan.eq.${targetJurusan},jurusan.eq.general`);
+        if (targetKelas) {
+          query = query.eq('kelas', targetKelas);
+        } else {
+          if (targetProgram) query = query.eq('program', targetProgram);
+          if (targetJurusan && targetJurusan !== 'general') query = query.or(`jurusan.eq.${targetJurusan},jurusan.eq.general`);
+        }
         query = query.order('nama_lengkap');
         const { data: students } = await query;
         return NextResponse.json(students || []);
