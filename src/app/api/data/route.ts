@@ -90,6 +90,18 @@ export async function GET(request: NextRequest) {
         return NextResponse.json(data || []);
       }
 
+      case 'active_absensi_sessions': {
+        const today = new Date().toISOString().split('T')[0];
+        const { data } = await admin
+          .from('absensi_sessions')
+          .select('*, jadwal:jadwal_id(mata_pelajaran:mata_pelajaran_id(nama_mapel), jam_mulai, jam_selesai)')
+          .eq('is_active', true)
+          .eq('tanggal', today)
+          .gt('session_expired_at', new Date().toISOString());
+        return NextResponse.json(data || []);
+      }
+
+
       case 'pengumuman': {
         const { data } = await admin
           .from('pengumuman')
@@ -579,6 +591,59 @@ export async function POST(request: NextRequest) {
         const records = (payload.records || []).map((r: any) => ({ ...r, dicatat_oleh: user.id }));
         if (records.length === 0) return NextResponse.json({ error: 'No records provided' }, { status: 400 });
         const { data, error } = await admin.from('absensi').upsert(records, { onConflict: 'mahasiswa_id,jadwal_id,tanggal' }).select();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
+      case 'open_absensi_session': {
+        if (role !== 'instruktur' && role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { jadwal_id, duration_minutes } = payload;
+        const expired_at = new Date(Date.now() + duration_minutes * 60000).toISOString();
+        
+        // Deactivate any existing active session for this jadwal today
+        const today = new Date().toISOString().split('T')[0];
+        await admin.from('absensi_sessions')
+          .update({ is_active: false })
+          .eq('jadwal_id', jadwal_id)
+          .eq('tanggal', today);
+          
+        const { data, error } = await admin.from('absensi_sessions').insert({
+          jadwal_id,
+          instruktur_id: user.id,
+          tanggal: today,
+          metode: 'online',
+          session_expired_at: expired_at,
+          is_active: true
+        }).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
+      case 'close_absensi_session': {
+        if (role !== 'instruktur' && role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { session_id } = payload;
+        const { data, error } = await admin.from('absensi_sessions')
+          .update({ is_active: false, session_expired_at: new Date().toISOString() })
+          .eq('id', session_id)
+          .select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
+      case 'submit_absensi_online': {
+        if (role !== 'mahasiswa') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { jadwal_id } = payload;
+        const today = new Date().toISOString().split('T')[0];
+        
+        const { data, error } = await admin.from('absensi').upsert({
+          mahasiswa_id: user.id,
+          jadwal_id,
+          tanggal: today,
+          status: 'hadir',
+          metode: 'online',
+          dicatat_oleh: user.id
+        }, { onConflict: 'mahasiswa_id,jadwal_id,tanggal' }).select().single();
+        
         if (error) return NextResponse.json({ error: error.message }, { status: 400 });
         return NextResponse.json(data);
       }
