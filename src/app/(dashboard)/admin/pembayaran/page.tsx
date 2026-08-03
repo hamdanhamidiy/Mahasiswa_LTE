@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { fetchData, updateData } from '@/lib/api';
+import { fetchData, updateData, createData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import {
   Wallet, CheckCircle2, Clock, AlertCircle, XCircle,
   Search, Download, Loader2, Users, TrendingUp,
-  Banknote, MoreHorizontal, Eye, Calendar, CreditCard,
+  Banknote, MoreHorizontal, Eye, Calendar, CreditCard, Upload, Plus,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -18,6 +18,10 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { exportToCSV } from '@/lib/export';
+import { UploadCSVModal } from '@/components/shared/UploadCSVModal';
+import { PEMBAYARAN_FIELDS } from '@/lib/import';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface PembayaranRecord {
   id: string;
@@ -81,6 +85,11 @@ export default function AdminPembayaranPage() {
   const [data, setData] = useState<PembayaranRecord[]>([]);
   const [search, setSearch] = useState('');
   const [detailItem, setDetailItem] = useState<PembayaranRecord | null>(null);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+  const [isTagihanOpen, setIsTagihanOpen] = useState(false);
+  const [mahasiswaList, setMahasiswaList] = useState<any[]>([]);
+  const [tagihanForm, setTagihanForm] = useState({ mahasiswa_id: '', jenis: '', jumlah: '', tanggal_jatuh_tempo: '', keterangan: '' });
+  const [savingTagihan, setSavingTagihan] = useState(false);
 
   const loadData = () => {
     setLoading(true);
@@ -139,9 +148,22 @@ export default function AdminPembayaranPage() {
             <h1>Manajemen Pembayaran</h1>
             <p>Kelola tagihan dan pembayaran seluruh mahasiswa</p>
           </div>
-          <Button variant="outline" className="btn-press text-xs h-9 shadow-sm" onClick={handleExportCSV}>
-            <Download className="w-3.5 h-3.5 mr-2" /> Export Excel
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" className="btn-press text-xs h-9 shadow-sm" onClick={handleExportCSV}>
+              <Download className="w-3.5 h-3.5 mr-2" /> Export
+            </Button>
+            <Button variant="outline" className="btn-press text-xs h-9 shadow-sm" onClick={() => setIsImportOpen(true)}>
+              <Upload className="w-3.5 h-3.5 mr-2" /> Import CSV
+            </Button>
+            <Button className="bg-primary btn-press text-xs h-9 shadow-sm" onClick={async () => {
+              const mhs = await fetchData<any[]>('admin_mahasiswa');
+              setMahasiswaList(mhs || []);
+              setTagihanForm({ mahasiswa_id: '', jenis: '', jumlah: '', tanggal_jatuh_tempo: '', keterangan: '' });
+              setIsTagihanOpen(true);
+            }}>
+              <Plus className="w-3.5 h-3.5 mr-2" /> Tambah Tagihan
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -337,6 +359,86 @@ export default function AdminPembayaranPage() {
           })()}
         </DialogContent>
       </Dialog>
+
+      {/* Tambah Tagihan Manual */}
+      <Dialog open={isTagihanOpen} onOpenChange={setIsTagihanOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-base flex items-center gap-2"><Plus className="w-4 h-4 text-primary" /> Tambah Tagihan</DialogTitle>
+          </DialogHeader>
+          <form className="space-y-4 pt-2" onSubmit={async (e) => {
+            e.preventDefault();
+            if (!tagihanForm.mahasiswa_id || !tagihanForm.jenis || !tagihanForm.jumlah || !tagihanForm.tanggal_jatuh_tempo) {
+              toast.error('Semua field wajib diisi');
+              return;
+            }
+            setSavingTagihan(true);
+            const { error } = await createData('tambah_tagihan', tagihanForm);
+            setSavingTagihan(false);
+            if (error) { toast.error('Gagal: ' + error); }
+            else { toast.success('Tagihan berhasil dibuat'); setIsTagihanOpen(false); loadData(); }
+          }}>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Mahasiswa *</Label>
+              <Select value={tagihanForm.mahasiswa_id} onValueChange={v => setTagihanForm(p => ({ ...p, mahasiswa_id: v || '' }))}>
+                <SelectTrigger className="h-9 text-sm">
+                  <SelectValue placeholder="Pilih mahasiswa..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {mahasiswaList.map((m: any) => (
+                    <SelectItem key={m.id} value={m.id} className="text-sm">{m.nama_lengkap} ({m.nim || m.email})</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Jenis Pembayaran *</Label>
+              <Input placeholder="Contoh: SPP Semester 1" className="h-9 text-sm" value={tagihanForm.jenis} onChange={e => setTagihanForm(p => ({ ...p, jenis: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Jumlah (Rp) *</Label>
+                <Input type="number" placeholder="15000000" className="h-9 text-sm" value={tagihanForm.jumlah} onChange={e => setTagihanForm(p => ({ ...p, jumlah: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-xs font-semibold">Jatuh Tempo *</Label>
+                <Input type="date" className="h-9 text-sm" value={tagihanForm.tanggal_jatuh_tempo} onChange={e => setTagihanForm(p => ({ ...p, tanggal_jatuh_tempo: e.target.value }))} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-semibold">Keterangan (opsional)</Label>
+              <Input placeholder="Catatan tambahan..." className="h-9 text-sm" value={tagihanForm.keterangan} onChange={e => setTagihanForm(p => ({ ...p, keterangan: e.target.value }))} />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsTagihanOpen(false)}>Batal</Button>
+              <Button type="submit" size="sm" className="bg-primary" disabled={savingTagihan}>
+                {savingTagihan ? <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" /> : <Plus className="w-3.5 h-3.5 mr-1.5" />}
+                Buat Tagihan
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* CSV Import Modal */}
+      <UploadCSVModal
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        title="Import Tagihan Massal"
+        description="Upload file CSV berisi tagihan pembayaran. Sistem akan mencari mahasiswa berdasarkan NIM secara otomatis."
+        targetFields={PEMBAYARAN_FIELDS}
+        onImport={async (data) => {
+          const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ type: 'bulk_import_pembayaran', data: { rows: data } }),
+          });
+          const result = await res.json();
+          if (result.success > 0) loadData();
+          return result;
+        }}
+      />
     </div>
   );
 }

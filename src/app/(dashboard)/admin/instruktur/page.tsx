@@ -6,11 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Plus, MoreHorizontal, Mail, User, Loader2, Save, X, Pencil, Trash2 } from 'lucide-react';
+import { Users, Search, Plus, MoreHorizontal, Mail, User, Loader2, Save, X, Pencil, Trash2, Upload } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { fetchData, createData, updateData, deleteData } from '@/lib/api';
+import { UploadCSVModal } from '@/components/shared/UploadCSVModal';
+import { INSTRUKTUR_FIELDS } from '@/lib/import';
 
 interface InstrukturItem {
   id: string; nim: string; nama_lengkap: string; email: string; status_aktif: boolean; created_at: string;
@@ -22,6 +24,7 @@ export default function AdminInstrukturPage() {
   const [search, setSearch] = useState('');
   const [instruktur, setInstruktur] = useState<InstrukturItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Dialog state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -100,9 +103,14 @@ export default function AdminInstrukturPage() {
     <div className="space-y-6 animate-fade-in">
       <div className="page-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div><h1>Manajemen Instruktur</h1><p>Kelola data pengajar dan instruktur LTE Cruise</p></div>
-        <Button size="sm" className="bg-primary text-xs h-8 btn-press self-start" onClick={() => { setForm(emptyForm); setIsFormOpen(true); }}>
-          <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Instruktur
-        </Button>
+        <div className="flex items-center gap-2 self-start">
+          <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setIsImportOpen(true)}>
+            <Upload className="w-3.5 h-3.5 mr-1.5" /> Import CSV
+          </Button>
+          <Button size="sm" className="bg-primary text-xs h-8 btn-press" onClick={() => { setForm(emptyForm); setIsFormOpen(true); }}>
+            <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Instruktur
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
@@ -249,6 +257,26 @@ export default function AdminInstrukturPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import Modal */}
+      <UploadCSVModal
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        title="Import Data Instruktur"
+        description="Upload file CSV berisi data tutor/instruktur. Akun login akan dibuat otomatis."
+        targetFields={INSTRUKTUR_FIELDS}
+        onImport={async (data) => {
+          const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ type: 'bulk_import_instruktur', data: { rows: data } }),
+          });
+          const result = await res.json();
+          if (result.success > 0) load();
+          return result;
+        }}
+      />
     </div>
   );
 }

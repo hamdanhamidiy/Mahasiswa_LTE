@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Clock, MapPin, Users, Plus, BookOpen, Loader2, Save, X, Pencil, Trash2, MoreVertical } from 'lucide-react';
+import { Calendar, Clock, MapPin, Users, Plus, BookOpen, Loader2, Save, X, Pencil, Trash2, MoreVertical, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,6 +11,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { fetchData, createData, updateData, deleteData } from '@/lib/api';
+import { UploadCSVModal } from '@/components/shared/UploadCSVModal';
+import { JADWAL_FIELDS } from '@/lib/import';
 
 const HARI_ORDER = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
 
@@ -38,6 +40,7 @@ export default function AdminJadwalPage() {
   const [mapelList, setMapelList] = useState<MapelOption[]>([]);
   const [instrukturList, setInstrukturList] = useState<InstrukturOption[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   // Dialog state
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -190,9 +193,14 @@ export default function AdminJadwalPage() {
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
           <div><h1>Jadwal Kuliah</h1><p>Kelola jadwal perkuliahan seluruh kelas</p></div>
-          <Button size="sm" className="bg-primary text-xs h-8 btn-press self-start" onClick={() => { setForm(emptyForm); setIsFormOpen(true); }}>
-            <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Jadwal
-          </Button>
+          <div className="flex items-center gap-2 self-start">
+            <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setIsImportOpen(true)}>
+              <Upload className="w-3.5 h-3.5 mr-1.5" /> Import CSV
+            </Button>
+            <Button size="sm" className="bg-primary text-xs h-8 btn-press" onClick={() => { setForm(emptyForm); setIsFormOpen(true); }}>
+              <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Jadwal
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -318,6 +326,26 @@ export default function AdminJadwalPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import Modal */}
+      <UploadCSVModal
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        title="Import Jadwal Kelas"
+        description="Upload file CSV berisi jadwal. Sistem akan mencari mata pelajaran (kode_mapel) dan instruktur (email) secara otomatis."
+        targetFields={JADWAL_FIELDS}
+        onImport={async (data) => {
+          const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ type: 'bulk_import_jadwal', data: { rows: data } }),
+          });
+          const result = await res.json();
+          if (result.success > 0) load();
+          return result;
+        }}
+      />
     </div>
   );
 }

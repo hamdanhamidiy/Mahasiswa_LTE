@@ -53,38 +53,59 @@ export default function JadwalPage() {
         <div className="empty-state"><Calendar className="w-12 h-12 mx-auto empty-state-icon" /><h3>Belum ada jadwal</h3><p>Jadwal akan muncul setelah diatur oleh admin</p></div>
       )}
 
-      <div className="space-y-4 stagger-children">
+      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-5 stagger-children">
         {sortedHari.map(hari => {
           const isToday = hari === todayHari;
           return (
-            <Card key={hari} className={`border shadow-none overflow-hidden animate-slide-up ${isToday ? 'border-primary/30 bg-primary/[0.02]' : 'border-border/60'}`}>
-              <CardHeader className="pb-3 px-5 pt-4">
+            <Card key={hari} className={`border shadow-sm overflow-hidden animate-slide-up ${isToday ? 'border-primary/50 ring-1 ring-primary/20 bg-primary/[0.02]' : 'border-border/60'}`}>
+              <CardHeader className={`pb-4 px-5 pt-5 ${isToday ? 'bg-primary/5' : 'bg-muted/30'} border-b`}>
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2.5">
-                    <span className="font-semibold">{hari}</span>
-                    {isToday && <Badge className="bg-primary text-white border-0 text-[10px] px-2 font-normal">Hari Ini</Badge>}
+                  <CardTitle className="text-base font-semibold flex items-center gap-2.5">
+                    {hari}
+                    {isToday && <Badge className="bg-primary text-white border-0 text-[10px] px-2 py-0 h-4 font-medium uppercase tracking-wider">Hari Ini</Badge>}
                   </CardTitle>
-                  <span className="text-[11px] text-muted-foreground">{jadwalByHari[hari].length} sesi</span>
+                  <Badge variant="outline" className="bg-background text-xs font-normal">
+                    {jadwalByHari[hari].length} Sesi
+                  </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="px-5 pb-4 space-y-2">
-                {jadwalByHari[hari].map(j => (
-                  <div key={j.id} className="row-hover flex items-center gap-3 py-2.5 px-3 -mx-3 rounded-lg border border-transparent hover:border-border/60 transition-all">
-                    <div className="w-20 shrink-0">
-                      <span className="text-xs font-mono text-primary font-medium">{j.jam_mulai}</span>
-                      <span className="text-[10px] text-muted-foreground"> - {j.jam_selesai}</span>
+              <CardContent className="p-5">
+                <div className="relative pl-5 space-y-6 before:absolute before:inset-0 before:ml-[7px] before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                  {jadwalByHari[hari]
+                    .sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai))
+                    .map((j, idx) => (
+                    <div key={j.id} className="relative">
+                      {/* Timeline Dot */}
+                      <div className="absolute -left-[25px] top-2 w-3 h-3 rounded-full bg-background border-2 border-primary ring-4 ring-background z-10 shadow-sm" />
+                      
+                      {/* Time Block */}
+                      <div className="mb-2 flex items-center text-xs font-mono font-medium text-primary bg-primary/10 w-fit px-2 py-0.5 rounded-md">
+                        {j.jam_mulai.substring(0, 5)} - {j.jam_selesai.substring(0, 5)}
+                      </div>
+                      
+                      {/* Course Card */}
+                      <div className="bg-card border border-border/60 rounded-xl p-3.5 hover:border-primary/40 hover:shadow-sm transition-all group">
+                        <div className="flex items-start justify-between gap-3 mb-2">
+                          <h4 className="font-semibold text-sm leading-tight group-hover:text-primary transition-colors">{j.mata_pelajaran?.nama_mapel}</h4>
+                          <Badge variant="secondary" className="text-[10px] whitespace-nowrap bg-secondary/50">{j.mata_pelajaran?.sks} SKS</Badge>
+                        </div>
+                        
+                        <div className="space-y-1.5 mt-3">
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Users className="w-3.5 h-3.5 text-primary/70" />
+                            <span className="truncate">{j.instruktur?.nama_lengkap}</span>
+                          </div>
+                          {j.ruangan && (
+                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <MapPin className="w-3.5 h-3.5 text-chart-2/70" />
+                              <span className="truncate">Ruang {j.ruangan}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="w-px h-8 bg-border/60 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{j.mata_pelajaran?.nama_mapel}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5 flex items-center gap-1.5">
-                        <Users className="w-3 h-3" />{j.instruktur?.nama_lengkap}
-                        {j.ruangan && <><span className="opacity-30">·</span><MapPin className="w-3 h-3" />{j.ruangan}</>}
-                      </p>
-                    </div>
-                    <Badge variant="outline" className="text-[10px] font-normal shrink-0">{j.mata_pelajaran?.sks} SKS</Badge>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </CardContent>
             </Card>
           );

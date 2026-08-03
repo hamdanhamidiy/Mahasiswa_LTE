@@ -791,6 +791,230 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(ojtUpdated);
       }
 
+      // ============================================================
+      // BULK IMPORT ENDPOINTS
+      // ============================================================
+
+      case 'bulk_import_mahasiswa': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { rows } = payload as { rows: Record<string, string>[] };
+        if (!rows || !Array.isArray(rows)) return NextResponse.json({ error: 'rows array required' }, { status: 400 });
+
+        let success = 0;
+        const errors: string[] = [];
+
+        for (const row of rows) {
+          try {
+            if (!row.nama_lengkap || !row.email) {
+              errors.push(`Baris "${row.nama_lengkap || '?'}": nama_lengkap dan email wajib diisi`);
+              continue;
+            }
+            const password = row.password || 'ltecruise2025';
+            const { data: authData, error: authErr } = await admin.auth.admin.createUser({
+              email: row.email,
+              password,
+              email_confirm: true,
+              user_metadata: {
+                nama_lengkap: row.nama_lengkap,
+                role: 'mahasiswa',
+              },
+              app_metadata: { role: 'mahasiswa' },
+            });
+            if (authErr) {
+              errors.push(`${row.nama_lengkap} (${row.email}): ${authErr.message}`);
+              continue;
+            }
+            // Update profile fields
+            if (authData.user) {
+              await admin.from('users').update({
+                nama_lengkap: row.nama_lengkap,
+                nim: row.nim || null,
+                program: row.program || 'diploma1',
+                jurusan: row.jurusan || 'general',
+                angkatan: row.angkatan || `Angkatan ${new Date().getFullYear()}`,
+              }).eq('id', authData.user.id);
+            }
+            success++;
+          } catch (err: any) {
+            errors.push(`${row.nama_lengkap || '?'}: ${err.message}`);
+          }
+        }
+
+        return NextResponse.json({ success, failed: rows.length - success, errors });
+      }
+
+      case 'bulk_import_instruktur': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { rows } = payload as { rows: Record<string, string>[] };
+        if (!rows || !Array.isArray(rows)) return NextResponse.json({ error: 'rows array required' }, { status: 400 });
+
+        let success = 0;
+        const errors: string[] = [];
+
+        for (const row of rows) {
+          try {
+            if (!row.nama_lengkap || !row.email) {
+              errors.push(`Baris "${row.nama_lengkap || '?'}": nama_lengkap dan email wajib diisi`);
+              continue;
+            }
+            const password = row.password || 'tutor2025';
+            const { data: authData, error: authErr } = await admin.auth.admin.createUser({
+              email: row.email,
+              password,
+              email_confirm: true,
+              user_metadata: { nama_lengkap: row.nama_lengkap, role: 'instruktur' },
+              app_metadata: { role: 'instruktur' },
+            });
+            if (authErr) {
+              errors.push(`${row.nama_lengkap} (${row.email}): ${authErr.message}`);
+              continue;
+            }
+            if (authData.user) {
+              await admin.from('users').update({ nama_lengkap: row.nama_lengkap }).eq('id', authData.user.id);
+            }
+            success++;
+          } catch (err: any) {
+            errors.push(`${row.nama_lengkap || '?'}: ${err.message}`);
+          }
+        }
+
+        return NextResponse.json({ success, failed: rows.length - success, errors });
+      }
+
+      case 'bulk_import_jadwal': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { rows } = payload as { rows: Record<string, string>[] };
+        if (!rows || !Array.isArray(rows)) return NextResponse.json({ error: 'rows array required' }, { status: 400 });
+
+        // Pre-fetch lookup tables
+        const { data: allMapel } = await admin.from('mata_pelajaran').select('id, kode_mapel, nama_mapel');
+        const { data: allInstruktur } = await admin.from('users').select('id, email, nama_lengkap').eq('role', 'instruktur');
+
+        let success = 0;
+        const errors: string[] = [];
+
+        for (const row of rows) {
+          try {
+            // Lookup mapel by kode_mapel
+            const mapel = (allMapel || []).find(
+              (m: any) => m.kode_mapel?.toLowerCase() === row.kode_mapel?.toLowerCase()
+            );
+            if (!mapel) {
+              errors.push(`Baris "${row.kode_mapel}": Kode mata pelajaran tidak ditemukan di database`);
+              continue;
+            }
+
+            // Lookup instruktur by email
+            const instruktur = (allInstruktur || []).find(
+              (i: any) => i.email?.toLowerCase() === row.email_instruktur?.toLowerCase()
+            );
+            if (!instruktur) {
+              errors.push(`Baris "${row.kode_mapel}": Email instruktur "${row.email_instruktur}" tidak ditemukan`);
+              continue;
+            }
+
+            if (!row.hari || !row.jam_mulai || !row.jam_selesai) {
+              errors.push(`Baris "${row.kode_mapel}": Hari, jam mulai, dan jam selesai wajib diisi`);
+              continue;
+            }
+
+            const { error: insertErr } = await admin.from('jadwal').insert({
+              mata_pelajaran_id: mapel.id,
+              instruktur_id: instruktur.id,
+              kelas: row.kelas || 'A',
+              hari: row.hari,
+              jam_mulai: row.jam_mulai,
+              jam_selesai: row.jam_selesai,
+              ruangan: row.ruangan || '-',
+              is_active: true,
+              tanggal_efektif_mulai: new Date().toISOString().split('T')[0],
+              tanggal_efektif_selesai: new Date(Date.now() + 180 * 86400000).toISOString().split('T')[0],
+            });
+
+            if (insertErr) {
+              errors.push(`Jadwal ${row.kode_mapel} ${row.hari}: ${insertErr.message}`);
+              continue;
+            }
+            success++;
+          } catch (err: any) {
+            errors.push(`${row.kode_mapel || '?'}: ${err.message}`);
+          }
+        }
+
+        return NextResponse.json({ success, failed: rows.length - success, errors });
+      }
+
+      case 'bulk_import_pembayaran': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { rows } = payload as { rows: Record<string, string>[] };
+        if (!rows || !Array.isArray(rows)) return NextResponse.json({ error: 'rows array required' }, { status: 400 });
+
+        // Pre-fetch all mahasiswa by NIM for lookup
+        const { data: allMhs } = await admin.from('users').select('id, nim, nama_lengkap').eq('role', 'mahasiswa');
+
+        let success = 0;
+        const errors: string[] = [];
+
+        for (const row of rows) {
+          try {
+            if (!row.nim || !row.jenis || !row.jumlah || !row.tanggal_jatuh_tempo) {
+              errors.push(`Baris NIM "${row.nim || '?'}": nim, jenis, jumlah, dan tanggal_jatuh_tempo wajib diisi`);
+              continue;
+            }
+
+            const mhs = (allMhs || []).find(
+              (m: any) => m.nim?.toLowerCase() === row.nim?.toLowerCase()
+            );
+            if (!mhs) {
+              errors.push(`NIM "${row.nim}": Mahasiswa tidak ditemukan di database`);
+              continue;
+            }
+
+            const jumlah = parseInt(row.jumlah.replace(/[^\d]/g, ''), 10);
+            if (isNaN(jumlah) || jumlah <= 0) {
+              errors.push(`NIM "${row.nim}": Jumlah "${row.jumlah}" tidak valid`);
+              continue;
+            }
+
+            const { error: insertErr } = await admin.from('pembayaran').insert({
+              mahasiswa_id: mhs.id,
+              jenis: row.jenis,
+              jumlah,
+              status: row.status || 'belum_lunas',
+              tanggal_jatuh_tempo: row.tanggal_jatuh_tempo,
+            });
+
+            if (insertErr) {
+              errors.push(`NIM "${row.nim}" - ${row.jenis}: ${insertErr.message}`);
+              continue;
+            }
+            success++;
+          } catch (err: any) {
+            errors.push(`NIM "${row.nim || '?'}": ${err.message}`);
+          }
+        }
+
+        return NextResponse.json({ success, failed: rows.length - success, errors });
+      }
+
+      case 'tambah_tagihan': {
+        if (role !== 'admin') return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        const { mahasiswa_id, jenis, jumlah, tanggal_jatuh_tempo, keterangan } = payload;
+        if (!mahasiswa_id || !jenis || !jumlah || !tanggal_jatuh_tempo) {
+          return NextResponse.json({ error: 'mahasiswa_id, jenis, jumlah, tanggal_jatuh_tempo required' }, { status: 400 });
+        }
+        const { data, error } = await admin.from('pembayaran').insert({
+          mahasiswa_id,
+          jenis,
+          jumlah: parseInt(String(jumlah).replace(/[^\d]/g, ''), 10),
+          status: 'belum_lunas',
+          tanggal_jatuh_tempo,
+          keterangan: keterangan || null,
+        }).select().single();
+        if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+        return NextResponse.json(data);
+      }
+
       default:
         return NextResponse.json({ error: 'Invalid type for POST' }, { status: 400 });
     }

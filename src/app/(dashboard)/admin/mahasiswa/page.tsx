@@ -7,13 +7,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2, Save, X, Pencil, Trash2 } from 'lucide-react';
+import { Users, Search, Plus, UserCheck, GraduationCap, Briefcase, MoreHorizontal, Download, Loader2, Save, X, Pencil, Trash2, Upload } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { fetchData, updateData, createData, deleteData } from '@/lib/api';
 import { toast } from 'sonner';
 import { exportToCSV } from '@/lib/export';
+import { UploadCSVModal } from '@/components/shared/UploadCSVModal';
+import { MAHASISWA_FIELDS } from '@/lib/import';
 
 interface MahasiswaItem {
   id: string; nama_lengkap: string; nim: string; email: string; program: string; jurusan: string; angkatan: string; status_aktif: boolean; created_at: string;
@@ -25,6 +27,7 @@ export default function AdminMahasiswaPage() {
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [mahasiswa, setMahasiswa] = useState<MahasiswaItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isImportOpen, setIsImportOpen] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -139,6 +142,9 @@ export default function AdminMahasiswaPage() {
             toast.success('File CSV berhasil diunduh');
           }}>
             <Download className="w-3.5 h-3.5 mr-1.5" /> Export
+          </Button>
+          <Button variant="outline" size="sm" className="text-xs h-8" onClick={() => setIsImportOpen(true)}>
+            <Upload className="w-3.5 h-3.5 mr-1.5" /> Import CSV
           </Button>
           <Button size="sm" className="bg-primary text-xs h-8 btn-press" onClick={() => setIsFormOpen(true)}>
             <Plus className="w-3.5 h-3.5 mr-1.5" /> Tambah Mahasiswa
@@ -409,6 +415,26 @@ export default function AdminMahasiswaPage() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* CSV Import Modal */}
+      <UploadCSVModal
+        open={isImportOpen}
+        onOpenChange={setIsImportOpen}
+        title="Import Data Mahasiswa"
+        description="Upload file CSV berisi data mahasiswa. Akun login akan dibuat otomatis."
+        targetFields={MAHASISWA_FIELDS}
+        onImport={async (data) => {
+          const res = await fetch('/api/data', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({ type: 'bulk_import_mahasiswa', data: { rows: data } }),
+          });
+          const result = await res.json();
+          if (result.success > 0) load(); // refresh table
+          return result;
+        }}
+      />
     </div>
   );
 }
