@@ -150,15 +150,28 @@ export async function GET(request: NextRequest) {
         // Jadwal hari ini
         const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
         const todayHari = days[new Date().getDay()];
-        const { data: jadwalToday } = await admin
+        
+        let userKelas = null;
+        if (role === 'mahasiswa') {
+          const { data: userData } = await admin.from('users').select('kelas').eq('id', userId).single();
+          userKelas = userData?.kelas;
+        }
+
+        let query = admin
           .from('jadwal')
           .select('jam_mulai, jam_selesai, ruangan, mata_pelajaran:mata_pelajaran_id(nama_mapel), instruktur:instruktur_id(nama_lengkap)')
           .eq('hari', todayHari)
           .eq('is_active', true)
           .order('jam_mulai');
 
+        if (userKelas) {
+          query = query.eq('kelas', userKelas);
+        }
+
+        const { data: jadwalToday } = await query;
+
         const jadwalHariIni = (jadwalToday || []).map((j: any) => ({
-          waktu: `${j.jam_mulai} - ${j.jam_selesai}`,
+          waktu: `${j.jam_mulai.substring(0, 5)} - ${j.jam_selesai.substring(0, 5)}`,
           mapel: j.mata_pelajaran?.nama_mapel || '',
           ruangan: j.ruangan || '',
           instruktur: j.instruktur?.nama_lengkap || '',
