@@ -6,20 +6,43 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
-import { ClipboardCheck, CheckCircle2, XCircle, AlertCircle, Clock, TrendingUp, Loader2, Download, Radio, Timer } from 'lucide-react';
+import {
+  ClipboardCheck, CheckCircle2, XCircle, AlertCircle, Clock,
+  TrendingUp, Loader2, Download, Radio, Timer, BarChart3,
+  CalendarDays, Fingerprint, ChevronRight, History
+} from 'lucide-react';
+import Link from 'next/link';
 
-interface AbsensiRecord { id: string; tanggal: string; status: string; metode: string; jadwal: { mata_pelajaran: { nama_mapel: string; kode_mapel: string } } }
-interface RekapMapel { mapel: string; kode: string; hadir: number; izin: number; sakit: number; alpha: number; total: number; persen: number }
+interface AbsensiRecord {
+  id: string;
+  tanggal: string;
+  status: string;
+  metode: string;
+  jadwal: { mata_pelajaran: { nama_mapel: string; kode_mapel: string } };
+}
+
+interface RekapMapel {
+  mapel: string;
+  kode: string;
+  hadir: number;
+  izin: number;
+  sakit: number;
+  alpha: number;
+  total: number;
+  persen: number;
+}
 
 export default function AbsensiPage() {
   const [loading, setLoading] = useState(true);
   const [rekap, setRekap] = useState<RekapMapel[]>([]);
   const [recent, setRecent] = useState<AbsensiRecord[]>([]);
   const [stats, setStats] = useState({ hadir: 0, izin: 0, sakit: 0, alpha: 0, total: 0 });
-  
+  const [tab, setTab] = useState<'rekap' | 'riwayat'>('rekap');
+
   // Live Session State
   const [activeSessions, setActiveSessions] = useState<any[]>([]);
   const [submittingSessionId, setSubmittingSessionId] = useState<string | null>(null);
+  const [absenDone, setAbsenDone] = useState<Set<string>>(new Set());
 
   const fetchAbsensiData = useCallback(async () => {
     try {
@@ -48,7 +71,6 @@ export default function AbsensiPage() {
     }
   }, []);
 
-  // Poll for active sessions
   useEffect(() => {
     fetchAbsensiData();
     const pollActiveSessions = async () => {
@@ -60,10 +82,6 @@ export default function AbsensiPage() {
     return () => clearInterval(interval);
   }, [fetchAbsensiData]);
 
-  const handleDownloadPDF = () => {
-    window.print();
-  };
-
   const handleSubmitHadir = async (jadwalId: string, sessionId: string) => {
     setSubmittingSessionId(sessionId);
     try {
@@ -72,7 +90,8 @@ export default function AbsensiPage() {
         body: JSON.stringify({ type: 'submit_absensi_online', data: { jadwal_id: jadwalId } })
       });
       if (res.ok) {
-        fetchAbsensiData(); // Refresh history
+        setAbsenDone(prev => new Set(prev).add(sessionId));
+        fetchAbsensiData();
       } else {
         alert("Gagal melakukan absensi");
       }
@@ -85,17 +104,24 @@ export default function AbsensiPage() {
 
   const overallPct = stats.total > 0 ? Math.round((stats.hadir / stats.total) * 100) : 0;
 
-  const statusCfg: Record<string, { label: string; cls: string; icon: typeof CheckCircle2 }> = {
-    hadir: { label: 'Hadir', cls: 'text-success', icon: CheckCircle2 },
-    izin: { label: 'Izin', cls: 'text-primary', icon: Clock },
-    sakit: { label: 'Sakit', cls: 'text-warning', icon: AlertCircle },
-    alpha: { label: 'Alpha', cls: 'text-error', icon: XCircle },
+  const statusCfg: Record<string, { label: string; cls: string; bg: string; border: string; icon: typeof CheckCircle2 }> = {
+    hadir: { label: 'Hadir', cls: 'text-emerald-600 dark:text-emerald-400', bg: 'bg-emerald-50 dark:bg-emerald-950/30', border: 'border-emerald-200 dark:border-emerald-800', icon: CheckCircle2 },
+    izin:  { label: 'Izin',  cls: 'text-blue-600 dark:text-blue-400',       bg: 'bg-blue-50 dark:bg-blue-950/30',       border: 'border-blue-200 dark:border-blue-800',    icon: Clock },
+    sakit: { label: 'Sakit', cls: 'text-amber-600 dark:text-amber-400',     bg: 'bg-amber-50 dark:bg-amber-950/30',     border: 'border-amber-200 dark:border-amber-800',  icon: AlertCircle },
+    alpha: { label: 'Alpha', cls: 'text-red-600 dark:text-red-400',         bg: 'bg-red-50 dark:bg-red-950/30',         border: 'border-red-200 dark:border-red-800',      icon: XCircle },
   };
 
-  if (loading) return <div className="page-loading"><div className="loading-content"><div className="spinner-modern mx-auto mb-3" /><p className="text-xs text-muted-foreground">Memuat data absensi...</p></div></div>;
+  if (loading) return (
+    <div className="page-loading">
+      <div className="loading-content">
+        <div className="spinner-modern mx-auto mb-3" />
+        <p className="text-xs text-muted-foreground">Memuat data absensi...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="space-y-7 animate-fade-in pb-20">
+    <div className="space-y-6 animate-fade-in pb-20">
       {/* Page Header */}
       <div className="page-header">
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
@@ -103,163 +129,263 @@ export default function AbsensiPage() {
             <h1>Absensi</h1>
             <p>Rekap kehadiran dan riwayat absensi perkuliahan</p>
           </div>
-          <Button onClick={handleDownloadPDF} variant="outline" className="btn-press shadow-sm h-10 text-xs w-full sm:w-auto">
-            <Download className="w-4 h-4 mr-2" />
-            Unduh Riwayat
-          </Button>
+          <div className="flex gap-2">
+            <Link href="/mahasiswa/jadwal">
+              <Button variant="outline" className="h-9 text-xs gap-1.5 shadow-sm">
+                <CalendarDays className="w-3.5 h-3.5" />
+                Lihat Jadwal
+              </Button>
+            </Link>
+            <Button onClick={() => window.print()} variant="outline" className="h-9 text-xs gap-1.5 shadow-sm">
+              <Download className="w-3.5 h-3.5" />
+              Unduh Riwayat
+            </Button>
+          </div>
         </div>
       </div>
 
       {/* Live Active Sessions Banner */}
       {activeSessions.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {activeSessions.map((session) => {
-            const hasAttended = recent.some(r => r.jadwal?.mata_pelajaran?.nama_mapel === session.jadwal?.mata_pelajaran?.nama_mapel && r.status === 'hadir' && new Date(r.tanggal).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]);
-            
+            const isDone = absenDone.has(session.id);
+            const hasAttended = isDone || recent.some(r =>
+              r.jadwal?.mata_pelajaran?.nama_mapel === session.jadwal?.mata_pelajaran?.nama_mapel
+              && r.status === 'hadir'
+              && new Date(r.tanggal).toISOString().split('T')[0] === new Date().toISOString().split('T')[0]
+            );
+
             return (
-              <Card key={session.id} className="border-primary bg-primary/5 shadow-md shadow-primary/10 animate-fade-in relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
-                <CardContent className="p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-6 relative z-10">
-                  <div className="flex items-center gap-4 text-center sm:text-left w-full sm:w-auto">
-                    <div className="w-14 h-14 shrink-0 rounded-2xl bg-background border border-primary/20 shadow-inner flex items-center justify-center relative mx-auto sm:mx-0">
-                      <div className="absolute inset-0 bg-primary/20 rounded-2xl animate-ping opacity-30"></div>
-                      <Radio className="w-7 h-7 text-primary animate-pulse" />
+              <div key={session.id} className="relative overflow-hidden rounded-xl border-2 border-emerald-500/40 bg-gradient-to-r from-emerald-50 via-green-50 to-teal-50 dark:from-emerald-950/40 dark:via-green-950/30 dark:to-teal-950/30 shadow-sm">
+                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-400 via-green-400 to-teal-400" />
+                <div className="absolute -top-20 -right-20 w-40 h-40 bg-emerald-400/10 rounded-full blur-3xl" />
+                <div className="relative p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="relative shrink-0">
+                      <div className="w-12 h-12 rounded-xl bg-emerald-500/15 flex items-center justify-center">
+                        <Radio className="w-6 h-6 text-emerald-600 dark:text-emerald-400 animate-pulse" />
+                      </div>
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                      <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full" />
                     </div>
                     <div>
-                      <div className="flex items-center gap-2 justify-center sm:justify-start mb-1">
-                        <Badge variant="outline" className="bg-primary text-primary-foreground border-none text-[10px] px-2 py-0">LIVE SESSION</Badge>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1 font-medium"><Timer className="w-3.5 h-3.5" /> Terbatas</span>
+                      <div className="flex items-center gap-2 mb-0.5">
+                        <Badge className="bg-emerald-500 text-white border-0 text-[9px] px-1.5 py-0 h-4 font-semibold uppercase tracking-wider inline-flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                          LIVE
+                        </Badge>
+                        <span className="text-xs text-emerald-600/60 dark:text-emerald-400/50 flex items-center gap-1 font-medium">
+                          <Timer className="w-3 h-3" /> Sesi Terbatas
+                        </span>
                       </div>
-                      <h3 className="font-bold text-lg text-foreground">{session.jadwal?.mata_pelajaran?.nama_mapel || "Kelas Aktif"}</h3>
-                      <p className="text-sm text-muted-foreground mt-0.5">
-                        Instruktur telah membuka sesi absensi online.
-                      </p>
+                      <h3 className="font-bold text-base text-emerald-900 dark:text-emerald-200">
+                        {session.jadwal?.mata_pelajaran?.nama_mapel || "Kelas Aktif"}
+                      </h3>
                     </div>
                   </div>
-                  
-                  <div className="w-full sm:w-auto shrink-0 flex justify-center">
+                  <div className="w-full sm:w-auto shrink-0">
                     {hasAttended ? (
-                      <div className="flex items-center gap-2 text-success bg-success/10 px-5 py-3 rounded-xl border border-success/20 font-semibold text-sm">
-                        <CheckCircle2 className="w-5 h-5" />
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 bg-emerald-100/80 dark:bg-emerald-900/30 px-4 py-2.5 rounded-lg border border-emerald-200/60 dark:border-emerald-700/40 font-semibold text-sm">
+                        <CheckCircle2 className="w-4 h-4" />
                         Anda Sudah Absen
                       </div>
                     ) : (
-                      <Button 
-                        size="lg" 
-                        className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/30 w-full sm:w-auto h-12 px-8 font-semibold rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 text-[15px]"
+                      <Button
                         onClick={() => handleSubmitHadir(session.jadwal_id, session.id)}
                         disabled={submittingSessionId === session.id}
+                        className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-500 text-white shadow-md hover:shadow-lg transition-all h-11 px-6 rounded-xl font-semibold text-sm gap-2"
                       >
                         {submittingSessionId === session.id ? (
-                          <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Memproses...</>
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Memproses...</>
                         ) : (
-                          "Klik Hadir Sekarang"
+                          <><Fingerprint className="w-4.5 h-4.5" /> Klik Hadir Sekarang</>
                         )}
                       </Button>
                     )}
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             );
           })}
         </div>
       )}
 
-      <div id="absensi-content" className="space-y-7">
-        {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 stagger-children">
-          <Card className="border border-border shadow-sm col-span-2 lg:col-span-1 card-stat-highlight animate-slide-up">
-            <CardContent className="p-5 text-center">
-              <p className="stat-value">{overallPct}%</p>
-              <p className="stat-label mt-1.5">Kehadiran</p>
-            </CardContent>
-          </Card>
-          {(['hadir', 'izin', 'sakit', 'alpha'] as const).map(k => {
-            const c = statusCfg[k];
-            return (
-              <Card key={k} className="border border-border shadow-sm card-interactive animate-slide-up">
-                <CardContent className="p-5 text-center">
-                  <c.icon className={`w-5 h-5 mx-auto mb-2 ${c.cls}`} />
-                  <p className="text-xl font-bold tabular-nums">{stats[k]}</p>
-                  <p className="text-[11px] text-muted-foreground mt-1">{c.label}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-
-        {/* Per Mapel */}
-        <Card className="border border-border shadow-sm">
-          <CardHeader className="pb-3 px-5 pt-5">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <ClipboardCheck className="w-4 h-4 text-muted-foreground" /> Rekap per Mata Pelajaran
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 pb-5 space-y-3">
-            {rekap.length === 0 && (
-              <div className="text-center py-10">
-                <ClipboardCheck className="w-10 h-10 mx-auto mb-3 text-muted-foreground/12" />
-                <p className="text-sm text-muted-foreground font-medium">Belum ada data absensi</p>
+      {/* Stats Overview */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+        {/* Overall Percentage — Hero */}
+        <Card className="col-span-2 lg:col-span-1 border border-border shadow-sm overflow-hidden">
+          <CardContent className="p-5 flex flex-col items-center justify-center h-full">
+            <div className="relative w-20 h-20 mb-2">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-muted/20" />
+                <circle
+                  cx="50" cy="50" r="42" fill="none"
+                  strokeWidth="8" strokeLinecap="round"
+                  className={overallPct >= 80 ? 'text-emerald-500' : overallPct >= 60 ? 'text-amber-500' : 'text-red-500'}
+                  stroke="currentColor"
+                  strokeDasharray={`${overallPct * 2.64} 264`}
+                  style={{ transition: 'stroke-dasharray 1s ease' }}
+                />
+              </svg>
+              <div className="absolute inset-0 flex items-center justify-center">
+                <span className="text-xl font-bold tabular-nums">{overallPct}%</span>
               </div>
-            )}
-            {rekap.map((r, i) => (
-              <div key={i} className="p-4 rounded-xl border border-border hover:border-primary/20 transition-colors duration-200 hover:shadow-sm">
+            </div>
+            <p className="text-[11px] text-muted-foreground font-semibold uppercase tracking-wider">Kehadiran</p>
+          </CardContent>
+        </Card>
+
+        {/* Individual Status Cards */}
+        {(['hadir', 'izin', 'sakit', 'alpha'] as const).map(k => {
+          const c = statusCfg[k];
+          return (
+            <Card key={k} className="border border-border shadow-sm">
+              <CardContent className="p-4 sm:p-5">
                 <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-[13px] font-semibold">{r.mapel}</p>
-                    <p className="text-[11px] text-muted-foreground font-mono mt-0.5">{r.kode}</p>
+                  <div className={`w-8 h-8 rounded-lg ${c.bg} ${c.border} border flex items-center justify-center`}>
+                    <c.icon className={`w-4 h-4 ${c.cls}`} />
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="hidden sm:flex items-center gap-2.5 text-[11px] text-muted-foreground font-medium">
-                      <span>{r.hadir}H</span> <span>{r.izin}I</span> <span>{r.sakit}S</span> <span>{r.alpha}A</span>
+                  {stats.total > 0 && (
+                    <span className="text-[10px] text-muted-foreground font-medium tabular-nums">
+                      {Math.round((stats[k] / stats.total) * 100)}%
+                    </span>
+                  )}
+                </div>
+                <p className="text-2xl font-bold tabular-nums leading-none">{stats[k]}</p>
+                <p className="text-[11px] text-muted-foreground mt-1.5 font-medium">{c.label}</p>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="flex gap-1 bg-muted/50 p-1 rounded-xl border border-border/50 w-fit">
+        <button
+          onClick={() => setTab('rekap')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            tab === 'rekap'
+              ? 'bg-background text-foreground shadow-sm border border-border/60'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <BarChart3 className="w-3.5 h-3.5" /> Rekap per Mapel
+        </button>
+        <button
+          onClick={() => setTab('riwayat')}
+          className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+            tab === 'riwayat'
+              ? 'bg-background text-foreground shadow-sm border border-border/60'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <History className="w-3.5 h-3.5" /> Riwayat Terbaru
+        </button>
+      </div>
+
+      {/* Tab Content */}
+      <div className="animate-fade-in">
+        {tab === 'rekap' && (
+          <Card className="border border-border shadow-sm">
+            <CardContent className="p-5 space-y-3">
+              {rekap.length === 0 && (
+                <div className="text-center py-14">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    <ClipboardCheck className="w-7 h-7 text-muted-foreground/25" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Belum ada data absensi</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Data akan muncul setelah Anda mengikuti kelas</p>
+                </div>
+              )}
+              {rekap.map((r, i) => (
+                <div key={i} className="p-4 rounded-xl border border-border/60 hover:border-border transition-all hover:shadow-sm group">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="min-w-0">
+                      <p className="text-[13px] font-semibold truncate group-hover:text-primary transition-colors">{r.mapel}</p>
+                      {r.kode && <p className="text-[10px] text-muted-foreground font-mono mt-0.5 opacity-60">{r.kode}</p>}
                     </div>
-                    <Badge variant="outline" className={`text-xs font-semibold ${r.persen >= 80 ? 'text-success border-success/20' : 'text-error border-error/20'}`}>{r.persen}%</Badge>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <div className="hidden sm:flex items-center gap-2 text-[10px] font-medium">
+                        <span className="text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-1.5 py-0.5 rounded">{r.hadir}H</span>
+                        <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/30 px-1.5 py-0.5 rounded">{r.izin}I</span>
+                        <span className="text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 px-1.5 py-0.5 rounded">{r.sakit}S</span>
+                        <span className="text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 px-1.5 py-0.5 rounded">{r.alpha}A</span>
+                      </div>
+                      <Badge
+                        variant="outline"
+                        className={`text-xs font-bold tabular-nums ${
+                          r.persen >= 80
+                            ? 'text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/30'
+                            : r.persen >= 60
+                            ? 'text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-950/30'
+                            : 'text-red-600 dark:text-red-400 border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-950/30'
+                        }`}
+                      >
+                        {r.persen}%
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted/50 overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ease-out ${
+                        r.persen >= 80 ? 'bg-emerald-500' : r.persen >= 60 ? 'bg-amber-500' : 'bg-red-500'
+                      }`}
+                      style={{ width: `${r.persen}%` }}
+                    />
                   </div>
                 </div>
-                <Progress value={r.persen} className="h-2" />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
-        {/* Recent */}
-        <Card className="border border-border shadow-sm">
-          <CardHeader className="pb-3 px-5 pt-5">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-muted-foreground" /> Riwayat Terbaru
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="px-5 pb-5">
-            <div className="divide-y divide-border">
+        {tab === 'riwayat' && (
+          <Card className="border border-border shadow-sm">
+            <CardContent className="p-5">
               {recent.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">Belum ada riwayat absensi.</p>
+                <div className="text-center py-14">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-muted/50 flex items-center justify-center">
+                    <History className="w-7 h-7 text-muted-foreground/25" />
+                  </div>
+                  <p className="text-sm text-muted-foreground font-medium">Belum ada riwayat absensi</p>
+                  <p className="text-xs text-muted-foreground/60 mt-1">Riwayat akan muncul setelah Anda mengikuti kelas</p>
+                </div>
               )}
-              {recent.slice(0, 10).map(r => {
-                const c = statusCfg[r.status] || statusCfg.alpha;
-                return (
-                  <div key={r.id} className="row-hover flex items-center justify-between py-3 px-2 -mx-2 rounded-lg">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <c.icon className={`w-[18px] h-[18px] shrink-0 ${c.cls}`} />
-                      <div className="min-w-0">
-                        <p className="text-[13px] font-semibold truncate">{r.jadwal?.mata_pelajaran?.nama_mapel}</p>
-                        <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground font-medium">
-                          <span>{new Date(r.tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
-                          {r.metode === 'online' && (
-                            <>
-                              <span>•</span>
-                              <span className="text-primary/70 flex items-center gap-1"><Radio className="w-3 h-3" /> Online</span>
-                            </>
-                          )}
+              <div className="space-y-1">
+                {recent.slice(0, 10).map(r => {
+                  const c = statusCfg[r.status] || statusCfg.alpha;
+                  return (
+                    <div key={r.id} className="flex items-center justify-between py-3 px-3 -mx-1 rounded-lg hover:bg-muted/30 transition-colors">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-lg ${c.bg} ${c.border} border flex items-center justify-center shrink-0`}>
+                          <c.icon className={`w-3.5 h-3.5 ${c.cls}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-semibold truncate">{r.jadwal?.mata_pelajaran?.nama_mapel}</p>
+                          <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground font-medium">
+                            <span>{new Date(r.tanggal).toLocaleDateString('id-ID', { weekday: 'short', day: 'numeric', month: 'short' })}</span>
+                            {r.metode === 'online' && (
+                              <>
+                                <span className="opacity-30">•</span>
+                                <span className="text-primary/70 flex items-center gap-1"><Radio className="w-2.5 h-2.5" /> Online</span>
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] font-semibold ${c.cls} ${c.bg} ${c.border}`}
+                      >
+                        {c.label}
+                      </Badge>
                     </div>
-                    <span className={`text-[11px] px-2 py-0.5 rounded border font-semibold ${r.status === 'hadir' ? 'border-success/20 bg-success/10 text-success' : r.status === 'izin' ? 'border-primary/20 bg-primary/10 text-primary' : r.status === 'sakit' ? 'border-warning/20 bg-warning/10 text-warning' : 'border-error/20 bg-error/10 text-error'}`}>{c.label}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );
