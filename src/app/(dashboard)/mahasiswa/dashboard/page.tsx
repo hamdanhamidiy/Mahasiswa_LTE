@@ -59,11 +59,20 @@ export default function MahasiswaDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       
-      {/* 1. HERO BANNER - Symmetrical, Clean, Corporate */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1e3a5f] via-[#2a5298] to-[#1e3a5f] bg-[length:200%_200%] animate-[gradient_8s_ease_infinite] text-white shadow-xl shadow-blue-900/20 border border-blue-800/50">
-        {/* Subtle Background Elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
+      {/* 1. HERO BANNER - Premium Animated Gradient */}
+      <div className="relative overflow-hidden rounded-2xl text-white shadow-2xl shadow-blue-900/30">
+        {/* Multi-layer gradient background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0c1e3a] via-[#1e3a5f] to-[#1a365d]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-transparent to-indigo-600/20 bg-[length:200%_100%] animate-[gradient_6s_ease_infinite]" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
+        
+        {/* Floating Orbs */}
+        <div className="absolute top-[-30%] right-[-10%] w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] pointer-events-none" />
+        <div className="absolute bottom-[-40%] left-[-5%] w-[400px] h-[400px] bg-indigo-400/10 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] pointer-events-none" />
+        <div className="absolute top-[20%] right-[30%] w-[200px] h-[200px] bg-cyan-400/8 rounded-full blur-2xl animate-[float_12s_ease-in-out_infinite] pointer-events-none" />
+        
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
         
         <div className="relative z-10 p-7 sm:p-10 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
           
