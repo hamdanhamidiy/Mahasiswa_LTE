@@ -60,10 +60,10 @@ export default function MahasiswaDashboard() {
     <div className="space-y-8 animate-fade-in pb-8">
       
       {/* 1. HERO BANNER - Symmetrical, Clean, Corporate */}
-      <div className="relative overflow-hidden rounded-2xl bg-[#0f172a] text-white shadow-xl shadow-slate-900/10 border border-slate-800">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#1e3a5f] via-[#2a5298] to-[#1e3a5f] bg-[length:200%_200%] animate-[gradient_8s_ease_infinite] text-white shadow-xl shadow-blue-900/20 border border-blue-800/50">
         {/* Subtle Background Elements */}
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl pointer-events-none" />
         
         <div className="relative z-10 p-7 sm:p-10 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
           
