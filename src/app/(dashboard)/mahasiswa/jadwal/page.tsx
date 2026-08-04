@@ -112,7 +112,6 @@ export default function JadwalPage() {
   const totalSKS = Object.values(jadwalByHari).flat().reduce((a, j) => a + (j.mata_pelajaran?.sks || 0), 0);
   const totalMapel = new Set(Object.values(jadwalByHari).flat().map(j => j.mata_pelajaran?.nama_mapel)).size;
   const totalSesi = Object.values(jadwalByHari).flat().length;
-  const currentSessions = selectedHari ? (jadwalByHari[selectedHari] || []).sort((a, b) => a.jam_mulai.localeCompare(b.jam_mulai)) : [];
   const activeJadwalIds = new Set(activeSessions.map(s => s.jadwal_id));
 
   return (
