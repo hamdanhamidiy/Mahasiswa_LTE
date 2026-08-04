@@ -161,35 +161,41 @@ export default function ProfilPage() {
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       {/* Hero Profile Banner */}
-      <div className="relative overflow-hidden rounded-2xl shadow-xl shadow-blue-900/15">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0c1e3a] via-[#1e3a5f] to-[#1a365d]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/15 via-transparent to-indigo-600/15 bg-[length:200%_100%] animate-[gradient_6s_ease_infinite]" />
-        <div className="absolute top-[-30%] right-[-10%] w-[400px] h-[400px] bg-blue-500/10 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] pointer-events-none" />
-        <div className="absolute bottom-[-40%] left-[-5%] w-[300px] h-[300px] bg-indigo-400/8 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] pointer-events-none" />
+      <div className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-blue-900/10 border border-white/5 bg-[#0a1526]">
+        {/* Soft Mesh Background Gradients */}
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-blue-600/30 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-indigo-600/30 via-transparent to-transparent" />
         
-        <div className="relative z-10 p-7 sm:p-10">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        {/* Floating Ambient Lights */}
+        <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-500/30 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] mix-blend-screen pointer-events-none" />
+        <div className="absolute top-[20%] left-[30%] w-[300px] h-[300px] bg-cyan-400/15 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
+        
+        {/* Modern Dot Grid Overlay */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }} />
+        
+        <div className="relative z-10 p-8 sm:p-12">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             {/* Avatar */}
             <div className="relative group shrink-0">
-              <div className="ring-4 ring-white/20 rounded-full p-0.5 bg-gradient-to-br from-blue-400 to-indigo-500">
-                <Avatar className="w-24 h-24 sm:w-28 sm:h-28 border-[3px] border-[#1e3a5f]">
+              <div className="ring-4 ring-white/10 rounded-full p-1 bg-gradient-to-br from-blue-400/50 to-indigo-500/50 backdrop-blur-sm">
+                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-[#0a1526]">
                   <AvatarImage src={user?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-white/10 text-white text-2xl font-bold backdrop-blur-md">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-white/5 text-white text-3xl font-bold backdrop-blur-md">{initials}</AvatarFallback>
                 </Avatar>
               </div>
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploading}
-                className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/40 flex items-center justify-center transition-all duration-300 cursor-pointer"
+                className="absolute inset-0 rounded-full bg-black/0 group-hover:bg-black/50 flex items-center justify-center transition-all duration-300 cursor-pointer"
               >
                 {uploading ? (
                   <Loader2 className="w-6 h-6 text-white animate-spin" />
                 ) : (
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1">
-                    <Camera className="w-5 h-5 text-white" />
-                    <span className="text-[9px] text-white font-medium">Ubah</span>
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center gap-1.5">
+                    <Camera className="w-6 h-6 text-white" />
+                    <span className="text-[10px] text-white font-semibold tracking-wider uppercase">Ubah Foto</span>
                   </div>
                 )}
               </button>
@@ -203,28 +209,32 @@ export default function ProfilPage() {
             </div>
 
             {/* Info */}
-            <div className="flex-1 text-center sm:text-left text-white">
-              <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{user?.nama_lengkap}</h1>
-              <p className="text-blue-200/60 font-mono text-sm mt-1">{user?.nim}</p>
+            <div className="flex-1 text-center sm:text-left text-white flex flex-col justify-center min-h-[8rem]">
+              <div className="space-y-2">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{user?.nama_lengkap}</h1>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm font-medium text-blue-100/70">
+                  <span className="font-mono bg-blue-900/40 border border-blue-400/20 px-2.5 py-1 rounded-md text-blue-200">{user?.nim}</span>
+                  <span className="flex items-center gap-1.5">
+                    <Mail className="w-4 h-4 text-blue-300" /> 
+                    {user?.email}
+                  </span>
+                </div>
+              </div>
               
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-4">
-                <Badge className="bg-white/10 text-white/80 border-white/15 text-[11px] font-medium backdrop-blur-sm">
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-5">
+                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
                   {user?.program ? getProgramLabel(user.program) : 'D1'}
                 </Badge>
-                <Badge className="bg-white/10 text-white/80 border-white/15 text-[11px] font-medium backdrop-blur-sm">
+                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
                   {user?.jurusan ? getJurusanLabel(user.jurusan) : '—'}
                 </Badge>
-                <Badge className="bg-white/10 text-white/80 border-white/15 text-[11px] font-medium backdrop-blur-sm">
+                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
                   {user?.angkatan}
                 </Badge>
-                <Badge className={`text-[11px] font-semibold backdrop-blur-sm ${user?.status_aktif ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/30' : 'bg-red-500/20 text-red-300 border-red-400/30'}`}>
+                <Badge className={`text-[11px] font-semibold backdrop-blur-md px-3 py-1 ${user?.status_aktif ? 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20' : 'bg-red-500/10 text-red-300 border-red-400/20'}`}>
                   <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user?.status_aktif ? 'bg-emerald-400' : 'bg-red-400'}`} />
                   {user?.status_aktif ? 'Aktif' : 'Nonaktif'}
                 </Badge>
-              </div>
-              
-              <div className="flex items-center gap-4 mt-4 text-sm text-blue-200/50">
-                <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" /> {user?.email}</span>
               </div>
             </div>
 

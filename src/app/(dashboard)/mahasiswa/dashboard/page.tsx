@@ -59,96 +59,86 @@ export default function MahasiswaDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       
-      {/* 1. HERO BANNER - Premium Animated Gradient */}
-      <div className="relative overflow-hidden rounded-2xl text-white shadow-2xl shadow-blue-900/30">
-        {/* Multi-layer gradient background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0c1e3a] via-[#1e3a5f] to-[#1a365d]" />
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 via-transparent to-indigo-600/20 bg-[length:200%_100%] animate-[gradient_6s_ease_infinite]" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-white/5" />
+      {/* 1. HERO BANNER - Premium Modern Gradient */}
+      <div className="relative overflow-hidden rounded-[2rem] text-white shadow-xl shadow-blue-900/10 border border-white/5 bg-[#0a1526]">
+        {/* Soft Mesh Background Gradients */}
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-blue-600/30 via-transparent to-transparent" />
+        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-indigo-600/30 via-transparent to-transparent" />
         
-        {/* Floating Orbs */}
-        <div className="absolute top-[-30%] right-[-10%] w-[500px] h-[500px] bg-blue-500/15 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] pointer-events-none" />
-        <div className="absolute bottom-[-40%] left-[-5%] w-[400px] h-[400px] bg-indigo-400/10 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] pointer-events-none" />
-        <div className="absolute top-[20%] right-[30%] w-[200px] h-[200px] bg-cyan-400/8 rounded-full blur-2xl animate-[float_12s_ease-in-out_infinite] pointer-events-none" />
+        {/* Floating Ambient Lights */}
+        <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-500/30 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
+        <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] mix-blend-screen pointer-events-none" />
+        <div className="absolute top-[20%] left-[30%] w-[300px] h-[300px] bg-cyan-400/15 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
         
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* Modern Dot Grid Overlay */}
+        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }} />
         
-        <div className="relative z-10 p-7 sm:p-10 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
+        <div className="relative z-10 p-8 sm:p-12 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
           
           {/* Left: User Identity */}
-          <div className="space-y-4 flex-1">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 backdrop-blur-md">
-              <Sparkles className="w-3.5 h-3.5 text-blue-400" />
-              <span className="text-[11px] font-medium tracking-widest uppercase text-slate-300">
+          <div className="space-y-5 flex-1">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-inner">
+              <Sparkles className="w-4 h-4 text-blue-300" />
+              <span className="text-xs font-semibold tracking-widest uppercase text-blue-100/90">
                 {getGreeting()}
               </span>
             </div>
             
-            <div>
-              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white mb-2">
+            <div className="space-y-2">
+              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
                 {user?.nama_lengkap || 'Mahasiswa'}
               </h1>
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-slate-400">
+              <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-blue-100/70">
                 {user?.nim && (
-                  <span className="font-mono bg-slate-800/50 px-2 py-0.5 rounded text-slate-300">{user.nim}</span>
+                  <span className="font-mono bg-blue-900/40 border border-blue-400/20 px-2.5 py-1 rounded-md text-blue-200">{user.nim}</span>
                 )}
                 <span>•</span>
                 <span>{user?.angkatan || 'Angkatan 25'}</span>
                 {user?.program && (
                   <>
                     <span>•</span>
-                    <span className="text-blue-300 font-medium">{getProgramLabel(user.program)}</span>
+                    <span className="bg-white/10 px-2.5 py-1 rounded-md">{getProgramLabel(user.program)}</span>
                   </>
                 )}
-                {user?.jurusan && user.jurusan !== 'general' && (
+                {user?.jurusan && (
                   <>
                     <span>•</span>
-                    <span>{getJurusanLabel(user.jurusan)}</span>
+                    <span className="bg-white/10 px-2.5 py-1 rounded-md">{getJurusanLabel(user.jurusan)}</span>
                   </>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Right: Academic Progress Widget */}
-          <div className="w-full lg:w-[320px] shrink-0 bg-white/5 backdrop-blur-md border border-white/10 p-5 rounded-2xl">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">Progress Studi</span>
-              <span className="text-lg font-bold text-white tabular-nums">{Math.round(overallProgress)}%</span>
-            </div>
-            
-            <div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden mb-4">
-              <div 
-                className="h-full bg-gradient-to-r from-blue-500 to-indigo-400 rounded-full transition-all duration-1000 ease-out relative" 
-                style={{ width: `${overallProgress}%` }} 
-              >
-                <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" />
+          {/* Right: Progress Tracker */}
+          <div className="w-full lg:w-[340px] shrink-0">
+            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-inner">
+              <div className="flex justify-between items-center mb-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">Progress Studi</p>
+                <p className="text-2xl font-bold text-white tabular-nums">{overallProgress}%</p>
+              </div>
+              
+              <div className="relative h-2 w-full bg-slate-900/50 rounded-full overflow-hidden mb-4">
+                <div 
+                  className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_10px_rgba(96,165,250,0.5)] transition-all duration-1000 ease-out"
+                  style={{ width: `${overallProgress}%` }}
+                />
+              </div>
+
+              <div className="flex justify-between text-[10px] font-medium text-slate-400 relative">
+                <span className={overallProgress >= 0 ? 'text-blue-300 font-bold' : ''}>Kelas</span>
+                <span className={overallProgress >= 70 ? 'text-blue-300 font-bold' : ''}>OJT</span>
+                <span className={overallProgress >= 100 ? 'text-blue-300 font-bold' : ''}>Akhir</span>
+                
+                {/* Milestone dots */}
+                <div className="absolute -top-6 left-0 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]" />
+                <div className={`absolute -top-6 left-[70%] w-1.5 h-1.5 rounded-full transition-colors ${overallProgress >= 70 ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]' : 'bg-slate-700'}`} />
+                <div className={`absolute -top-6 right-0 w-1.5 h-1.5 rounded-full transition-colors ${overallProgress >= 100 ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]' : 'bg-slate-700'}`} />
               </div>
             </div>
-
-            <div className="flex justify-between items-center">
-              {fases.map((f, i) => (
-                <div key={f.fase} className="flex flex-col items-center gap-1.5">
-                  <div className={`w-2 h-2 rounded-full transition-colors ${f.isActive ? 'bg-blue-400 shadow-[0_0_8px_rgba(96,165,250,0.6)]' : overallProgress > (i * 33) ? 'bg-slate-500' : 'bg-slate-700'}`} />
-                  <span className={`text-[9px] uppercase font-bold tracking-wider ${f.isActive ? 'text-blue-300' : 'text-slate-500'}`}>
-                    {f.label.split(' ')[1] || f.label}
-                  </span>
-                </div>
-              ))}
-              {fases.length === 0 && (
-                <div className="w-full flex justify-between">
-                  <div className="w-2 h-2 rounded-full bg-slate-700" />
-                  <div className="w-2 h-2 rounded-full bg-slate-700" />
-                  <div className="w-2 h-2 rounded-full bg-slate-700" />
-                </div>
-              )}
-            </div>
           </div>
-          
         </div>
       </div>
-
       {/* 2. STATS GRID - Minimalist Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 stagger-children">
         {[
