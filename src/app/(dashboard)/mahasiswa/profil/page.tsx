@@ -167,7 +167,7 @@ export default function ProfilPage() {
         <div className="relative h-32 sm:h-48 w-full overflow-hidden" style={{background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #1e3a8a 75%, #172554 100%)'}}>
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
           <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5 blur-2zl pointer-events-none" />
-          <div className="absolute inset-0 opacity-[0.04]" style=+{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px'}} />
+          <div className="absolute inset-0 opacity-[0.04]" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px'}} />
         </div>
 
         {/* Profile Content */}
@@ -390,7 +390,7 @@ export default function ProfilPage() {
                               placeholder="Minimal 6 karakter"
                               className="h-11 rounded-xl bg-muted/30 border-border/60 pr-10"
                             />
-                            <button type="button" onClick={ => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                            <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
                               {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                             </button>
                           </div>
