@@ -174,13 +174,14 @@ export default function ProfilPage() {
 
         {/* Profile Content */}
         <div className="px-6 sm:px-10 pb-6">
-          <div className="flex flex-col lg:flex-row gap-5 justify-between items-start lg:items-end -mt-10 sm:-mt-12 relative z-10">
+          {/* Main flex row: NO negative margin here, we apply it only to the avatar so text never overlaps the banner */}
+          <div className="flex flex-col lg:flex-row gap-5 justify-between items-start lg:items-end relative z-10">
             
             {/* Avatar & Identity */}
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end flex-1 min-w-0 w-full">
               
-              {/* Avatar */}
-              <div className="relative group shrink-0">
+              {/* Avatar - Negative margin pulls ONLY the avatar into the banner */}
+              <div className="relative group shrink-0 -mt-12 sm:-mt-16">
                 <div className="ring-4 ring-card rounded-full bg-card shadow-xl">
                   <Avatar className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-border/50 bg-muted">
                     <AvatarImage src={user?.avatar_url || undefined} className="object-cover" />
@@ -217,7 +218,7 @@ export default function ProfilPage() {
                   </Badge>
                 </div>
                 
-                ${/* Badges/Tags */}
+                {/* Badges/Tags */}
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {user?.nim && (
                     <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-md text-xs font-medium">
@@ -249,16 +250,19 @@ export default function ProfilPage() {
 
             {/* Right Side Actions & Completion */}
             <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-4 shrink-0 pt-2 lg:pt-0">
-               <div className="bg-muted/30 border border-border/50 rounded-xl p-3.5 flex-1 lg:flex-none flex flex-col justify-center items-center lg:items-end min-w-[200px]">
+               <div className="bg-muted/30 border border-border/50 rounded-xl p-3.5 flex-1 lg:flex-none flex flex-col justify-center items-center lg:items-end min-w-[220px]">
                  <div className="flex items-center gap-2 mb-2.5 w-full justify-between">
                    <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                     <CheckCircle2 className="w-3 h-3 text-primary" /> Kelengkapan
+                     <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Kelengkapan
                    </span>
-                   <span className="text-xs font-extrabold text-foreground">{completionPct}%</span>
+                   <span className="text-sm font-extrabold text-foreground">{completionPct}%</span>
                  </div>
-                 <div className="h-2 w-full bg-border/60 rounded-full overflow-hidden">
-                   <div className="h-full bg-primary rounded-full transition-all duration-1000 ease-out relative overflow-hidden" style={{ width: `\${completionPct}%` }}>
-                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-[shimmer_2.5s_ease-in-out_infinite]" />
+                 <div className="h-2 w-full bg-border/60 rounded-full overflow-hidden shadow-inner">
+                   <div 
+                     className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden" 
+                     style={{ width: `${completionPct}%`, background: 'linear-gradient(90deg, #38bdf8, #818cf8)' }}
+                   >
+                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-[shimmer_2.5s_ease-in-out_infinite]" style={{animationName: 'slideShimmer'}} />
                    </div>
                  </div>
                </div>
