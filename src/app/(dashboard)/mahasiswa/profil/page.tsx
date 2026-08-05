@@ -263,7 +263,7 @@ export default function ProfilPage() {
                
                <div className="flex gap-2 w-full">
                   <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                    <DialogTrigger asChild>
+                    <DialogTrigger>
                       <Button variant="outline" className="flex-1 bg-background hover:bg-muted border-border/60 shadow-sm h-10 gap-2 transition-all">
                         <Edit2 className="w-4 h-4" /> Edit Profile
                       </Button>
@@ -365,7 +365,7 @@ export default function ProfilPage() {
                   </Dialog>
                   
                   <Dialog open={isPwdOpen} onOpenChange={setIsPwdOpen}>
-                    <DialogTrigger asChild>
+                    <DialogTrigger>
                       <Button variant="outline" className="flex-1 bg-background hover:bg-muted border-border/60 shadow-sm h-10 gap-2 transition-all">
                         <Lock className="w-4 h-4" /> Password
                       </Button>
