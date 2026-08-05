@@ -163,16 +163,18 @@ export default function ProfilPage() {
       {/* Modern Profile Header */}
       <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm overflow-hidden mb-8 animate-slide-up">
         
-        {/* Cover Photo */}
-        <div className="relative h-32 sm:h-48 w-full overflow-hidden" style={{background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #1e3a8a 75%, #172554 100%)'}}>
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20 pointer-events-none" />
-          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/5 blur-2zl pointer-events-none" />
+        {/* Cover Photo - Smaller and matched to dashboard gradient */}
+        <div className="relative h-24 sm:h-32 w-full overflow-hidden" style={{background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #1e3a8a 75%, #172554 100%)'}}>
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-transparent to-blue-950/60 pointer-events-none" />
+          <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-blue-950/50 to-transparent pointer-events-none" />
+          <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-400/10 blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
           <div className="absolute inset-0 opacity-[0.04]" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px'}} />
         </div>
 
         {/* Profile Content */}
-        <div className="px-6 sm:px-10 pb-8">
-          <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-end -mt-12 sm:-mt-16 relative z-10">
+        <div className="px-6 sm:px-10 pb-6">
+          <div className="flex flex-col lg:flex-row gap-5 justify-between items-start lg:items-end -mt-10 sm:-mt-12 relative z-10">
             
             {/* Avatar & Identity */}
             <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end flex-1 min-w-0 w-full">
@@ -180,13 +182,13 @@ export default function ProfilPage() {
               {/* Avatar */}
               <div className="relative group shrink-0">
                 <div className="ring-4 ring-card rounded-full bg-card shadow-xl">
-                  <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-2 border-border/50 bg-muted">
+                  <Avatar className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-border/50 bg-muted">
                     <AvatarImage src={user?.avatar_url || undefined} className="object-cover" />
                     <AvatarFallback className="bg-primary/5 text-primary text-3xl font-bold">{initials}</AvatarFallback>
                   </Avatar>
                 </div>
                 {/* Status dot */}
-                <div className={`absolute bottom-1 right-1 w-5 h-5 rounded-full border-4 border-card ${user?.status_aktif ? 'bg-emerald-500 shadou-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-red-500 shadou-[0_0_10px_rgba(239,68,68,0.4)]'}`} />
+                <div className={`absolute bottom-1 right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full border-4 border-card ${user?.status_aktif ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.4)]' : 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]'}`} />
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
@@ -205,9 +207,9 @@ export default function ProfilPage() {
               </div>
 
               {/* Identity Details */}
-              <div className="flex-1 min-w-0 space-y-2.5 pt-3 sm:pt-0 pb-1 w-full text-left">
+              <div className="flex-1 min-w-0 space-y-1.5 pt-3 sm:pt-0 pb-1 w-full text-left">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                  <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground truncate">
+                  <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground truncate">
                     {user?.nama_lengkap}
                   </h1>
                   <Badge variant="outline" className="w-fit bg-primary/5 text-primary border-primary/20 gap-1.5 px-2.5 py-0.5">
@@ -247,12 +249,12 @@ export default function ProfilPage() {
 
             {/* Right Side Actions & Completion */}
             <div className="w-full lg:w-auto flex flex-col sm:flex-row lg:flex-col gap-4 shrink-0 pt-2 lg:pt-0">
-               <div className="bg-muted/30 border border-border/50 rounded-xl p-3.5 flex-1 lg:flex-none flex flex-col justify-center items-center lg:items-end min-w-[220px]">
+               <div className="bg-muted/30 border border-border/50 rounded-xl p-3.5 flex-1 lg:flex-none flex flex-col justify-center items-center lg:items-end min-w-[200px]">
                  <div className="flex items-center gap-2 mb-2.5 w-full justify-between">
-                   <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                     <CheckCircle2 className="w-3.5 h-3.5 text-primary" /> Kelengkapan
+                   <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                     <CheckCircle2 className="w-3 h-3 text-primary" /> Kelengkapan
                    </span>
-                   <span className="text-sm font-extrabold text-foreground">{completionPct}%</span>
+                   <span className="text-xs font-extrabold text-foreground">{completionPct}%</span>
                  </div>
                  <div className="h-2 w-full bg-border/60 rounded-full overflow-hidden">
                    <div className="h-full bg-primary rounded-full transition-all duration-1000 ease-out relative overflow-hidden" style={{ width: `\${completionPct}%` }}>
