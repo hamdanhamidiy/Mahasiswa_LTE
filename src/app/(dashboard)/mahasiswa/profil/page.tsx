@@ -178,12 +178,12 @@ export default function ProfilPage() {
           <div className="flex flex-col lg:flex-row gap-5 justify-between items-start lg:items-end relative z-10">
             
             {/* Avatar & Identity */}
-            <div className="flex flex-col sm:flex-row gap-5 items-start sm:items-end flex-1 min-w-0 w-full">
+            <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-end flex-1 min-w-0 w-full">
               
               {/* Avatar - Negative margin pulls ONLY the avatar into the banner */}
-              <div className="relative group shrink-0 -mt-12 sm:-mt-16">
+              <div className="relative group shrink-0 -mt-16 sm:-mt-20">
                 <div className="ring-4 ring-card rounded-full bg-card shadow-xl">
-                  <Avatar className="w-20 h-20 sm:w-28 sm:h-28 border-2 border-border/50 bg-muted">
+                  <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-2 border-border/50 bg-muted">
                     <AvatarImage src={user?.avatar_url || undefined} className="object-cover" />
                     <AvatarFallback className="bg-primary/5 text-primary text-3xl font-bold">{initials}</AvatarFallback>
                   </Avatar>
@@ -208,18 +208,18 @@ export default function ProfilPage() {
               </div>
 
               {/* Identity Details */}
-              <div className="flex-1 min-w-0 space-y-1.5 pt-3 sm:pt-0 pb-1 w-full text-left">
-                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+              <div className="flex-1 min-w-0 space-y-1.5 pt-3 sm:pt-0 pb-1 w-full text-center sm:text-left">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 justify-center sm:justify-start">
                   <h1 className="text-xl sm:text-2xl font-extrabold tracking-tight text-foreground truncate">
                     {user?.nama_lengkap}
                   </h1>
-                  <Badge variant="outline" className="w-fit bg-primary/5 text-primary border-primary/20 gap-1.5 px-2.5 py-0.5">
+                  <Badge variant="outline" className="w-fit bg-primary/5 text-primary border-primary/20 gap-1.5 px-2.5 py-0.5 mx-auto sm:mx-0">
                     <Sparkles className="w-3.5 h-3.5" /> Mahasiswa LTE
                   </Badge>
                 </div>
                 
                 {/* Badges/Tags */}
-                <div className="flex flex-wrap items-center gap-2 pt-1">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                   {user?.nim && (
                     <div className="flex items-center gap-1.5 text-muted-foreground bg-muted/50 border border-border/50 px-2.5 py-1 rounded-md text-xs font-medium">
                       <CreditCard className="w-3.5 h-3.5" />
