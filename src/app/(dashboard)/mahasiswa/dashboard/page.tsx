@@ -59,77 +59,100 @@ export default function MahasiswaDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       
-      {/* 1. HERO BANNER - Clean Modern Professional Style */}
-      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#090E17] border border-slate-800 shadow-sm">
-        {/* Clean geometric/subtle gradient overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800/30 via-[#090E17] to-[#090E17] pointer-events-none" />
-        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none" />
-        
-        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
+      {/* 1. HERO BANNER - Vibrant Blue Gradient Modern */}
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl" style={{background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #1e3a8a 75%, #172554 100%)'}}>
+        {/* Layered gradient depth - top left lighter */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-transparent to-blue-950/60 pointer-events-none" />
+        {/* Bottom fade to deep navy */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-blue-950/50 to-transparent pointer-events-none" />
+        {/* Decorative subtle circle top-right */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-400/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+        {/* Subtle grid/dot texture overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px'}} />
+
+        <div className="relative z-10 p-7 sm:p-9 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
           
           {/* Left: User Identity */}
-          <div className="space-y-5 flex-1">
-            <div className="space-y-1.5">
-              <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
-                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
-                {getGreeting()}
-              </p>
-              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-100">
+          <div className="space-y-5 flex-1 min-w-0">
+            {/* Greeting chip */}
+            <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3.5 py-1.5 rounded-full w-fit">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-300 shadow-[0_0_6px_rgba(186,230,253,0.9)] animate-pulse" />
+              <span className="text-xs font-semibold text-blue-100 tracking-wide">{getGreeting()}</span>
+            </div>
+
+            <div className="space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white drop-shadow-sm truncate">
                 {user?.nama_lengkap || 'Mahasiswa'}
               </h1>
+              <p className="text-blue-200/70 text-sm font-medium">Mahasiswa LTE Cruise AIS</p>
             </div>
-            
-            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
+
+            {/* Info chips row */}
+            <div className="flex flex-wrap gap-2">
               {user?.nim && (
-                <div className="flex items-center bg-slate-800/80 border border-slate-700/50 px-2.5 py-1 rounded-md shadow-sm">
-                  <span className="font-mono text-slate-300 text-xs">{user.nim}</span>
+                <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <CreditCard className="w-3.5 h-3.5 text-sky-300" />
+                  <span className="font-mono text-white text-xs font-semibold">{user.nim}</span>
                 </div>
               )}
               {user?.angkatan && (
-                <div className="flex items-center gap-1.5">
-                  <Calendar className="w-4 h-4 text-slate-500" />
-                  <span>{user.angkatan}</span>
+                <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <Calendar className="w-3.5 h-3.5 text-sky-300" />
+                  <span className="text-blue-100 text-xs font-medium">{user.angkatan}</span>
                 </div>
               )}
               {user?.program && (
-                <div className="flex items-center gap-1.5">
-                  <GraduationCap className="w-4 h-4 text-slate-500" />
-                  <span>{getProgramLabel(user.program)}</span>
+                <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <GraduationCap className="w-3.5 h-3.5 text-sky-300" />
+                  <span className="text-blue-100 text-xs font-medium">{getProgramLabel(user.program)}</span>
                 </div>
               )}
               {user?.jurusan && (
-                <div className="flex items-center gap-1.5">
-                  <Briefcase className="w-4 h-4 text-slate-500" />
-                  <span>{getJurusanLabel(user.jurusan)}</span>
+                <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                  <Briefcase className="w-3.5 h-3.5 text-sky-300" />
+                  <span className="text-blue-100 text-xs font-medium">{getJurusanLabel(user.jurusan)}</span>
                 </div>
               )}
             </div>
           </div>
 
-          {/* Right: Progress Tracker */}
-          <div className="w-full lg:w-[320px] shrink-0">
-            <div className="bg-[#0D131F]/80 border border-slate-800/80 rounded-xl p-5 shadow-sm">
-              <div className="flex justify-between items-center mb-4">
+          {/* Right: Progress Tracker Card */}
+          <div className="w-full lg:w-[300px] shrink-0">
+            <div className="bg-white/8 border border-white/15 backdrop-blur-md rounded-2xl p-5 shadow-xl">
+              {/* Header */}
+              <div className="flex justify-between items-center mb-5">
                 <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-blue-500" />
-                  <p className="text-xs font-semibold text-slate-300">Progress Studi</p>
+                  <div className="p-1.5 rounded-lg bg-sky-400/20 border border-sky-400/20">
+                    <TrendingUp className="w-3.5 h-3.5 text-sky-300" />
+                  </div>
+                  <p className="text-xs font-bold text-blue-100 uppercase tracking-wider">Progress Studi</p>
                 </div>
-                <p className="text-lg font-bold text-slate-100 tabular-nums">{overallProgress}%</p>
+                <p className="text-2xl font-extrabold text-white tabular-nums">{overallProgress}<span className="text-sm font-medium text-blue-200 ml-0.5">%</span></p>
               </div>
               
-              <div className="h-2 w-full bg-slate-800/50 rounded-full overflow-hidden mb-3">
+              {/* Progress bar */}
+              <div className="h-2 w-full bg-blue-950/60 rounded-full overflow-hidden mb-4 shadow-inner">
                 <div 
-                  className="h-full bg-blue-500 relative transition-all duration-1000 ease-out"
-                  style={{ width: `${overallProgress}%` }}
+                  className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                  style={{ width: `${overallProgress}%`, background: 'linear-gradient(90deg, #38bdf8, #818cf8)' }}
                 >
-                  <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-[shimmer_2.5s_ease-in-out_infinite]" style={{animationName: 'slideShimmer'}} />
                 </div>
               </div>
 
-              <div className="flex justify-between text-[11px] font-medium text-slate-500">
-                <span className={overallProgress >= 0 ? 'text-blue-400' : ''}>Kelas</span>
-                <span className={overallProgress >= 70 ? 'text-blue-400' : ''}>OJT</span>
-                <span className={overallProgress >= 100 ? 'text-blue-400' : ''}>Akhir</span>
+              {/* Steps with milestones */}
+              <div className="flex justify-between items-center">
+                {[
+                  { label: 'Kelas', threshold: 0 },
+                  { label: 'OJT', threshold: 70 },
+                  { label: 'Akhir', threshold: 100 },
+                ].map((step) => (
+                  <div key={step.label} className="flex flex-col items-center gap-1">
+                    <div className={`w-2 h-2 rounded-full transition-all duration-500 ${overallProgress >= step.threshold ? 'bg-sky-300 shadow-[0_0_6px_rgba(125,211,252,0.8)]' : 'bg-blue-800/60'}`} />
+                    <span className={`text-[10px] font-semibold ${overallProgress >= step.threshold ? 'text-sky-300' : 'text-blue-400/50'}`}>{step.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
