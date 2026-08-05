@@ -6,7 +6,7 @@ import { fetchData, updateData, createData } from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Mail, Phone, MapPin, School, Calendar, Shield, Loader2, GraduationCap, Heart, Shirt, Edit2, Lock, Camera, Save, X, Eye, EyeOff, CheckCircle2, Sparkles } from 'lucide-react';
+import { User, Mail, Phone, MapPin, School, Calendar, Shield, Loader2, GraduationCap, Heart, Shirt, Edit2, Lock, Camera, Save, X, Eye, EyeOff, CheckCircle2, Sparkles, CreditCard } from 'lucide-react';
 import { getProgramLabel, getJurusanLabel, formatDate } from '@/lib/utils/helpers';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -160,25 +160,34 @@ export default function ProfilPage() {
 
   return (
     <div className="space-y-8 animate-fade-in pb-8">
-      {/* Hero Profile Banner - Modern Premium Style */}
-      <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 shadow-xl border border-white/5">
-        {/* Soft Organic Mesh Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-blue-900/60 to-slate-950" />
-        
-        {/* Subtle Decorative Glows for organic feel */}
-        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-500/15 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
-        <div className="absolute bottom-0 left-10 -mb-20 w-72 h-72 bg-indigo-500/15 rounded-full blur-[80px] mix-blend-screen pointer-events-none" />
-        
-        <div className="relative z-10 p-8 sm:p-10">
-          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
+      {/* Hero Profile Banner - Matching Dashboard Blue Gradient */}
+      <div className="relative overflow-hidden rounded-2xl shadow-2xl" style={{background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 25%, #2563eb 50%, #1e3a8a 75%, #172554 100%)'}}>
+        {/* Layered gradient depth - top left lighter */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-400/20 via-transparent to-blue-950/60 pointer-events-none" />
+        {/* Bottom fade to deep navy */}
+        <div className="absolute bottom-0 left-0 right-0 h-1/2 bg-gradient-to-t from-blue-950/50 to-transparent pointer-events-none" />
+        {/* Decorative subtle circle top-right */}
+        <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-blue-400/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-10 -left-10 w-48 h-48 rounded-full bg-indigo-500/10 blur-2xl pointer-events-none" />
+        {/* Extra ambient glow */}
+        <div className="absolute top-1/2 left-1/3 w-72 h-72 rounded-full bg-sky-400/5 blur-3xl pointer-events-none" />
+        {/* Subtle grid/dot texture overlay */}
+        <div className="absolute inset-0 opacity-[0.04]" style={{backgroundImage: 'radial-gradient(circle, #fff 1px, transparent 1px)', backgroundSize: '28px 28px'}} />
+
+        <div className="relative z-10 p-7 sm:p-9 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
+          
+          {/* Left: Avatar + User Identity */}
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 flex-1 min-w-0">
             {/* Avatar */}
             <div className="relative group shrink-0">
-              <div className="ring-4 ring-white/10 rounded-full p-1 bg-gradient-to-br from-blue-400/50 to-indigo-500/50 backdrop-blur-sm">
-                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-4 border-[#0a1526]">
+              <div className="ring-[3px] ring-white/20 rounded-full p-1.5 bg-white/10 backdrop-blur-sm shadow-xl">
+                <Avatar className="w-28 h-28 sm:w-32 sm:h-32 border-[3px] border-blue-900/50">
                   <AvatarImage src={user?.avatar_url || undefined} />
-                  <AvatarFallback className="bg-white/5 text-white text-3xl font-bold backdrop-blur-md">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-white/10 text-white text-3xl font-bold backdrop-blur-md">{initials}</AvatarFallback>
                 </Avatar>
               </div>
+              {/* Status dot */}
+              <div className={`absolute bottom-2 right-2 w-4 h-4 rounded-full border-[3px] border-blue-800 ${user?.status_aktif ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]' : 'bg-red-400 shadow-[0_0_8px_rgba(248,113,113,0.9)]'}`} />
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
@@ -203,210 +212,253 @@ export default function ProfilPage() {
               />
             </div>
 
-            {/* Info */}
-            <div className="flex-1 text-center sm:text-left text-white flex flex-col justify-center min-h-[8rem]">
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{user?.nama_lengkap}</h1>
-                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm font-medium text-blue-100/70">
-                  <span className="font-mono bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-white">{user?.nim}</span>
-                  <span className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md px-3 py-1 rounded-lg border border-white/5">
-                    <Mail className="w-4 h-4 text-blue-300" /> 
-                    <span className="text-white/90">{user?.email}</span>
+            {/* Identity */}
+            <div className="flex-1 text-center sm:text-left min-w-0 space-y-4">
+              {/* Greeting chip */}
+              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 backdrop-blur-sm px-3.5 py-1.5 rounded-full w-fit">
+                <span className="w-1.5 h-1.5 rounded-full bg-sky-300 shadow-[0_0_6px_rgba(186,230,253,0.9)] animate-pulse" />
+                <span className="text-xs font-semibold text-blue-100 tracking-wide">Profil Mahasiswa</span>
+              </div>
+
+              <div className="space-y-1">
+                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-white drop-shadow-sm truncate">{user?.nama_lengkap}</h1>
+                <p className="text-blue-200/70 text-sm font-medium">Mahasiswa LTE Cruise AIS</p>
+              </div>
+
+              {/* Info chips row */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                {user?.nim && (
+                  <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <CreditCard className="w-3.5 h-3.5 text-sky-300" />
+                    <span className="font-mono text-white text-xs font-semibold">{user.nim}</span>
+                  </div>
+                )}
+                {user?.email && (
+                  <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <Mail className="w-3.5 h-3.5 text-sky-300" />
+                    <span className="text-blue-100 text-xs font-medium truncate max-w-[200px]">{user.email}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Program badges row */}
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                {user?.program && (
+                  <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <GraduationCap className="w-3.5 h-3.5 text-sky-300" />
+                    <span className="text-blue-100 text-xs font-medium">{getProgramLabel(user.program)}</span>
+                  </div>
+                )}
+                {user?.jurusan && (
+                  <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <School className="w-3.5 h-3.5 text-sky-300" />
+                    <span className="text-blue-100 text-xs font-medium">{getJurusanLabel(user.jurusan)}</span>
+                  </div>
+                )}
+                {user?.angkatan && (
+                  <div className="flex items-center gap-1.5 bg-white/10 border border-white/15 backdrop-blur-sm px-3 py-1.5 rounded-lg">
+                    <Calendar className="w-3.5 h-3.5 text-sky-300" />
+                    <span className="text-blue-100 text-xs font-medium">{user.angkatan}</span>
+                  </div>
+                )}
+                <div className={`flex items-center gap-1.5 backdrop-blur-sm px-3 py-1.5 rounded-lg border ${user?.status_aktif ? 'bg-emerald-500/15 border-emerald-400/25' : 'bg-red-500/15 border-red-400/25'}`}>
+                  <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${user?.status_aktif ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)]' : 'bg-red-400 shadow-[0_0_6px_rgba(248,113,113,0.8)]'}`} />
+                  <span className={`text-xs font-semibold ${user?.status_aktif ? 'text-emerald-300' : 'text-red-300'}`}>
+                    {user?.status_aktif ? 'Aktif' : 'Nonaktif'}
                   </span>
                 </div>
               </div>
-              
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-5">
-                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
-                  {user?.program ? getProgramLabel(user.program) : 'D1'}
-                </Badge>
-                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
-                  {user?.jurusan ? getJurusanLabel(user.jurusan) : '—'}
-                </Badge>
-                <Badge className="bg-white/5 text-blue-100 border-white/10 text-[11px] font-medium backdrop-blur-md px-3 py-1">
-                  {user?.angkatan}
-                </Badge>
-                <Badge className={`text-[11px] font-semibold backdrop-blur-md px-3 py-1 ${user?.status_aktif ? 'bg-emerald-500/10 text-emerald-300 border-emerald-400/20' : 'bg-red-500/10 text-red-300 border-red-400/20'}`}>
-                  <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${user?.status_aktif ? 'bg-emerald-400' : 'bg-red-400'}`} />
-                  {user?.status_aktif ? 'Aktif' : 'Nonaktif'}
-                </Badge>
-              </div>
             </div>
+          </div>
 
-            {/* Action Buttons */}
-            <div className="flex sm:flex-col gap-2 shrink-0">
-              <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogTrigger render={<Button size="sm" className="bg-white/10 hover:bg-white/20 text-white border-white/15 backdrop-blur-sm gap-2 text-xs h-9 px-4 rounded-xl" />}>
-                  <Edit2 className="w-3.5 h-3.5" /> Edit Profil
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2 text-lg">
-                      <Edit2 className="w-5 h-5 text-primary" />
-                      Edit Data Pribadi
-                    </DialogTitle>
-                    <p className="text-sm text-muted-foreground mt-1">Lengkapi informasi pribadi Anda di bawah ini</p>
-                  </DialogHeader>
-                  <form onSubmit={handleSaveProfile} className="space-y-6 pt-4">
-                    {/* Personal Info Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 pb-2 border-b border-border">
-                        <User className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-foreground">Identitas</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Tempat Lahir</Label>
-                          <Input name="tempat_lahir" value={editForm.tempat_lahir || ''} onChange={handleEditChange} placeholder="Contoh: Jakarta" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Tanggal Lahir</Label>
-                          <Input type="date" name="tanggal_lahir" value={editForm.tanggal_lahir || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Jenis Kelamin</Label>
-                          <select name="jenis_kelamin" value={editForm.jenis_kelamin || ''} onChange={handleEditChange as any} className="flex h-10 w-full rounded-xl border border-border/60 bg-muted/30 px-3 text-sm focus:bg-background focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">
-                            <option value="">Pilih...</option>
-                            <option value="L">Laki-laki</option>
-                            <option value="P">Perempuan</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">No. HP</Label>
-                          <Input name="no_hp" value={editForm.no_hp || ''} onChange={handleEditChange} placeholder="08xxxxxxxxxx" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                      </div>
+          {/* Right: Glassmorphism Card - Profile Completion + Actions */}
+          <div className="w-full lg:w-[280px] shrink-0">
+            <div className="bg-white/8 border border-white/15 backdrop-blur-md rounded-2xl p-5 shadow-xl space-y-5">
+              {/* Profile Completion */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-sky-400/20 border border-sky-400/20">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-sky-300" />
                     </div>
+                    <p className="text-xs font-bold text-blue-100 uppercase tracking-wider">Kelengkapan</p>
+                  </div>
+                  <p className="text-2xl font-extrabold text-white tabular-nums">{completionPct}<span className="text-sm font-medium text-blue-200 ml-0.5">%</span></p>
+                </div>
 
-                    {/* Address Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 pb-2 border-b border-border">
-                        <MapPin className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-foreground">Alamat</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Kota Asal</Label>
-                          <Input name="kota_asal" value={editForm.kota_asal || ''} onChange={handleEditChange} placeholder="Contoh: Kediri" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Provinsi</Label>
-                          <Input name="provinsi_asal" value={editForm.provinsi_asal || ''} onChange={handleEditChange} placeholder="Contoh: Jawa Timur" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5 sm:col-span-2">
-                          <Label className="text-xs font-semibold text-muted-foreground">Alamat Lengkap</Label>
-                          <Input name="alamat_lengkap" value={editForm.alamat_lengkap || ''} onChange={handleEditChange} placeholder="Jl. ..." className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                      </div>
-                    </div>
+                {/* Progress bar */}
+                <div className="h-2 w-full bg-blue-950/60 rounded-full overflow-hidden mb-3 shadow-inner">
+                  <div 
+                    className="h-full rounded-full transition-all duration-1000 ease-out relative overflow-hidden"
+                    style={{ width: `${completionPct}%`, background: 'linear-gradient(90deg, #38bdf8, #818cf8)' }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -skew-x-12 animate-[shimmer_2.5s_ease-in-out_infinite]" style={{animationName: 'slideShimmer'}} />
+                  </div>
+                </div>
 
-                    {/* Guardian Section */}
-                    <div className="space-y-4">
-                      <div className="flex items-center gap-2 pb-2 border-b border-border">
-                        <Heart className="w-4 h-4 text-primary" />
-                        <span className="text-xs font-bold uppercase tracking-wider text-foreground">Data Wali & Pendidikan</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">Nama Wali</Label>
-                          <Input name="nama_wali" value={editForm.nama_wali || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs font-semibold text-muted-foreground">No. HP Wali</Label>
-                          <Input name="no_hp_wali" value={editForm.no_hp_wali || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                        <div className="space-y-1.5 sm:col-span-2">
-                          <Label className="text-xs font-semibold text-muted-foreground">Asal Sekolah</Label>
-                          <Input name="asal_sekolah" value={editForm.asal_sekolah || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
-                        </div>
-                      </div>
-                    </div>
+                <p className="text-[10px] text-blue-300/60 font-medium text-center">
+                  {completedFields} dari {totalFields} data terisi
+                </p>
+              </div>
 
-                    <div className="flex gap-3 pt-2">
-                      <Button type="button" variant="outline" className="flex-1 h-11 rounded-xl gap-2" onClick={() => setIsEditOpen(false)}>
-                        <X className="w-4 h-4" /> Batal
-                      </Button>
-                      <Button type="submit" className="flex-1 h-11 rounded-xl gap-2 bg-primary hover:bg-primary/90" disabled={isSaving}>
-                        {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                        Simpan Perubahan
-                      </Button>
-                    </div>
-                  </form>
-                </DialogContent>
-              </Dialog>
+              {/* Divider */}
+              <div className="h-px bg-white/10" />
 
-              <Dialog open={isPwdOpen} onOpenChange={setIsPwdOpen}>
-                <DialogTrigger render={<Button variant="outline" size="sm" className="bg-white/5 hover:bg-white/10 text-white/70 border-white/15 backdrop-blur-sm gap-2 text-xs h-9 px-4 rounded-xl" />}>
-                  <Lock className="w-3.5 h-3.5" /> Password
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-md">
-                  <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                      <Lock className="w-5 h-5 text-primary" />
-                      Ubah Password
-                    </DialogTitle>
-                  </DialogHeader>
-                  <form onSubmit={handlePasswordChange} className="space-y-5 pt-4">
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-muted-foreground">Password Baru</Label>
-                      <div className="relative">
+              {/* Action Buttons */}
+              <div className="space-y-2">
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                  <DialogTrigger render={<Button size="sm" className="w-full bg-sky-400/20 hover:bg-sky-400/30 text-white border border-sky-300/20 backdrop-blur-sm gap-2 text-xs h-9 rounded-xl transition-all duration-300 hover:scale-[1.02] hover:shadow-lg hover:shadow-sky-500/10" />}>
+                    <Edit2 className="w-3.5 h-3.5" /> Edit Profil
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2 text-lg">
+                        <Edit2 className="w-5 h-5 text-primary" />
+                        Edit Data Pribadi
+                      </DialogTitle>
+                      <p className="text-sm text-muted-foreground mt-1">Lengkapi informasi pribadi Anda di bawah ini</p>
+                    </DialogHeader>
+                    <form onSubmit={handleSaveProfile} className="space-y-6 pt-4">
+                      {/* Personal Info Section */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-border">
+                          <User className="w-4 h-4 text-primary" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-foreground">Identitas</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Tempat Lahir</Label>
+                            <Input name="tempat_lahir" value={editForm.tempat_lahir || ''} onChange={handleEditChange} placeholder="Contoh: Jakarta" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Tanggal Lahir</Label>
+                            <Input type="date" name="tanggal_lahir" value={editForm.tanggal_lahir || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Jenis Kelamin</Label>
+                            <select name="jenis_kelamin" value={editForm.jenis_kelamin || ''} onChange={handleEditChange as any} className="flex h-10 w-full rounded-xl border border-border/60 bg-muted/30 px-3 text-sm focus:bg-background focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-colors">
+                              <option value="">Pilih...</option>
+                              <option value="L">Laki-laki</option>
+                              <option value="P">Perempuan</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">No. HP</Label>
+                            <Input name="no_hp" value={editForm.no_hp || ''} onChange={handleEditChange} placeholder="08xxxxxxxxxx" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Address Section */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-border">
+                          <MapPin className="w-4 h-4 text-primary" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-foreground">Alamat</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Kota Asal</Label>
+                            <Input name="kota_asal" value={editForm.kota_asal || ''} onChange={handleEditChange} placeholder="Contoh: Kediri" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Provinsi</Label>
+                            <Input name="provinsi_asal" value={editForm.provinsi_asal || ''} onChange={handleEditChange} placeholder="Contoh: Jawa Timur" className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <Label className="text-xs font-semibold text-muted-foreground">Alamat Lengkap</Label>
+                            <Input name="alamat_lengkap" value={editForm.alamat_lengkap || ''} onChange={handleEditChange} placeholder="Jl. ..." className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Guardian Section */}
+                      <div className="space-y-4">
+                        <div className="flex items-center gap-2 pb-2 border-b border-border">
+                          <Heart className="w-4 h-4 text-primary" />
+                          <span className="text-xs font-bold uppercase tracking-wider text-foreground">Data Wali & Pendidikan</span>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">Nama Wali</Label>
+                            <Input name="nama_wali" value={editForm.nama_wali || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs font-semibold text-muted-foreground">No. HP Wali</Label>
+                            <Input name="no_hp_wali" value={editForm.no_hp_wali || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                          <div className="space-y-1.5 sm:col-span-2">
+                            <Label className="text-xs font-semibold text-muted-foreground">Asal Sekolah</Label>
+                            <Input name="asal_sekolah" value={editForm.asal_sekolah || ''} onChange={handleEditChange} className="h-10 rounded-xl bg-muted/30 border-border/60 focus:bg-background transition-colors" />
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 pt-2">
+                        <Button type="button" variant="outline" className="flex-1 h-11 rounded-xl gap-2" onClick={() => setIsEditOpen(false)}>
+                          <X className="w-4 h-4" /> Batal
+                        </Button>
+                        <Button type="submit" className="flex-1 h-11 rounded-xl gap-2 bg-primary hover:bg-primary/90" disabled={isSaving}>
+                          {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+                          Simpan Perubahan
+                        </Button>
+                      </div>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+
+                <Dialog open={isPwdOpen} onOpenChange={setIsPwdOpen}>
+                  <DialogTrigger render={<Button variant="outline" size="sm" className="w-full bg-white/5 hover:bg-white/15 text-white/80 border-white/15 backdrop-blur-sm gap-2 text-xs h-9 rounded-xl transition-all duration-300 hover:scale-[1.02]" />}>
+                    <Lock className="w-3.5 h-3.5" /> Ubah Password
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="flex items-center gap-2">
+                        <Lock className="w-5 h-5 text-primary" />
+                        Ubah Password
+                      </DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handlePasswordChange} className="space-y-5 pt-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-muted-foreground">Password Baru</Label>
+                        <div className="relative">
+                          <Input 
+                            type={showPwd ? "text" : "password"} 
+                            value={pwdForm.newPassword} 
+                            onChange={e => setPwdForm({...pwdForm, newPassword: e.target.value})}
+                            required
+                            minLength={6}
+                            placeholder="Minimal 6 karakter"
+                            className="h-11 rounded-xl bg-muted/30 border-border/60 pr-10"
+                          />
+                          <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
+                            {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                          </button>
+                        </div>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold text-muted-foreground">Konfirmasi Password</Label>
                         <Input 
                           type={showPwd ? "text" : "password"} 
-                          value={pwdForm.newPassword} 
-                          onChange={e => setPwdForm({...pwdForm, newPassword: e.target.value})}
+                          value={pwdForm.confirmPassword} 
+                          onChange={e => setPwdForm({...pwdForm, confirmPassword: e.target.value})}
                           required
                           minLength={6}
-                          placeholder="Minimal 6 karakter"
-                          className="h-11 rounded-xl bg-muted/30 border-border/60 pr-10"
+                          placeholder="Ulangi password baru"
+                          className="h-11 rounded-xl bg-muted/30 border-border/60"
                         />
-                        <button type="button" onClick={() => setShowPwd(!showPwd)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
-                          {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                        </button>
                       </div>
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label className="text-xs font-semibold text-muted-foreground">Konfirmasi Password</Label>
-                      <Input 
-                        type={showPwd ? "text" : "password"} 
-                        value={pwdForm.confirmPassword} 
-                        onChange={e => setPwdForm({...pwdForm, confirmPassword: e.target.value})}
-                        required
-                        minLength={6}
-                        placeholder="Ulangi password baru"
-                        className="h-11 rounded-xl bg-muted/30 border-border/60"
-                      />
-                    </div>
-                    <Button type="submit" className="w-full h-11 rounded-xl gap-2" disabled={pwdLoading}>
-                      {pwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
-                      Simpan Password
-                    </Button>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                      <Button type="submit" className="w-full h-11 rounded-xl gap-2" disabled={pwdLoading}>
+                        {pwdLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Lock className="w-4 h-4" />}
+                        Simpan Password
+                      </Button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Profile Completion Card */}
-      {completionPct < 100 && (
-        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 border border-amber-200/60 dark:border-amber-500/20 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center gap-5 animate-slide-up shadow-sm">
-          <div className="p-3 bg-amber-100 dark:bg-amber-500/20 rounded-2xl shrink-0">
-            <Sparkles className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="flex-1 text-center sm:text-left w-full">
-            <p className="text-base font-bold text-amber-900 dark:text-amber-200">Lengkapi Profil Anda</p>
-            <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1 font-medium">
-              {completedFields} dari {totalFields} data sudah terisi • {completionPct}% lengkap
-            </p>
-          </div>
-          <div className="w-full sm:w-32 h-2.5 bg-amber-200/50 dark:bg-amber-900/40 rounded-full overflow-hidden shrink-0 mt-3 sm:mt-0">
-            <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" style={{ width: `${completionPct}%` }}>
-              <div className="absolute inset-0 bg-white/20 animate-shimmer" />
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Data Sections — Modern Cards */}
       <div className="grid lg:grid-cols-2 gap-6 stagger-children">
