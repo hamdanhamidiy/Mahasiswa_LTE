@@ -59,81 +59,77 @@ export default function MahasiswaDashboard() {
   return (
     <div className="space-y-8 animate-fade-in pb-8">
       
-      {/* 1. HERO BANNER - Premium Modern Gradient */}
-      <div className="relative overflow-hidden rounded-[2rem] text-white shadow-xl shadow-blue-900/10 border border-white/5 bg-[#0a1526]">
-        {/* Soft Mesh Background Gradients */}
-        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-blue-600/30 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-indigo-600/30 via-transparent to-transparent" />
+      {/* 1. HERO BANNER - Clean Modern Professional Style */}
+      <div className="relative overflow-hidden rounded-xl sm:rounded-2xl bg-[#090E17] border border-slate-800 shadow-sm">
+        {/* Clean geometric/subtle gradient overlay */}
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800/30 via-[#090E17] to-[#090E17] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none" />
         
-        {/* Floating Ambient Lights */}
-        <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-500/30 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
-        <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] mix-blend-screen pointer-events-none" />
-        <div className="absolute top-[20%] left-[30%] w-[300px] h-[300px] bg-cyan-400/15 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
-        
-        {/* Modern Dot Grid Overlay */}
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }} />
-        
-        <div className="relative z-10 p-8 sm:p-12 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
+        <div className="relative z-10 p-6 sm:p-8 flex flex-col lg:flex-row gap-8 justify-between items-start lg:items-center">
           
           {/* Left: User Identity */}
           <div className="space-y-5 flex-1">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-md shadow-inner">
-              <Sparkles className="w-4 h-4 text-blue-300" />
-              <span className="text-xs font-semibold tracking-widest uppercase text-blue-100/90">
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium text-slate-400 flex items-center gap-2">
+                <span className="inline-block w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.8)]" />
                 {getGreeting()}
-              </span>
-            </div>
-            
-            <div className="space-y-2">
-              <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white">
+              </p>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-100">
                 {user?.nama_lengkap || 'Mahasiswa'}
               </h1>
-              <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-blue-100/70">
-                {user?.nim && (
-                  <span className="font-mono bg-blue-900/40 border border-blue-400/20 px-2.5 py-1 rounded-md text-blue-200">{user.nim}</span>
-                )}
-                <span>•</span>
-                <span>{user?.angkatan || 'Angkatan 25'}</span>
-                {user?.program && (
-                  <>
-                    <span>•</span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-md">{getProgramLabel(user.program)}</span>
-                  </>
-                )}
-                {user?.jurusan && (
-                  <>
-                    <span>•</span>
-                    <span className="bg-white/10 px-2.5 py-1 rounded-md">{getJurusanLabel(user.jurusan)}</span>
-                  </>
-                )}
-              </div>
+            </div>
+            
+            <div className="flex flex-wrap items-center gap-3 text-sm text-slate-400">
+              {user?.nim && (
+                <div className="flex items-center bg-slate-800/80 border border-slate-700/50 px-2.5 py-1 rounded-md shadow-sm">
+                  <span className="font-mono text-slate-300 text-xs">{user.nim}</span>
+                </div>
+              )}
+              {user?.angkatan && (
+                <div className="flex items-center gap-1.5">
+                  <Calendar className="w-4 h-4 text-slate-500" />
+                  <span>{user.angkatan}</span>
+                </div>
+              )}
+              {user?.program && (
+                <div className="flex items-center gap-1.5">
+                  <GraduationCap className="w-4 h-4 text-slate-500" />
+                  <span>{getProgramLabel(user.program)}</span>
+                </div>
+              )}
+              {user?.jurusan && (
+                <div className="flex items-center gap-1.5">
+                  <Briefcase className="w-4 h-4 text-slate-500" />
+                  <span>{getJurusanLabel(user.jurusan)}</span>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Right: Progress Tracker */}
-          <div className="w-full lg:w-[340px] shrink-0">
-            <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-5 shadow-inner">
-              <div className="flex justify-between items-center mb-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">Progress Studi</p>
-                <p className="text-2xl font-bold text-white tabular-nums">{overallProgress}%</p>
+          <div className="w-full lg:w-[320px] shrink-0">
+            <div className="bg-[#0D131F]/80 border border-slate-800/80 rounded-xl p-5 shadow-sm">
+              <div className="flex justify-between items-center mb-4">
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-blue-500" />
+                  <p className="text-xs font-semibold text-slate-300">Progress Studi</p>
+                </div>
+                <p className="text-lg font-bold text-slate-100 tabular-nums">{overallProgress}%</p>
               </div>
               
-              <div className="relative h-2 w-full bg-slate-900/50 rounded-full overflow-hidden mb-4">
+              <div className="h-2 w-full bg-slate-800/50 rounded-full overflow-hidden mb-3">
                 <div 
-                  className="absolute top-0 left-0 h-full rounded-full bg-gradient-to-r from-blue-400 to-indigo-400 shadow-[0_0_10px_rgba(96,165,250,0.5)] transition-all duration-1000 ease-out"
+                  className="h-full bg-blue-500 relative transition-all duration-1000 ease-out"
                   style={{ width: `${overallProgress}%` }}
-                />
+                >
+                  <div className="absolute inset-0 bg-white/20 w-full animate-[shimmer_2s_infinite]" />
+                </div>
               </div>
 
-              <div className="flex justify-between text-[10px] font-medium text-slate-400 relative">
-                <span className={overallProgress >= 0 ? 'text-blue-300 font-bold' : ''}>Kelas</span>
-                <span className={overallProgress >= 70 ? 'text-blue-300 font-bold' : ''}>OJT</span>
-                <span className={overallProgress >= 100 ? 'text-blue-300 font-bold' : ''}>Akhir</span>
-                
-                {/* Milestone dots */}
-                <div className="absolute -top-6 left-0 w-1.5 h-1.5 rounded-full bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]" />
-                <div className={`absolute -top-6 left-[70%] w-1.5 h-1.5 rounded-full transition-colors ${overallProgress >= 70 ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]' : 'bg-slate-700'}`} />
-                <div className={`absolute -top-6 right-0 w-1.5 h-1.5 rounded-full transition-colors ${overallProgress >= 100 ? 'bg-blue-400 shadow-[0_0_5px_rgba(96,165,250,0.8)]' : 'bg-slate-700'}`} />
+              <div className="flex justify-between text-[11px] font-medium text-slate-500">
+                <span className={overallProgress >= 0 ? 'text-blue-400' : ''}>Kelas</span>
+                <span className={overallProgress >= 70 ? 'text-blue-400' : ''}>OJT</span>
+                <span className={overallProgress >= 100 ? 'text-blue-400' : ''}>Akhir</span>
               </div>
             </div>
           </div>
@@ -147,21 +143,21 @@ export default function MahasiswaDashboard() {
           { label: 'Mata Pelajaran', value: data ? `${data.totalMapel}` : '—', desc: 'Telah dievaluasi', icon: BookOpen, color: 'text-indigo-600 dark:text-indigo-400', bg: 'bg-indigo-50 dark:bg-indigo-500/10', border: 'border-indigo-100 dark:border-indigo-500/20' },
           { label: 'Jadwal Hari Ini', value: data ? `${data.jadwalHariIni.length}` : '—', desc: new Date().toLocaleDateString('id-ID', { weekday: 'long' }), icon: Calendar, color: 'text-amber-600 dark:text-amber-400', bg: 'bg-amber-50 dark:bg-amber-500/10', border: 'border-amber-100 dark:border-amber-500/20' },
         ].map((stat, i) => (
-          <div key={i} className={`group relative bg-card p-5 rounded-2xl border ${stat.border} shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up hover:-translate-y-1 overflow-hidden`}>
+          <div key={i} className={`group relative bg-card p-6 rounded-[2rem] border ${stat.border} shadow-sm hover:shadow-xl hover:shadow-${stat.color.split('-')[1]}/10 transition-all duration-500 animate-slide-up hover:-translate-y-1.5 overflow-hidden`}>
             {/* Background Icon Watermark */}
-            <stat.icon className={`absolute -right-4 -bottom-4 w-24 h-24 ${stat.color} opacity-5 group-hover:scale-110 transition-transform duration-500`} />
+            <stat.icon className={`absolute -right-4 -bottom-4 w-32 h-32 ${stat.color} opacity-[0.03] group-hover:opacity-[0.06] group-hover:scale-110 group-hover:-rotate-6 transition-all duration-700`} />
             
             <div className="relative z-10 flex flex-col h-full justify-between">
-              <div className="flex justify-between items-start mb-4">
-                <div className={`p-2.5 rounded-xl ${stat.bg} ${stat.color}`}>
-                  <stat.icon className="w-5 h-5" />
+              <div className="flex justify-between items-start mb-6">
+                <div className={`p-3 rounded-2xl ${stat.bg} ${stat.color} transition-transform duration-500 group-hover:scale-110`}>
+                  <stat.icon className="w-6 h-6" />
                 </div>
               </div>
               <div>
-                <p className="text-3xl font-bold tracking-tight text-foreground tabular-nums mb-1">
+                <p className="text-4xl font-extrabold tracking-tight text-foreground tabular-nums mb-1.5">
                   {stat.value}
                 </p>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
                   {stat.label}
                 </p>
                 <p className="text-[10px] text-muted-foreground mt-1">
@@ -193,10 +189,10 @@ export default function MahasiswaDashboard() {
             { href: '/mahasiswa/pengumuman', label: 'Info', icon: Megaphone, color: 'group-hover:text-pink-500' },
           ].map((item, i) => (
             <Link key={item.href} href={item.href} className="block group animate-slide-up h-full">
-              <div className="bg-card border border-border/60 hover:border-border rounded-2xl p-4 flex flex-col items-center justify-center gap-3 h-full shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 cursor-pointer relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-muted/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <div className="relative z-10 p-2 rounded-xl bg-muted/40 group-hover:bg-background transition-colors">
-                  <item.icon className={`w-5 h-5 text-muted-foreground transition-colors duration-300 ${item.color}`} />
+              <div className="bg-card border border-border/40 hover:border-border/80 rounded-[1.5rem] p-4 flex flex-col items-center justify-center gap-3.5 h-full shadow-sm hover:shadow-lg hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-1.5 cursor-pointer relative overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-muted/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="relative z-10 p-3 rounded-2xl bg-muted/30 group-hover:bg-background transition-colors duration-500">
+                  <item.icon className={`w-6 h-6 text-muted-foreground transition-all duration-500 group-hover:scale-110 ${item.color}`} />
                 </div>
                 <span className="relative z-10 text-[10px] font-semibold text-muted-foreground group-hover:text-foreground text-center">
                   {item.label}
@@ -211,20 +207,20 @@ export default function MahasiswaDashboard() {
       <div className="grid lg:grid-cols-2 gap-6 pt-4">
         
         {/* Jadwal Hari Ini Timeline */}
-        <div className="bg-card rounded-2xl border border-border/80 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-5 border-b border-border/50 flex items-center justify-between bg-muted/10">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-amber-100 dark:bg-amber-500/20 rounded-md text-amber-600 dark:text-amber-400">
-                <Clock className="w-4 h-4" />
+        <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-500 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-border/40 flex items-center justify-between bg-muted/5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-amber-100 dark:bg-amber-500/20 rounded-xl text-amber-600 dark:text-amber-400">
+                <Clock className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-sm">Agenda Hari Ini</h3>
+              <h3 className="font-bold text-base">Agenda Hari Ini</h3>
             </div>
-            <Link href="/mahasiswa/jadwal" className="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
+            <Link href="/mahasiswa/jadwal" className="text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
               Lihat Semua <ChevronRight className="w-3 h-3" />
             </Link>
           </div>
           
-          <div className="p-5 flex-1 bg-background/50">
+          <div className="p-6 flex-1 bg-background/30">
             {(!data || data.jadwalHariIni.length === 0) ? (
               <div className="flex flex-col items-center justify-center h-full text-center space-y-3 py-8">
                 <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
@@ -267,15 +263,15 @@ export default function MahasiswaDashboard() {
         </div>
 
         {/* Pengumuman Feed */}
-        <div className="bg-card rounded-2xl border border-border/80 shadow-sm overflow-hidden flex flex-col">
-          <div className="p-5 border-b border-border/50 flex items-center justify-between bg-muted/10">
-            <div className="flex items-center gap-2.5">
-              <div className="p-1.5 bg-blue-100 dark:bg-blue-500/20 rounded-md text-blue-600 dark:text-blue-400">
-                <Bell className="w-4 h-4" />
+        <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-500 overflow-hidden flex flex-col">
+          <div className="p-6 border-b border-border/40 flex items-center justify-between bg-muted/5">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
+                <Bell className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-sm">Pengumuman Terbaru</h3>
+              <h3 className="font-bold text-base">Pengumuman Terbaru</h3>
             </div>
-            <Link href="/mahasiswa/pengumuman" className="text-[11px] font-semibold text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
+            <Link href="/mahasiswa/pengumuman" className="text-xs font-semibold text-primary hover:text-primary/80 flex items-center gap-1 transition-colors">
               Pusat Info <ChevronRight className="w-3 h-3" />
             </Link>
           </div>

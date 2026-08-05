@@ -160,21 +160,16 @@ export default function ProfilPage() {
 
   return (
     <div className="space-y-8 animate-fade-in pb-8">
-      {/* Hero Profile Banner */}
-      <div className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-blue-900/10 border border-white/5 bg-[#0a1526]">
-        {/* Soft Mesh Background Gradients */}
-        <div className="absolute top-0 right-0 w-full h-full bg-gradient-to-bl from-blue-600/30 via-transparent to-transparent" />
-        <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-tr from-indigo-600/30 via-transparent to-transparent" />
+      {/* Hero Profile Banner - Modern Premium Style */}
+      <div className="relative overflow-hidden rounded-[2rem] bg-slate-950 shadow-xl border border-white/5">
+        {/* Soft Organic Mesh Gradient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-blue-900/60 to-slate-950" />
         
-        {/* Floating Ambient Lights */}
-        <div className="absolute -top-[20%] -right-[10%] w-[500px] h-[500px] bg-blue-500/30 rounded-full blur-3xl animate-[float_8s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
-        <div className="absolute -bottom-[20%] -left-[10%] w-[400px] h-[400px] bg-indigo-500/20 rounded-full blur-3xl animate-[float_10s_ease-in-out_infinite_reverse] mix-blend-screen pointer-events-none" />
-        <div className="absolute top-[20%] left-[30%] w-[300px] h-[300px] bg-cyan-400/15 rounded-full blur-3xl animate-[float_12s_ease-in-out_infinite] mix-blend-screen pointer-events-none" />
+        {/* Subtle Decorative Glows for organic feel */}
+        <div className="absolute top-0 right-0 -mt-20 -mr-20 w-96 h-96 bg-blue-500/15 rounded-full blur-[100px] mix-blend-screen pointer-events-none" />
+        <div className="absolute bottom-0 left-10 -mb-20 w-72 h-72 bg-indigo-500/15 rounded-full blur-[80px] mix-blend-screen pointer-events-none" />
         
-        {/* Modern Dot Grid Overlay */}
-        <div className="absolute inset-0 opacity-[0.07]" style={{ backgroundImage: 'radial-gradient(circle at center, white 1.5px, transparent 1.5px)', backgroundSize: '24px 24px' }} />
-        
-        <div className="relative z-10 p-8 sm:p-12">
+        <div className="relative z-10 p-8 sm:p-10">
           <div className="flex flex-col sm:flex-row items-center sm:items-start gap-8">
             {/* Avatar */}
             <div className="relative group shrink-0">
@@ -213,10 +208,10 @@ export default function ProfilPage() {
               <div className="space-y-2">
                 <h1 className="text-3xl sm:text-4xl font-bold tracking-tight">{user?.nama_lengkap}</h1>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm font-medium text-blue-100/70">
-                  <span className="font-mono bg-blue-900/40 border border-blue-400/20 px-2.5 py-1 rounded-md text-blue-200">{user?.nim}</span>
-                  <span className="flex items-center gap-1.5">
+                  <span className="font-mono bg-white/10 backdrop-blur-md border border-white/10 px-2.5 py-1 rounded-lg text-white">{user?.nim}</span>
+                  <span className="flex items-center gap-1.5 bg-white/5 backdrop-blur-md px-3 py-1 rounded-lg border border-white/5">
                     <Mail className="w-4 h-4 text-blue-300" /> 
-                    {user?.email}
+                    <span className="text-white/90">{user?.email}</span>
                   </span>
                 </div>
               </div>
@@ -395,18 +390,20 @@ export default function ProfilPage() {
 
       {/* Profile Completion Card */}
       {completionPct < 100 && (
-        <div className="bg-amber-50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 rounded-2xl p-5 flex items-center gap-4 animate-slide-up">
-          <div className="p-2.5 bg-amber-100 dark:bg-amber-500/15 rounded-xl shrink-0">
-            <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-500/10 dark:to-orange-500/5 border border-amber-200/60 dark:border-amber-500/20 rounded-[2rem] p-6 flex flex-col sm:flex-row items-center gap-5 animate-slide-up shadow-sm">
+          <div className="p-3 bg-amber-100 dark:bg-amber-500/20 rounded-2xl shrink-0">
+            <Sparkles className="w-6 h-6 text-amber-600 dark:text-amber-400" />
           </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold text-amber-900 dark:text-amber-200">Lengkapi Profil Anda</p>
-            <p className="text-xs text-amber-600/70 dark:text-amber-400/60 mt-0.5">
+          <div className="flex-1 text-center sm:text-left w-full">
+            <p className="text-base font-bold text-amber-900 dark:text-amber-200">Lengkapi Profil Anda</p>
+            <p className="text-xs text-amber-700/80 dark:text-amber-400/80 mt-1 font-medium">
               {completedFields} dari {totalFields} data sudah terisi • {completionPct}% lengkap
             </p>
           </div>
-          <div className="w-20 h-2 bg-amber-200/60 dark:bg-amber-900/30 rounded-full overflow-hidden shrink-0">
-            <div className="h-full bg-amber-500 rounded-full transition-all duration-500" style={{ width: `${completionPct}%` }} />
+          <div className="w-full sm:w-32 h-2.5 bg-amber-200/50 dark:bg-amber-900/40 rounded-full overflow-hidden shrink-0 mt-3 sm:mt-0">
+            <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-1000 ease-out relative overflow-hidden" style={{ width: `${completionPct}%` }}>
+              <div className="absolute inset-0 bg-white/20 animate-shimmer" />
+            </div>
           </div>
         </div>
       )}
@@ -415,15 +412,15 @@ export default function ProfilPage() {
       <div className="grid lg:grid-cols-2 gap-6 stagger-children">
         
         {/* Data Akademik */}
-        <div className="bg-card rounded-2xl border border-border/80 shadow-sm overflow-hidden animate-slide-up">
-          <div className="p-5 border-b border-border/50 flex items-center gap-2.5 bg-muted/10">
-            <div className="p-1.5 bg-blue-100 dark:bg-blue-500/20 rounded-lg text-blue-600 dark:text-blue-400">
-              <GraduationCap className="w-4 h-4" />
+        <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-500 overflow-hidden animate-slide-up flex flex-col">
+          <div className="p-6 border-b border-border/40 flex items-center gap-3 bg-muted/5">
+            <div className="p-2 bg-blue-100 dark:bg-blue-500/20 rounded-xl text-blue-600 dark:text-blue-400">
+              <GraduationCap className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-sm">Data Akademik</h3>
+            <h3 className="font-bold text-base">Data Akademik</h3>
           </div>
-          <div className="p-4 bg-background/50">
-            <div className="grid grid-cols-2 gap-0">
+          <div className="p-6 bg-background/30 flex-1">
+            <div className="grid grid-cols-2 gap-4">
               <Field label="NIM" value={user?.nim} />
               <Field label="Program Studi" value={user?.program ? getProgramLabel(user.program) : null} />
               <Field label="Jurusan" value={user?.jurusan ? getJurusanLabel(user.jurusan) : null} />
@@ -435,15 +432,15 @@ export default function ProfilPage() {
         </div>
 
         {/* Data Pribadi */}
-        <div className="bg-card rounded-2xl border border-border/80 shadow-sm overflow-hidden animate-slide-up">
-          <div className="p-5 border-b border-border/50 flex items-center gap-2.5 bg-muted/10">
-            <div className="p-1.5 bg-indigo-100 dark:bg-indigo-500/20 rounded-lg text-indigo-600 dark:text-indigo-400">
-              <User className="w-4 h-4" />
+        <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-500 overflow-hidden animate-slide-up flex flex-col">
+          <div className="p-6 border-b border-border/40 flex items-center gap-3 bg-muted/5">
+            <div className="p-2 bg-indigo-100 dark:bg-indigo-500/20 rounded-xl text-indigo-600 dark:text-indigo-400">
+              <User className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-sm">Data Pribadi</h3>
+            <h3 className="font-bold text-base">Data Pribadi</h3>
           </div>
-          <div className="p-4 bg-background/50">
-            <div className="grid grid-cols-2 gap-0">
+          <div className="p-6 bg-background/30 flex-1">
+            <div className="grid grid-cols-2 gap-4">
               <Field label="Tempat Lahir" value={profile?.tempat_lahir} icon={MapPin} />
               <Field label="Tanggal Lahir" value={profile?.tanggal_lahir ? formatDate(profile.tanggal_lahir) : null} icon={Calendar} />
               <Field label="Jenis Kelamin" value={profile?.jenis_kelamin === 'L' ? 'Laki-laki' : profile?.jenis_kelamin === 'P' ? 'Perempuan' : null} />
@@ -458,15 +455,15 @@ export default function ProfilPage() {
 
         {/* Data Wali & Pendidikan */}
         {profile && (
-          <div className="bg-card rounded-2xl border border-border/80 shadow-sm overflow-hidden lg:col-span-2 animate-slide-up">
-            <div className="p-5 border-b border-border/50 flex items-center gap-2.5 bg-muted/10">
-              <div className="p-1.5 bg-emerald-100 dark:bg-emerald-500/20 rounded-lg text-emerald-600 dark:text-emerald-400">
-                <Heart className="w-4 h-4" />
+          <div className="bg-card rounded-[2rem] border border-border/60 shadow-sm hover:shadow-md transition-shadow duration-500 overflow-hidden lg:col-span-2 animate-slide-up">
+            <div className="p-6 border-b border-border/40 flex items-center gap-3 bg-muted/5">
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-xl text-emerald-600 dark:text-emerald-400">
+                <Heart className="w-5 h-5" />
               </div>
-              <h3 className="font-bold text-sm">Data Wali & Pendidikan</h3>
+              <h3 className="font-bold text-base">Data Wali & Pendidikan</h3>
             </div>
-            <div className="p-4 bg-background/50">
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-0">
+            <div className="p-6 bg-background/30">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <Field label="Nama Wali" value={profile.nama_wali} />
                 <Field label="Hubungan" value={profile.hubungan_wali} />
                 <Field label="No. HP Wali" value={profile.no_hp_wali} icon={Phone} />
